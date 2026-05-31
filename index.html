@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NameSpark Baby — Trouvez le prénom parfait pour votre bébé</title>
+  <meta name="description" content="Générateur de prénoms bébé : découvrez des milliers d'idées selon l'origine, la signification et le style. Hébreu, français, arabe, italien et plus." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ============================ HEADER / NAV ============================ -->
+  <header class="site-header">
+    <nav class="nav container">
+      <a href="#accueil" class="brand" data-nav>
+        <span class="spark">✶</span>
+        <span>NameSpark <b>Baby</b></span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#accueil" data-nav data-i18n="nav_home">Accueil</a></li>
+        <li><a href="#generateur" data-nav data-i18n="nav_generator">Générateur</a></li>
+        <li><a href="#comment" data-nav data-i18n="nav_how">Comment ça marche</a></li>
+        <li><a href="#faq" data-nav data-i18n="nav_faq">FAQ</a></li>
+        <li id="navListeWrap">
+          <a href="#" class="nav-liste-link" id="navListeLink" onclick="event.preventDefault();openSelection()">
+            📋 Ma liste <span id="navListeBadge" class="nav-badge">0</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-right">
+        <!-- Mon espace -->
+        <button class="espace-btn" id="espaceBtn" aria-haspopup="dialog">
+          <span class="espace-avatar-mini" id="espaceAvatarMini" aria-hidden="true"></span>
+          <span id="espaceBtnLabel" data-i18n="mon_espace">Mon espace</span>
+        </button>
+        <div class="lang-switch" id="langSwitch">
+          <button data-lang="fr" class="active">FR</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============================ HERO / ACCUEIL ============================ -->
+    <section class="hero" id="accueil">
+      <div class="container hero-inner">
+        <span class="eyebrow" data-i18n="hero_eyebrow">Générateur de prénoms bébé</span>
+        <h1 data-animate-title data-i18n="hero_title">Trouvez le prénom parfait pour votre bébé</h1>
+        <p class="subtitle" data-i18n="hero_subtitle">Découvrez des milliers d'idées de prénoms selon leur origine, leur signification et leur style.</p>
+        <div class="hero-actions">
+          <a href="#generateur" class="btn btn-primary" data-nav data-i18n="hero_cta">Lancer le générateur</a>
+          <a href="#comment" class="btn btn-ghost" data-nav data-i18n="hero_cta2">Comment ça marche</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ POURQUOI ============================ -->
+    <section id="pourquoi">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 data-i18n="why_title">Pourquoi utiliser NameSpark Baby</h2>
+          <p data-i18n="why_sub">Un outil pensé pour les futurs parents, simple, élégant et précis.</p>
+        </div>
+        <div class="grid grid-3">
+          <div class="card reveal">
+            <div class="ico">🎯</div>
+            <h3 data-i18n="why_1_t">Des résultats sur-mesure</h3>
+            <p data-i18n="why_1_d">Filtrez par genre, origine, style, signification, première lettre et longueur pour des idées vraiment adaptées.</p>
+          </div>
+          <div class="card reveal">
+            <div class="ico">📖</div>
+            <h3 data-i18n="why_2_t">Le sens derrière chaque prénom</h3>
+            <p data-i18n="why_2_d">Signification, origine et explication : vous comprenez pourquoi chaque prénom vous correspond.</p>
+          </div>
+          <div class="card reveal">
+            <div class="ico">✨</div>
+            <h3 data-i18n="why_3_t">Des idées qui s'enchaînent</h3>
+            <p data-i18n="why_3_d">Un prénom vous plaît ? Découvrez en un clic des prénoms similaires en style et en origine.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ GÉNÉRATEUR ============================ -->
+    <section id="generateur" class="alt-bg">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 data-i18n="gen_title">Le générateur de prénoms</h2>
+          <p data-i18n="gen_sub">Renseignez vos préférences, on s'occupe du reste.</p>
+        </div>
+
+        <div class="generator-wrap">
+          <!-- FORMULAIRE -->
+          <form class="form-card reveal" id="genForm">
+            <!-- Genre -->
+            <div class="field">
+              <label data-i18n="f_gender">Genre</label>
+              <div class="segmented" data-segmented="gender">
+                <button type="button" data-value="boy" data-i18n="g_boy">Garçon</button>
+                <button type="button" data-value="girl" data-i18n="g_girl">Fille</button>
+                <button type="button" data-value="mixte" data-i18n="g_mixte">Mixte</button>
+              </div>
+            </div>
+
+            <!-- Origine -->
+            <div class="field">
+              <label for="origin" data-i18n="f_origin">Origine</label>
+              <select id="origin">
+                <option value="" data-i18n="o_all">Toutes</option>
+                <option value="hebreu" data-i18n="o_hebreu">Hébreu</option>
+                <option value="francais" data-i18n="o_francais">Français</option>
+                <option value="anglais" data-i18n="o_anglais">Anglais</option>
+                <option value="arabe" data-i18n="o_arabe">Arabe</option>
+                <option value="italien" data-i18n="o_italien">Italien</option>
+                <option value="espagnol" data-i18n="o_espagnol">Espagnol</option>
+                <option value="grec" data-i18n="o_grec">Grec</option>
+                <option value="latin" data-i18n="o_latin">Latin</option>
+              </select>
+            </div>
+
+            <!-- Style -->
+            <div class="field">
+              <label for="style" data-i18n="f_style">Style</label>
+              <select id="style">
+                <option value="" data-i18n="any">Peu importe</option>
+                <option value="classique" data-i18n="s_classique">Classique</option>
+                <option value="moderne" data-i18n="s_moderne">Moderne</option>
+                <option value="rare" data-i18n="s_rare">Rare</option>
+                <option value="elegant" data-i18n="s_elegant">Élégant</option>
+                <option value="court" data-i18n="s_court">Court</option>
+                <option value="poetique" data-i18n="s_poetique">Poétique</option>
+              </select>
+            </div>
+
+            <!-- Signification -->
+            <div class="field">
+              <label for="meaning" data-i18n="f_meaning">Signification recherchée</label>
+              <select id="meaning">
+                <option value="" data-i18n="any">Peu importe</option>
+                <option value="force" data-i18n="m_force">Force</option>
+                <option value="courage" data-i18n="m_courage">Courage</option>
+                <option value="sagesse" data-i18n="m_sagesse">Sagesse</option>
+                <option value="lumiere" data-i18n="m_lumiere">Lumière</option>
+                <option value="nature" data-i18n="m_nature">Nature</option>
+                <option value="liberte" data-i18n="m_liberte">Liberté</option>
+                <option value="foi" data-i18n="m_foi">Foi</option>
+                <option value="amour" data-i18n="m_amour">Amour</option>
+              </select>
+            </div>
+
+            <!-- Première lettre -->
+            <div class="field">
+              <label for="letter" data-i18n="f_letter">Première lettre (optionnel)</label>
+              <input type="text" id="letter" maxlength="1" placeholder="A, B, C…" />
+            </div>
+
+            <!-- Longueur -->
+            <div class="field">
+              <label data-i18n="f_length">Longueur</label>
+              <div class="segmented" data-segmented="length">
+                <button type="button" data-value="court" data-i18n="l_court">Court</button>
+                <button type="button" data-value="moyen" data-i18n="l_moyen">Moyen</button>
+                <button type="button" data-value="long" data-i18n="l_long">Long</button>
+                <button type="button" data-value="" class="active" data-i18n="any">Peu importe</button>
+              </div>
+            </div>
+
+            <!-- Nom de famille -->
+            <div class="field">
+              <label for="surname" data-i18n="f_surname">Nom de famille (optionnel)</label>
+              <input type="text" id="surname" placeholder="Dupont…" />
+            </div>
+
+            <button type="submit" class="btn btn-primary" data-i18n="f_submit">Générer des prénoms</button>
+          </form>
+
+          <!-- RÉSULTATS -->
+          <div>
+            <div class="results-head">
+              <h3 data-i18n="res_title">Vos prénoms</h3>
+              <span class="count" id="resultCount"></span>
+            </div>
+            <div class="results" id="results">
+              <div class="empty">
+                <div class="big">👶</div>
+                <p data-i18n="res_empty">Choisissez vos critères puis cliquez sur « Générer » pour découvrir des idées de prénoms.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ COMMENT ÇA MARCHE ============================ -->
+    <section id="comment">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 data-i18n="how_title">Comment ça fonctionne</h2>
+          <p data-i18n="how_sub">Trois étapes simples pour trouver le prénom de votre bébé.</p>
+        </div>
+        <div class="grid grid-3">
+          <div class="card reveal">
+            <span class="step-num">01</span>
+            <h3 data-i18n="how_1_t">Définissez vos envies</h3>
+            <p data-i18n="how_1_d">Genre, origine, style, signification… affinez selon ce qui compte pour vous.</p>
+          </div>
+          <div class="card reveal">
+            <span class="step-num">02</span>
+            <h3 data-i18n="how_2_t">Générez des idées</h3>
+            <p data-i18n="how_2_d">Recevez une sélection de prénoms avec leur sens, leur origine et pourquoi ils fonctionnent.</p>
+          </div>
+          <div class="card reveal">
+            <span class="step-num">03</span>
+            <h3 data-i18n="how_3_t">Explorez les similaires</h3>
+            <p data-i18n="how_3_d">Un coup de cœur ? Découvrez des prénoms proches pour affiner votre choix.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ PRÉNOMS POPULAIRES ============================ -->
+    <section id="populaires" class="alt-bg">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 data-i18n="pop_title">Exemples de prénoms populaires</h2>
+          <p data-i18n="pop_sub">Cliquez sur un prénom pour voir des idées similaires dans le générateur.</p>
+        </div>
+        <div class="chips reveal" id="popularChips"></div>
+      </div>
+    </section>
+
+    <!-- ============================ FAQ ============================ -->
+    <section id="faq">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 data-i18n="faq_title">Questions fréquentes</h2>
+        </div>
+        <div id="faqList"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand" style="color:#fff; margin-bottom:12px;">
+            <span class="spark">✶</span><span>NameSpark <b style="color:var(--accent)">Baby</b></span>
+          </div>
+          <p style="color:#9c9388; font-size:.92rem; max-width:280px;" data-i18n="foot_tag">Le générateur de prénoms bébé pensé pour les futurs parents.</p>
+        </div>
+        <div>
+          <h5 data-i18n="foot_explore">Explorer</h5>
+          <ul>
+            <li><a href="seo/prenom-garcon.html">Prénoms garçon</a></li>
+            <li><a href="seo/prenom-fille.html">Prénoms fille</a></li>
+            <li><a href="seo/prenom-hebreu.html">Prénoms hébreu</a></li>
+            <li><a href="seo/prenom-rare.html">Prénoms rares</a></li>
+            <li><a href="seo/prenom-court.html">Prénoms courts</a></li>
+            <li><a href="seo/prenom-signification-force.html">Signification « force »</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5 data-i18n="foot_nav">Navigation</h5>
+          <ul>
+            <li><a href="#accueil" data-nav data-i18n="nav_home">Accueil</a></li>
+            <li><a href="#generateur" data-nav data-i18n="nav_generator">Générateur</a></li>
+            <li><a href="#comment" data-nav data-i18n="nav_how">Comment ça marche</a></li>
+            <li><a href="#faq" data-nav data-i18n="nav_faq">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 NameSpark Baby</span>
+        <span data-i18n="foot_demo">Mode démo — génération locale, sans API.</span>
+        <a href="admin.html" style="font-size:.75rem;color:rgba(0,0,0,.2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='rgba(0,0,0,.4)'" onmouseout="this.style.color='rgba(0,0,0,.2)'">admin</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================ WIDGET COMPACT FAVORIS ============================ -->
+  <aside class="sel-panel" id="selPanel" role="complementary" aria-label="Favoris">
+    <span class="sel-heart" aria-hidden="true">❤️</span>
+    <span class="sel-pill-count">
+      <strong id="selCount">0</strong>
+      <span id="selCountLbl">favoris</span>
+    </span>
+    <button class="sel-see-btn" id="selSeeBtn">Voir ma sélection</button>
+  </aside>
+
+  <!-- ============================ PAGE MA SÉLECTION (overlay pleine page) ============================ -->
+  <div class="selection-overlay" id="selectionOverlay" role="dialog" aria-modal="true" aria-label="Ma sélection">
+    <div class="sel-ov-inner">
+
+      <!-- Header sticky -->
+      <div class="sel-ov-head">
+        <div class="brand">
+          <span class="spark">✶</span>
+          <span>NameSpark <b>Baby</b></span>
+        </div>
+        <button class="sel-ov-close btn-close" id="closeSelection" aria-label="Fermer">✕</button>
+      </div>
+
+      <!-- Corps -->
+      <div class="sel-ov-body">
+
+        <!-- Hero -->
+        <div class="sel-ov-hero">
+          <span class="eyebrow" data-i18n="sel_page_eyebrow">Votre sélection</span>
+          <h1 class="sel-ov-title" data-i18n="sel_page_title">Votre sélection de prénoms</h1>
+          <p class="sel-ov-sub" data-i18n="sel_page_sub">Retrouvez tous les prénoms que vous avez enregistrés.</p>
+          <span class="sel-ov-count" id="selPageCount"></span>
+        </div>
+
+        <!-- Actions premium -->
+        <div class="sel-premium-wrap">
+          <p class="sel-premium-label" data-i18n="sel_premium_title">Faites plus avec votre sélection</p>
+          <div class="premium-actions" id="premiumActions"></div>
+        </div>
+
+        <!-- Grille des favoris -->
+        <div class="results" id="selPageResults"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ MODAL "VOTRE SÉLECTION EST PRÊTE" ============================ -->
+  <div class="modal-overlay" id="unlockModal" role="dialog" aria-modal="true" aria-labelledby="unlockTitle">
+    <div class="modal unlock-modal">
+
+      <!-- Fermer -->
+      <div class="unlock-modal-head">
+        <button class="btn-close" id="closeUnlockModal" aria-label="Fermer">✕</button>
+      </div>
+
+      <!-- Icône animée -->
+      <div class="unlock-icon" aria-hidden="true">✶</div>
+
+      <!-- Titre -->
+      <h3 class="unlock-title" id="unlockTitle">Votre sélection est prête !</h3>
+
+      <!-- Aperçu des prénoms choisis (généré par JS) -->
+      <div class="unlock-preview" id="unlockPreview"></div>
+
+      <!-- Accroche -->
+      <p class="unlock-desc" id="unlockDesc">
+        Créez votre espace gratuit pour y accéder, recevoir votre liste par email et la retrouver à tout moment.
+      </p>
+
+      <!-- Liste des bénéfices -->
+      <ul class="unlock-benefits" id="unlockBenefits">
+        <li>Retrouvez vos prénoms favoris depuis n'importe quel appareil</li>
+        <li>Recevez votre sélection complète par email</li>
+        <li>Partagez facilement avec votre partenaire</li>
+        <li>Téléchargez votre liste en PDF quand vous voulez</li>
+      </ul>
+
+      <!-- Formulaire -->
+      <form id="unlockForm" novalidate>
+        <div class="field">
+          <label for="unlockEmail" id="unlockEmailLabel">
+            <span data-i18n="save_field_email">Votre adresse email</span>
+            <span class="required-star" aria-hidden="true"> *</span>
+          </label>
+          <input type="email" id="unlockEmail" placeholder="marie@exemple.com"
+                 required autocomplete="email" inputmode="email" />
+          <div class="field-error-msg" id="unlockEmailError" role="alert"></div>
+        </div>
+        <div class="field">
+          <label for="unlockFirstName" data-i18n="save_field_fname">Votre prénom (optionnel)</label>
+          <input type="text" id="unlockFirstName" placeholder="Marie…" autocomplete="given-name" />
+        </div>
+        <button type="submit" class="btn btn-primary" id="unlockSubmit">
+          Accéder à ma sélection →
+        </button>
+      </form>
+
+      <!-- Note de confiance -->
+      <div class="unlock-trust" id="unlockTrust">
+        <span>🔒 Gratuit</span>
+        <span>• Sans engagement</span>
+        <span>• Données protégées</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================ MODULE "DÉCIDER ENSEMBLE" ============================ -->
+  <div class="decide-overlay" id="decideOverlay" role="dialog" aria-modal="true" aria-label="Décider ensemble">
+    <div class="decide-inner">
+
+      <!-- En-tête -->
+      <div class="decide-head">
+        <div>
+          <span class="eyebrow" data-i18n="decide_eyebrow">Décidez ensemble</span>
+          <h2 class="decide-title" data-i18n="decide_title">Invitez votre partenaire</h2>
+        </div>
+        <button class="btn-close" id="closeDecide" aria-label="Fermer">✕</button>
+      </div>
+
+      <!-- Contenu -->
+      <div class="decide-body">
+
+        <!-- ÉTAPE 1 : Invitation -->
+        <div class="decide-step" id="decideInvite" style="display:none">
+          <p class="decide-subtitle" data-i18n="decide_invite_sub">
+            Partagez ce lien avec votre conjoint pour qu'il vote sur vos prénoms favoris.
+          </p>
+          <div class="invite-link-box">
+            <input type="text" id="inviteLinkInput" readonly class="invite-link-input" />
+            <button class="btn btn-primary" id="copyInviteLinkBtn" data-i18n="decide_copy_link">Copier le lien</button>
+          </div>
+          <label class="checkbox-group">
+            <input type="checkbox" id="familyModeCheckbox" />
+            <span data-i18n="decide_family_mode">📢 Activer le mode famille (inviter aussi les parents)</span>
+          </label>
+          <button class="btn btn-ghost" id="continueAfterInviteBtn" data-i18n="decide_continue">Continuer</button>
+        </div>
+
+        <!-- ÉTAPE 2 : En attente de votes -->
+        <div class="decide-step" id="decideWaiting" style="display:none">
+          <p class="decide-subtitle" data-i18n="decide_waiting_sub">
+            Votre partenaire vote sur votre sélection...
+          </p>
+          <div class="voting-box">
+            <div class="voting-stats" id="votingStats"></div>
+            <button class="btn btn-ghost" id="refreshVotesBtn" data-i18n="decide_refresh">🔄 Actualiser</button>
+          </div>
+          <div class="decide-notifications" id="decideNotifications"></div>
+        </div>
+
+        <!-- ÉTAPE 3 : Résultats (Matchs) -->
+        <div class="decide-step" id="decideResults" style="display:none">
+          <p class="decide-subtitle" data-i18n="decide_results_sub">
+            Voici les prénoms où vous êtes d'accord !
+          </p>
+          <div class="results" id="decideMatchsGrid"></div>
+          <button class="btn btn-primary" id="shareMatchsBtn" data-i18n="decide_share_matchs">🔗 Partager ces matchs</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== CONTAINER PDF (invisible sur la page, visible uniquement à l'impression) ====== -->
+  <div id="printContainer" aria-hidden="true">
+    <div class="print-header">
+      <div class="print-logo">✶</div>
+      <div class="print-brand">NameSpark <b>Baby</b></div>
+      <div class="print-sub" id="printSub">Ma sélection de prénoms</div>
+    </div>
+    <div class="results" id="printResults"></div>
+  </div>
+
+  <!-- ============================ OVERLAY + DRAWER MON ESPACE ============================ -->
+  <div class="espace-overlay" id="espaceOverlay"></div>
+
+  <aside class="espace-drawer" id="espaceDrawer" role="dialog" aria-modal="true" aria-label="Mon espace">
+    <!-- En-tête -->
+    <div class="drawer-head">
+      <span class="drawer-head-title" data-i18n="mon_espace">Mon espace</span>
+      <button class="btn-close" id="closeEspace" aria-label="Fermer">✕</button>
+    </div>
+    <!-- Profil (rempli par JS) -->
+    <div class="drawer-profile" id="drawerProfile">
+      <div class="drawer-avatar" id="drawerAvatar">?</div>
+      <div>
+        <div class="drawer-greeting" id="drawerGreeting"></div>
+        <div class="drawer-user-email" id="drawerUserEmail"></div>
+      </div>
+    </div>
+    <!-- Corps (rendu par JS) -->
+    <div class="drawer-body" id="drawerBody"></div>
+    <!-- Pied -->
+    <div class="drawer-footer">
+      <button class="drawer-logout" id="drawerLogout" data-i18n="drawer_logout">Se déconnecter</button>
+    </div>
+  </aside>
+
+  <!-- ============================ MODAL AUTH (Créer mon espace) ============================ -->
+  <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="modal auth-modal">
+      <div class="modal-head">
+        <h3 id="authModalTitle" data-i18n="create_space_title">Créez votre espace</h3>
+        <button class="btn-close" id="closeAuthModal" aria-label="Fermer">✕</button>
+      </div>
+      <div class="auth-modal-icon" aria-hidden="true">✶</div>
+      <p class="auth-modal-desc" data-i18n="create_space_desc">
+        Sauvegardez vos prénoms favoris, retrouvez-les plus tard et exportez-les en PDF.
+      </p>
+      <form id="authForm" novalidate>
+        <div class="field">
+          <label for="authFirstName" data-i18n="save_field_fname">Votre prénom (optionnel)</label>
+          <input type="text" id="authFirstName" placeholder="Marie…" autocomplete="given-name" />
+        </div>
+        <div class="field">
+          <label for="authEmail">
+            <span data-i18n="save_field_email">Votre adresse email</span>
+            <span class="required-star" aria-hidden="true"> *</span>
+          </label>
+          <input type="email" id="authEmail" placeholder="marie@exemple.com"
+                 required autocomplete="email" inputmode="email" />
+          <div class="field-error-msg" id="authEmailError" role="alert"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="authSubmit" data-i18n="create_space_btn">
+          Créer mon espace
+        </button>
+      </form>
+      <p class="auth-hint" data-i18n="auth_hint">Déjà un espace ? Entrez simplement votre email.</p>
+    </div>
+  </div>
+
+  <!-- ============================ MODAL SAUVEGARDER MA LISTE ============================ -->
+  <div class="modal-overlay" id="saveListeModal" role="dialog" aria-modal="true" aria-labelledby="saveListeTitle">
+    <div class="modal save-modal">
+      <div class="modal-head">
+        <h3 id="saveListeTitle" data-i18n="save_modal_title">Sauvegarder ma liste</h3>
+        <button class="btn-close" id="closeSaveListeModal" aria-label="Fermer">✕</button>
+      </div>
+
+      <!-- Formulaire -->
+      <form id="saveListeForm" novalidate>
+        <p class="save-modal-desc" data-i18n="save_modal_desc">
+          Recevez votre sélection par email et retrouvez-la plus tard.
+        </p>
+        <div class="field">
+          <label for="saveListeFirstName" data-i18n="save_field_fname">Votre prénom (optionnel)</label>
+          <input type="text" id="saveListeFirstName" placeholder="Marie…" autocomplete="given-name" />
+        </div>
+        <div class="field">
+          <label for="saveListeEmail">
+            <span data-i18n="save_field_email">Votre adresse email</span>
+            <span class="required-star" aria-hidden="true"> *</span>
+          </label>
+          <input type="email" id="saveListeEmail" placeholder="marie@exemple.com"
+                 required autocomplete="email" inputmode="email" />
+          <div class="field-error-msg" id="saveListeEmailError" role="alert"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="saveListeSubmit" data-i18n="save_submit">
+          Recevoir ma liste
+        </button>
+      </form>
+
+      <!-- Confirmation (cachée par défaut) -->
+      <div id="saveListeSuccess" style="display:none">
+        <div class="save-success">
+          <div class="save-success-icon" aria-hidden="true">✓</div>
+          <h4 id="saveListeSuccessTitle" data-i18n="save_success_title">Votre sélection a été sauvegardée.</h4>
+          <p id="saveListeSuccessSub" data-i18n="save_success_sub">Vous recevrez bientôt un email avec votre liste.</p>
+          <button type="button" class="btn btn-ghost" id="saveListeSuccessClose" data-i18n="save_success_close">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ MODAL COMPARATEUR ============================ -->
+  <div class="modal-overlay" id="compareModal" role="dialog" aria-modal="true" aria-labelledby="compareTitleEl">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="compareTitleEl" data-i18n="compare_title">Comparateur de prénoms</h3>
+        <button class="btn-close" id="closeCompare" aria-label="Fermer">✕</button>
+      </div>
+      <div class="compare-table-wrap">
+        <table class="compare-table">
+          <thead id="compareThead"></thead>
+          <tbody id="compareTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ TOAST ============================ -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Storage abstrait doit être chargé AVANT app.js -->
+  <script src="storage.js"></script>
+  <!-- data.js et app.js (data.js en premier) -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

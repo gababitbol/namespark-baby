@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — NameSpark Baby</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ---- Styles admin-spécifiques ---- */
+    body { background: var(--bg); }
+    .admin-container { max-width: 1200px; margin: 0 auto; padding: 28px; }
+    .admin-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .admin-title { font-family: var(--serif); font-size: 2rem; font-weight: 700; }
+    .admin-logout { padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: none; cursor: pointer; font-size: .9rem; color: var(--ink-soft); transition: all .2s; }
+    .admin-logout:hover { color: #c05050; border-color: #e05050; background: #fef2f2; }
+
+    /* ---- Auth screen ---- */
+    .admin-auth { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .auth-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 40px; max-width: 380px; width: 100%; box-shadow: 0 10px 40px -12px rgba(0,0,0,.1); }
+    .auth-title { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 8px; }
+    .auth-subtitle { color: var(--ink-soft); margin-bottom: 24px; font-size: .95rem; }
+    .auth-form { display: flex; flex-direction: column; gap: 14px; }
+    .auth-form input { padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); font: inherit; font-size: .95rem; background: var(--bg); color: var(--ink); }
+    .auth-form button { padding: 14px; background: linear-gradient(135deg, var(--accent), var(--accent-deep)); border: 0; border-radius: var(--radius-sm); color: #fff; font-weight: 700; cursor: pointer; font-size: .95rem; }
+    .auth-form button:hover { filter: brightness(1.08); }
+    .auth-error { color: #c05050; font-size: .85rem; margin-top: -10px; }
+
+    /* ---- Dashboard ---- */
+    .admin-hidden { display: none; }
+    .admin-panel { display: flex; flex-direction: column; gap: 28px; }
+    .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px; }
+    .stat-label { font-size: .8rem; color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+    .stat-value { font-size: 2.2rem; font-weight: 700; font-family: var(--serif); color: var(--accent-deep); }
+
+    /* ---- Controls ---- */
+    .admin-controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .search-box { flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); font: inherit; font-size: .9rem; }
+    .export-btn { padding: 10px 18px; background: var(--accent-soft); border: 1.5px solid var(--accent); border-radius: var(--radius-sm); color: var(--accent-deep); font: inherit; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .export-btn:hover { background: var(--accent); color: #fff; }
+
+    /* ---- Table ---- */
+    .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 12px -4px rgba(0,0,0,.08); }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: var(--bg-soft); padding: 14px; text-align: left; font-weight: 700; font-size: .85rem; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft); border-bottom: 1px solid var(--line); cursor: pointer; user-select: none; }
+    th:hover { background: var(--bg); }
+    th.sortable::after { content: " ↕"; opacity: .5; font-size: .7rem; }
+    th.active { color: var(--accent-deep); }
+    th.active::after { opacity: 1; }
+    td { padding: 14px; border-bottom: 1px solid var(--line); font-size: .9rem; }
+    tr:last-child td { border-bottom: 0; }
+    tr:hover { background: var(--bg-soft); }
+
+    .table-empty { text-align: center; padding: 40px 20px; color: var(--ink-soft); }
+    .table-empty-big { font-size: 2rem; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- ====== AUTH SCREEN ====== -->
+  <div class="admin-auth" id="authScreen">
+    <div class="auth-card">
+      <h1 class="auth-title">Admin</h1>
+      <p class="auth-subtitle">Connectez-vous pour voir les utilisateurs</p>
+      <form class="auth-form" id="authForm" onsubmit="handleAuthSubmit(event); return false;">
+        <input type="password" id="adminPassword" placeholder="Mot de passe" autofocus />
+        <button type="submit">Se connecter</button>
+        <p class="auth-error" id="authError"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====== DASHBOARD ====== -->
+  <div id="adminDash" class="admin-hidden">
+    <div class="admin-container">
+
+      <!-- En-tête + logout -->
+      <div class="admin-head">
+        <h1 class="admin-title">Admin Dashboard</h1>
+        <button class="admin-logout" id="logoutBtn" onclick="handleLogout()">Se déconnecter</button>
+      </div>
+
+      <!-- Statistiques -->
+      <div class="admin-stats">
+        <div class="stat-card">
+          <div class="stat-label">Total utilisateurs</div>
+          <div class="stat-value" id="totalUsers">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Prénoms enregistrés (tous)</div>
+          <div class="stat-value" id="totalFavorites">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Utilisateurs avec prénoms</div>
+          <div class="stat-value" id="activeUsers">0</div>
+        </div>
+      </div>
+
+      <!-- Contrôles -->
+      <div class="admin-controls">
+        <input type="text" class="search-box" id="searchBox" placeholder="Chercher par email…" />
+        <button class="export-btn" onclick="exportCSV()">📥 Exporter CSV</button>
+      </div>
+
+      <!-- Tableau -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="email">Email</th>
+              <th class="sortable" data-sort="firstName">Prénom</th>
+              <th class="sortable" data-sort="createdAt">Date d'inscription</th>
+              <th class="sortable" data-sort="favoriteCount">Favoris</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="4" class="table-empty"><div class="table-empty-big">—</div>Aucun utilisateur</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

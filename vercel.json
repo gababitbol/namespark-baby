@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/prenom-garcon", "destination": "/seo/prenom-garcon.html" },
+    { "source": "/prenom-fille", "destination": "/seo/prenom-fille.html" },
+    { "source": "/prenom-hebreu", "destination": "/seo/prenom-hebreu.html" },
+    { "source": "/prenom-rare", "destination": "/seo/prenom-rare.html" },
+    { "source": "/prenom-court", "destination": "/seo/prenom-court.html" },
+    { "source": "/prenom-signification-force", "destination": "/seo/prenom-signification-force.html" }
+  ]
+}
