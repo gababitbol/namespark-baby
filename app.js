@@ -200,6 +200,15 @@ const I18N = {
     decide_refresh: "🔄 Actualiser",
     decide_results_sub: "Voici les prénoms où vous êtes d'accord !",
     decide_share_matchs: "🔗 Partager ces matchs",
+    decide_vote_sub: "Votre partenaire vous a invité·e à voter sur ces prénoms.",
+    decide_see_matchs: "Voir les prénoms en commun",
+    decide_simulate: "Simuler le vote du partenaire (démo)",
+    decide_invite_invalid: "Cette invitation est introuvable ou a expiré.",
+    decide_thanks: "Merci, votre vote est enregistré !",
+    decide_no_votes_yet: "Aucun vote pour l'instant. Partagez le lien à votre partenaire.",
+    vote_yes: "💚 J'aime",
+    vote_maybe: "🤷 Peut-être",
+    vote_no: "❌ Non",
     decide_voted: (n) => `${n} prénom${n > 1 ? "s" : ""} voté${n > 1 ? "s" : ""}`,
     notif_partner_voted: (n) => `Votre partenaire a voté sur ${n} prénom${n > 1 ? "s" : ""} !`,
     notif_match_found: (n) => `🎉 ${n} nouveau${n > 1 ? "x" : ""} match${n > 1 ? "s" : ""} !`,
@@ -362,6 +371,15 @@ const I18N = {
     decide_refresh: "🔄 Refresh",
     decide_results_sub: "Here are the names you both agreed on!",
     decide_share_matchs: "🔗 Share these matches",
+    decide_vote_sub: "Your partner invited you to vote on these names.",
+    decide_see_matchs: "See the names you agree on",
+    decide_simulate: "Simulate partner's vote (demo)",
+    decide_invite_invalid: "This invitation could not be found or has expired.",
+    decide_thanks: "Thanks, your vote has been saved!",
+    decide_no_votes_yet: "No votes yet. Share the link with your partner.",
+    vote_yes: "💚 Like",
+    vote_maybe: "🤷 Maybe",
+    vote_no: "❌ No",
     decide_voted: (n) => `${n} name${n > 1 ? "s" : ""} voted`,
     notif_partner_voted: (n) => `Your partner voted on ${n} name${n > 1 ? "s" : ""}!`,
     notif_match_found: (n) => `🎉 ${n} new match${n > 1 ? "es" : ""}!`,
@@ -406,28 +424,22 @@ let lastResults = null;
 let lastTitle = null;
 let lastSurname = "";
 
-/* Clés localStorage */
-const FAV_KEY     = "namespark_v1_favorites";
-const USER_KEY    = "namespark_v1_user";
-const HISTORY_KEY = "namespark_v1_history";
-const COMPARE_KEY = "namespark_v1_comparisons";
-
+/* Source de vérité : storage.js. `favorites` est un CACHE en mémoire,
+   hydraté depuis getSelection() et toujours réécrit via saveSelection(). */
 const favorites = new Set();
 let currentUser   = null; /* { email, firstName, createdAt, surname } */
 let pendingAction = null; /* action en attente avant authentification */
 
 function saveFavorites() {
-  try { localStorage.setItem(FAV_KEY, JSON.stringify([...favorites])); } catch (_) {}
+  saveSelection([...favorites]);
   /* Met à jour le compte admin si l'utilisateur est connecté */
   if (currentUser && typeof updateAdminFavoriteCount === "function") {
     updateAdminFavoriteCount(currentUser.email, favorites.size);
   }
 }
 function loadFavorites() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
-    if (Array.isArray(saved)) saved.forEach((n) => favorites.add(n));
-  } catch (_) {}
+  favorites.clear();
+  getSelection().forEach((n) => favorites.add(n));
 }
 
 /* =============================================================
@@ -442,7 +454,7 @@ function applyLang(next) {
   lang = next;
   document.documentElement.lang = lang;
   /* Persiste la langue (réutilisée sur les pages SEO et au prochain chargement) */
-  try { localStorage.setItem("namespark_v1_lang", lang); } catch (_) {}
+  saveLang(lang);
 
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const val = I18N[lang][el.getAttribute("data-i18n")];
@@ -940,7 +952,7 @@ function updateSelPanel() {
   if (listeBadge) listeBadge.textContent   = count;
 
   /* Persiste le nom de famille */
-  try { localStorage.setItem("namespark_v1_surname", lastSurname); } catch (_) {}
+  saveSurname(lastSurname);
 
   /* Texte du bouton "Voir ma sélection" */
   const seeBtn = document.getElementById("selSeeBtn");
@@ -1114,6 +1126,9 @@ function showToast(msg, duration = 3200) {
 function applyQueryPrefill() {
   const p = new URLSearchParams(location.search);
 
+  // Lien d'invitation partenaire : géré par le module "Décider ensemble" (voir init)
+  if (p.get("invite")) return;
+
   // Chargement d'une sélection partagée
   if (p.get("share")) {
     const names = p.get("share").split(",");
@@ -1179,8 +1194,6 @@ function applyQueryPrefill() {
      await fetch("/api/save-list", { method:"POST", body: JSON.stringify(entry) })
    La clé API (Resend, Brevo, etc.) restera UNIQUEMENT côté serveur.
    ============================================================= */
-const SAVED_KEY = "namespark_v1_saved_lists";
-
 function openSaveListeModal() {
   if (favorites.size === 0) { showToast(t("share_no_fav")); return; }
   // Réinitialise le formulaire
@@ -1232,7 +1245,7 @@ function handleSaveListeSubmit(e) {
 }
 
 function saveListeToStorage(firstName, email) {
-  const entry = {
+  addSavedList({
     id:        Date.now(),
     createdAt: new Date().toISOString(),
     firstName: firstName || null,
@@ -1240,12 +1253,7 @@ function saveListeToStorage(firstName, email) {
     names:     [...favorites],
     surname:   lastSurname || null,
     lang
-  };
-  try {
-    const existing = JSON.parse(localStorage.getItem(SAVED_KEY) || "[]");
-    existing.push(entry);
-    localStorage.setItem(SAVED_KEY, JSON.stringify(existing));
-  } catch (_) {}
+  });
 }
 
 function initSaveListeModal() {
@@ -1276,57 +1284,45 @@ function initSaveListeModal() {
    des appels à des routes API sécurisées.
    ============================================================= */
 
-/* ---- Gestion utilisateur ---- */
+/* ---- Gestion utilisateur (via storage.js) ---- */
 function loadUser() {
-  try {
-    const u = JSON.parse(localStorage.getItem(USER_KEY));
-    if (u?.email) currentUser = u;
-  } catch (_) {}
+  const u = getUser();
+  if (u?.email) currentUser = u;
 }
 function saveUser() {
-  try { localStorage.setItem(USER_KEY, JSON.stringify(currentUser)); } catch (_) {}
+  setUser(currentUser);
 }
 function logoutUser() {
   currentUser = null;
-  try { localStorage.removeItem(USER_KEY); } catch (_) {}
+  clearUser();
   updateEspaceButton();
   closeEspace();
   showToast(t("logout_bye"));
 }
 
-/* ---- Historique des générations ---- */
+/* ---- Historique des générations (via storage.js) ---- */
 function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch (_) { return []; }
+  return getHistory();
 }
 function addToHistory(filters, results) {
   if (!results.length) return;
-  try {
-    const h = loadHistory();
-    h.unshift({
-      id:      Date.now(),
-      date:    new Date().toISOString(),
-      filters: { gender: filters.gender, origin: filters.origin,
-                 style: filters.style, meaning: filters.meaning },
-      results: results.map((n) => n.name),
-      count:   results.length
-    });
-    h.splice(20); // garder les 20 dernières
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
-  } catch (_) {}
+  addHistory({
+    id:      Date.now(),
+    date:    new Date().toISOString(),
+    filters: { gender: filters.gender, origin: filters.origin,
+               style: filters.style, meaning: filters.meaning },
+    results: results.map((n) => n.name),
+    count:   results.length
+  });
 }
 
-/* ---- Historique des comparaisons ---- */
+/* ---- Historique des comparaisons (via storage.js) ---- */
 function loadComparisons() {
-  try { return JSON.parse(localStorage.getItem(COMPARE_KEY) || "[]"); } catch (_) { return []; }
+  return getComparisons();
 }
 function addToComparisons(names) {
   if (!names.length) return;
-  try {
-    const c = loadComparisons();
-    c.unshift({ id: Date.now(), date: new Date().toISOString(), names, surname: lastSurname || null });
-    c.splice(10);
-    localStorage.setItem(COMPARE_KEY, JSON.stringify(c));
-  } catch (_) {}
+  addComparison({ id: Date.now(), date: new Date().toISOString(), names, surname: lastSurname || null });
 }
 
 /* ---- Helpers affichage ---- */
@@ -1464,7 +1460,7 @@ function saveDrawerSurname() {
   lastSurname = val;
   document.getElementById("surname").value = val;
   if (currentUser) { currentUser.surname = val; saveUser(); }
-  try { localStorage.setItem("namespark_v1_surname", val); } catch (_) {}
+  saveSurname(val);
   if (favorites.size > 0) renderFavorites();
   updateSelPanel();
   showToast(t("drawer_surname_saved"));
@@ -1531,10 +1527,7 @@ function handleAuthSubmit(e) {
 
   setTimeout(() => {
     /* Vérifie si un espace existait déjà pour cet email */
-    const existing = (() => {
-      try { const u = JSON.parse(localStorage.getItem(USER_KEY)); return u?.email === email ? u : null; }
-      catch (_) { return null; }
-    })();
+    const existing = findUserByEmail(email);
 
     if (existing) {
       currentUser = existing;
@@ -1683,10 +1676,7 @@ function handleUnlockSubmit(e) {
 
   setTimeout(() => {
     /* Espace existant ou création */
-    const existing = (() => {
-      try { const u = JSON.parse(localStorage.getItem(USER_KEY)); return u?.email === email ? u : null; }
-      catch (_) { return null; }
-    })();
+    const existing = findUserByEmail(email);
 
     currentUser = existing || {
       email,
@@ -1834,41 +1824,39 @@ function openSaveSpaceModal() {
    fetch() vers Supabase / votre backend.
    ============================================================= */
 
-/* État du module "Décider ensemble" */
+/* État du module — simple POINTEUR. La vérité vit dans storage.js (Decision). */
 let decideState = {
-  shortlistId:  null,
-  role:         null, // "creator" | "invited" | "family"
-  partnerEmail: null,
-  votes:        {},   // { "name": "yes"|"no"|"maybe" }
-  matchs:       [],
+  decisionId:    null,
+  role:          null, // "creator" | "partner"
+  participantId: null,
 };
 
-/* ---- Ouvrir le module "Décider ensemble" ---- */
+/* Affiche une seule étape du module */
+function showDecideStep(stepId) {
+  document.querySelectorAll(".decide-step").forEach((s) => s.classList.remove("active"));
+  document.getElementById(stepId)?.classList.add("active");
+}
+
+/* ---- Créateur : ouvrir le module et créer la décision ---- */
 function openDecide() {
   if (!favorites.size) {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
     return;
   }
 
-  /* TODO: BACKEND — Initialiser/charger la shortlist depuis Supabase */
-  const shortlist = [...favorites].map((name) => ({
-    name,
-    id: Date.now() + Math.random(),
-    createdAt: new Date().toISOString(),
-  }));
+  const familyMode = document.getElementById("familyModeCheckbox")?.checked || false;
+  const { decision, participantId } = createDecision({
+    creatorName:  currentUser?.firstName || null,
+    creatorEmail: currentUser?.email || null,
+    surname:      lastSurname || null,
+    familyMode,
+    items:        [...favorites],
+  });
+  decideState = { decisionId: decision.id, role: "creator", participantId };
 
-  if (typeof saveShortlist === "function") {
-    saveShortlist(shortlist, generateShortlistId());
-    decideState.shortlistId = getShortlistId();
-  }
-
-  /* Affiche étape 1 : Invitation */
-  document.querySelectorAll(".decide-step").forEach((s) => s.classList.remove("active"));
-  document.getElementById("decideInvite").classList.add("active");
+  showDecideStep("decideInvite");
   document.getElementById("decideOverlay").classList.add("open");
   document.body.style.overflow = "hidden";
-
-  /* Génère le lien d'invitation */
   generateInviteLink();
 }
 
@@ -1877,17 +1865,13 @@ function closeDecide() {
   document.body.style.overflow = "";
 }
 
-/* ---- Générer le lien d'invitation ---- */
+/* ---- Lien d'invitation : ?invite=<decisionId> ---- */
 function generateInviteLink() {
-  if (!decideState.shortlistId) {
-    decideState.shortlistId = generateShortlistId();
-  }
-
   const baseUrl = window.location.href.split("?")[0].split("#")[0];
-  const inviteUrl = `${baseUrl}?invite=${decideState.shortlistId}&lang=${lang}`;
-
-  document.getElementById("inviteLinkInput").value = inviteUrl;
-  document.getElementById("inviteLinkInput").select();
+  const inviteUrl = `${baseUrl}?invite=${decideState.decisionId}&lang=${lang}`;
+  const input = document.getElementById("inviteLinkInput");
+  input.value = inviteUrl;
+  input.select();
 }
 
 /* ---- Copier le lien ---- */
@@ -1902,65 +1886,111 @@ function copyInviteLink() {
   }
 }
 
-/* ---- Enregistrer un vote ---- */
+/* ---- Partenaire : ouvrir via ?invite=<decisionId> ---- */
+function openDecideAsPartner(decisionId) {
+  const decision = getDecision(decisionId);
+  if (!decision) {
+    showToast(t("decide_invite_invalid"));
+    return false;
+  }
+  const participantId = joinDecision(decisionId, {
+    role:  "partner",
+    name:  currentUser?.firstName || null,
+    email: currentUser?.email || null,
+  });
+  decideState = { decisionId, role: "partner", participantId };
+
+  if (decision.surname) lastSurname = decision.surname;
+
+  renderDecideVote(decision);
+  showDecideStep("decideVote");
+  document.getElementById("decideOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+  return true;
+}
+
+/* ---- Partenaire : rendu de la liste de vote ---- */
+function renderDecideVote(decision) {
+  document.getElementById("decideVoteSub").textContent = t("decide_vote_sub");
+  const myVotes = getVotes(decideState.decisionId)[decideState.participantId] || {};
+  const reactions = [
+    { r: "yes",   txt: t("vote_yes")   },
+    { r: "maybe", txt: t("vote_maybe") },
+    { r: "no",    txt: t("vote_no")    },
+  ];
+
+  const wrap = document.getElementById("voteList");
+  wrap.innerHTML = decision.items.map((name) => {
+    const n = NAMES.find((x) => x.name === name);
+    return `
+      <div class="vote-item" data-vote-name="${name}">
+        <span class="vote-name">${n ? n.name : name}</span>
+        <div class="vote-actions">
+          ${reactions.map((x) =>
+            `<button class="vote-btn vote-${x.r}${myVotes[name] === x.r ? " selected" : ""}" data-react="${x.r}">${x.txt}</button>`
+          ).join("")}
+        </div>
+      </div>`;
+  }).join("");
+
+  wrap.querySelectorAll(".vote-item").forEach((item) => {
+    const name = item.dataset.voteName;
+    item.querySelectorAll("[data-react]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        handleVote(name, btn.dataset.react);
+        item.querySelectorAll("[data-react]").forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
+      });
+    });
+  });
+}
+
+/* ---- Enregistrer un vote (créateur OU partenaire) ---- */
 function handleVote(prenameName, reaction) {
-  if (typeof saveVote === "function") {
-    saveVote(decideState.shortlistId, currentUser?.email || "guest", prenameName, reaction);
-  }
-  decideState.votes[prenameName] = reaction;
-
-  /* Simule une notification : partenaire a voté */
-  if (Math.random() > 0.4) {
-    const msg = typeof t("notif_partner_voted") === "function"
-      ? t("notif_partner_voted")(Object.keys(decideState.votes).length)
-      : t("notif_partner_voted");
-    if (typeof addNotification === "function") addNotification("partner_voted", msg);
-    addNotificationUI(msg);
-  }
-
-  /* Calcule les matchs */
-  calculateMatchsLocal();
+  saveVote(decideState.decisionId, decideState.participantId, prenameName, reaction);
 }
 
-/* ---- Calculer les matchs ---- */
-function calculateMatchsLocal() {
-  /* TODO: BACKEND — Appeler calculateAndSaveMatchs via API */
-  /* Pour l'instant : simulation en frontend */
-  const yesVotes = Object.values(decideState.votes).filter((v) => v === "yes").length;
-  if (yesVotes > 0) {
-    decideState.matchs = Object.keys(decideState.votes)
-      .filter((name) => decideState.votes[name] === "yes");
-
-    /* Simule une notification : nouveau match */
-    if (decideState.matchs.length > 0) {
-      const msg = typeof t("notif_match_found") === "function"
-        ? t("notif_match_found")(decideState.matchs.length)
-        : t("notif_match_found");
-      if (typeof addNotification === "function") addNotification("match_found", msg);
-      addNotificationUI(msg);
-    }
-  }
-}
-
-/* ---- Afficher les résultats (matchs) ---- */
+/* ---- Afficher les résultats (matchs DÉRIVÉS via storage.computeMatches) ---- */
 function showDecideResults() {
-  /* Affiche étape 3 */
-  document.querySelectorAll(".decide-step").forEach((s) => s.classList.remove("active"));
-  document.getElementById("decideResults").classList.add("active");
+  showDecideStep("decideResults");
+  const matchs = computeMatches(decideState.decisionId);
 
-  /* Rendu des matchs */
   const grid = document.getElementById("decideMatchsGrid");
-  if (!decideState.matchs.length) {
+  if (!matchs.length) {
     grid.innerHTML = `<div class="results-empty" style="text-align:center;padding:40px;color:var(--ink-soft)">
       <div style="font-size:2rem;margin-bottom:10px">💭</div>
-      <p>${lang === "fr" ? "Aucun match pour l'instant" : "No matches yet"}</p>
+      <p>${lang === "fr" ? "Aucun prénom en commun pour l'instant" : "No names in common yet"}</p>
     </div>`;
     return;
   }
 
-  const names = decideState.matchs.map((n) => NAMES.find((x) => x.name === n)).filter(Boolean);
+  const fn  = t("notif_match_found");
+  const msg = typeof fn === "function" ? fn(matchs.length) : fn;
+  if (typeof addNotification === "function") addNotification("match_found", msg);
+
+  const names = matchs.map((n) => NAMES.find((x) => x.name === n)).filter(Boolean);
   grid.innerHTML = names.map((n, i) => nameCardHTML(n, i, lastSurname)).join("");
   wireCards(grid, "generateur");
+}
+
+/* ---- Créateur : rafraîchir l'état des votes reçus ---- */
+function refreshWaiting() {
+  const votes = getVotes(decideState.decisionId);
+  let yes = 0, no = 0, maybe = 0, voteCount = 0;
+  Object.entries(votes).forEach(([pid, byName]) => {
+    if (pid === decideState.participantId) return; // ignore les votes du créateur
+    Object.values(byName).forEach((r) => {
+      voteCount++;
+      if (r === "yes") yes++; else if (r === "no") no++; else maybe++;
+    });
+  });
+
+  document.getElementById("votingStats").innerHTML = `
+    <div class="voting-stat-item"><div class="voting-stat-num">${yes}</div><div class="voting-stat-label">${t("vote_yes")}</div></div>
+    <div class="voting-stat-item"><div class="voting-stat-num">${maybe}</div><div class="voting-stat-label">${t("vote_maybe")}</div></div>
+    <div class="voting-stat-item"><div class="voting-stat-num">${no}</div><div class="voting-stat-label">${t("vote_no")}</div></div>`;
+
+  return voteCount;
 }
 
 /* ---- Ajouter une notification dans l'UI ---- */
@@ -1976,81 +2006,56 @@ function addNotificationUI(text) {
 
 /* ---- Wire boutons "Décider ensemble" ---- */
 function wireDecideButtons() {
-  const openDecideBtn = document.querySelector("[data-i18n='decide_title']")?.closest("button") || null;
-  if (!openDecideBtn && favorites.size > 0) {
-    /* Ajoute un bouton "Décider ensemble" au panneau de sélection */
-    const panel = document.getElementById("selPanel");
-    if (panel) {
-      const btn = document.createElement("button");
-      btn.className = "btn btn-primary";
-      btn.textContent = lang === "fr" ? "💑 Décider ensemble" : "💑 Decide together";
-      btn.onclick = openDecide;
-      panel.appendChild(btn);
-    }
-  }
-
-  /* Boutons du module */
   document.getElementById("closeDecide")?.addEventListener("click", closeDecide);
   document.getElementById("copyInviteLinkBtn")?.addEventListener("click", copyInviteLink);
+
+  /* Créateur : passe à l'écran d'attente */
   document.getElementById("continueAfterInviteBtn")?.addEventListener("click", () => {
-    document.getElementById("decideInvite").classList.remove("active");
-    document.getElementById("decideWaiting").classList.add("active");
-    simulatePartnerVoting();
+    showDecideStep("decideWaiting");
+    refreshWaiting();
   });
+
+  /* Créateur : actualise les votes reçus → résultats si votes présents */
   document.getElementById("refreshVotesBtn")?.addEventListener("click", () => {
-    simulatePartnerVoting();
+    const count = refreshWaiting();
+    if (count > 0) showDecideResults();
+    else showToast(t("decide_no_votes_yet"));
   });
+
+  /* Démo : simuler le vote d'un partenaire (passe par storage) */
+  document.getElementById("simulatePartnerBtn")?.addEventListener("click", simulatePartnerVoting);
+
+  /* Partenaire : voir les prénoms en commun après avoir voté */
+  document.getElementById("seeMatchsBtn")?.addEventListener("click", () => {
+    showToast(t("decide_thanks"));
+    showDecideResults();
+  });
+
+  /* Partager les matchs */
   document.getElementById("shareMatchsBtn")?.addEventListener("click", () => {
-    if (decideState.matchs.length) shareSelection();
+    if (computeMatches(decideState.decisionId).length) shareSelection();
     closeDecide();
   });
 }
 
-/* ---- Simulation : partenaire vote (démo) ---- */
+/* ---- Démo : simule un partenaire DISTINCT qui vote (via storage) ---- */
 function simulatePartnerVoting() {
-  const shortlist = getShortlist();
-  const statsEl = document.getElementById("votingStats");
+  const decision = getDecision(decideState.decisionId);
+  if (!decision || !decision.items.length) return;
 
-  /* Simule les votes du partenaire */
-  let yesCount = 0, noCount = 0, maybeCount = 0;
-  shortlist.forEach((item) => {
-    const reaction = ["yes", "no", "maybe"][Math.floor(Math.random() * 3)];
-    handleVote(item.name, reaction);
-    if (reaction === "yes") yesCount++;
-    else if (reaction === "no") noCount++;
-    else maybeCount++;
+  const partnerPid = addParticipant(decideState.decisionId, {
+    role: "partner",
+    name: lang === "fr" ? "Partenaire (démo)" : "Partner (demo)",
+  });
+  decision.items.forEach((name) => {
+    const r = ["yes", "no", "maybe"][Math.floor(Math.random() * 3)];
+    saveVote(decideState.decisionId, partnerPid, name, r);
   });
 
-  /* Affiche stats */
-  statsEl.innerHTML = `
-    <div class="voting-stat-item">
-      <div class="voting-stat-num">${yesCount}</div>
-      <div class="voting-stat-label">💚 Oui</div>
-    </div>
-    <div class="voting-stat-item">
-      <div class="voting-stat-num">${maybeCount}</div>
-      <div class="voting-stat-label">🤷 Peut-être</div>
-    </div>
-    <div class="voting-stat-item">
-      <div class="voting-stat-num">${noCount}</div>
-      <div class="voting-stat-label">❌ Non</div>
-    </div>
-  `;
-
-  /* Après 2s, affiche les résultats */
-  setTimeout(() => showDecideResults(), 2000);
+  showDecideStep("decideWaiting");
+  refreshWaiting();
+  setTimeout(() => showDecideResults(), 900);
 }
-
-/* Helpers */
-function generateShortlistId() {
-  return `sl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-/* getShortlist() et getShortlistId() sont fournis par storage.js, chargé
-   AVANT app.js (voir index.html). On NE les redéfinit pas ici : une fonction
-   homonyme dans app.js écraserait celle de storage.js et s'appellerait
-   elle-même → récursion infinie (RangeError). La shortlist est garantie
-   sauvegardée par openDecide() avant tout vote. */
 
 /* =============================================================
    27) INIT
@@ -2071,7 +2076,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initMonEspace();
 
   loadFavorites();
-  loadUser();          // ← charge le profil utilisateur
+  loadUser();                       // ← charge le profil utilisateur
+  lastSurname = getSurname() || currentUser?.surname || "";
+  const surnameInput = document.getElementById("surname");
+  if (surnameInput && lastSurname) surnameInput.value = lastSurname;
   initNav();
   initSegments();
   initForm();
@@ -2079,10 +2087,19 @@ document.addEventListener("DOMContentLoaded", () => {
   renderFaq();
   animateTitle();
   initReveal();
-  applyLang("fr");    // appelle updateEspaceButton() en interne
+  applyLang(getLang());             // langue persistée ; appelle updateEspaceButton()
   renderFavorites();
-  applyQueryPrefill();
 
   /* Module "Décider ensemble" */
   wireDecideButtons();
+
+  /* Parcours partenaire : ?invite=<decisionId> a priorité sur le prefill */
+  const inviteId = new URLSearchParams(location.search).get("invite");
+  if (inviteId) {
+    const il = new URLSearchParams(location.search).get("lang");
+    if (il === "fr" || il === "en") applyLang(il);
+    openDecideAsPartner(inviteId);
+  } else {
+    applyQueryPrefill();
+  }
 });

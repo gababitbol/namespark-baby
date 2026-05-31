@@ -413,7 +413,7 @@
       <div class="decide-body">
 
         <!-- ÉTAPE 1 : Invitation -->
-        <div class="decide-step" id="decideInvite" style="display:none">
+        <div class="decide-step" id="decideInvite">
           <p class="decide-subtitle" data-i18n="decide_invite_sub">
             Partagez ce lien avec votre conjoint pour qu'il vote sur vos prénoms favoris.
           </p>
@@ -428,20 +428,30 @@
           <button class="btn btn-ghost" id="continueAfterInviteBtn" data-i18n="decide_continue">Continuer</button>
         </div>
 
-        <!-- ÉTAPE 2 : En attente de votes -->
-        <div class="decide-step" id="decideWaiting" style="display:none">
+        <!-- ÉTAPE PARTENAIRE : vote (ouverte via ?invite=) -->
+        <div class="decide-step" id="decideVote">
+          <p class="decide-subtitle" id="decideVoteSub">
+            Votre partenaire vous a invité·e à voter sur ces prénoms.
+          </p>
+          <div class="vote-list" id="voteList"></div>
+          <button class="btn btn-primary" id="seeMatchsBtn" data-i18n="decide_see_matchs">Voir les prénoms en commun</button>
+        </div>
+
+        <!-- ÉTAPE 2 : En attente de votes (côté créateur) -->
+        <div class="decide-step" id="decideWaiting">
           <p class="decide-subtitle" data-i18n="decide_waiting_sub">
             Votre partenaire vote sur votre sélection...
           </p>
           <div class="voting-box">
             <div class="voting-stats" id="votingStats"></div>
-            <button class="btn btn-ghost" id="refreshVotesBtn" data-i18n="decide_refresh">🔄 Actualiser</button>
+            <button class="btn btn-primary" id="refreshVotesBtn" data-i18n="decide_refresh">🔄 Actualiser</button>
+            <button class="btn btn-ghost btn-sm" id="simulatePartnerBtn" data-i18n="decide_simulate">Simuler le vote du partenaire (démo)</button>
           </div>
           <div class="decide-notifications" id="decideNotifications"></div>
         </div>
 
         <!-- ÉTAPE 3 : Résultats (Matchs) -->
-        <div class="decide-step" id="decideResults" style="display:none">
+        <div class="decide-step" id="decideResults">
           <p class="decide-subtitle" data-i18n="decide_results_sub">
             Voici les prénoms où vous êtes d'accord !
           </p>

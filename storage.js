@@ -1,340 +1,305 @@
-/* =============================================================
-   COUCHE STORAGE ABSTRAITE — NameSpark Baby
+/* =============================================================================
+   NameSpark Baby — COUCHE D'ACCÈS AUX DONNÉES (point d'accès UNIQUE)
+   -----------------------------------------------------------------------------
+   Toute l'application (app.js, admin.js, …) passe par les FONCTIONS PUBLIQUES
+   définies ici. AUCUNE autre partie du code ne doit lire/écrire localStorage
+   directement. C'est la garantie qu'on pourra brancher Supabase plus tard sans
+   toucher à l'interface utilisateur.
 
-   Isole TOUT le stockage en localStorage.
-   Prépare la migration future vers Supabase / backend.
+   ── MODÈLE DE DONNÉES (1 source de vérité) ──────────────────────────────────
+     selection : string[]                       // prénoms choisis (= favoris)
+     user      : { email, firstName, createdAt, surname }
+     Decision  : {
+       id, createdAt, surname, familyMode,
+       items:        string[],                  // prénoms soumis au vote
+       participants: { [pid]: { role, name, email, joinedAt } },
+       votes:        { [pid]: { [name]: "yes"|"no"|"maybe" } }
+     }
+     // Les "matchs" ne sont JAMAIS stockés : computeMatches() les dérive.
 
-   ⚠️  IMPORTANT : Chaque fonction `save*` / `get*` peut être
-   remplacée par un appel API sans toucher à app.js.
+   ── POUR BRANCHER SUPABASE (plus tard) ──────────────────────────────────────
+     Ne remplacer QUE :
+       1) les primitives _read/_write/_remove (bloc PERSISTANCE)
+       2) le corps des fonctions publiques (par des appels Supabase)
+     Les SIGNATURES publiques et la FORME des données ne changent pas.
+     Schéma SQL cible : voir docs/unification.md (§ Supabase).
+   ============================================================================= */
 
-   TODO: BACKEND — Remplacer tous les localStorage par des appels
-   POST/GET vers /api/storage/[entity] sur Supabase.
-   ============================================================= */
-
-/* ========== CLÉS LOCALSTORAGE ========== */
-const STORAGE_KEYS = {
-  /* Utilisateur actuel */
-  USER:             "namespark_v1_user",
-  FAVORITES:        "namespark_v1_favorites",
-  SURNAME:          "namespark_v1_surname",
-  LANG:             "namespark_v1_lang",
-
-  /* Shortlist + Décider ensemble */
-  SHORTLIST:        "namespark_v2_shortlist",      // [{ name, id, createdAt }]
-  SHORTLIST_ID:     "namespark_v2_shortlist_id",   // UUID unique pour le lien
-  VOTES:            "namespark_v2_votes",          // { "shortlistId": { "email": { "name": "yes"|"no"|"maybe" } } }
-  INVITATION:       "namespark_v2_invitation",     // { shortlistId, creatorEmail, creatorName, createdAt, familyMode }
-  PARTICIPANT:      "namespark_v2_participant",    // { email, name, role: "creator"|"invited"|"family" }
-  MATCHS:           "namespark_v2_matchs",         // { shortlistId: ["name1", "name2", ...] }
-
-  /* Notifications simulées */
-  NOTIFICATIONS:    "namespark_v2_notifications",  // [{ id, type, text, timestamp, read }]
+/* =============================================================================
+   ESPACE DE NOMS
+   ============================================================================= */
+const NS = "namespark.";
+const KEYS = {
+  user:            NS + "user",
+  lang:            NS + "lang",
+  surname:         NS + "surname",
+  selection:       NS + "selection",
+  decisions:       NS + "decisions",          // { [id]: Decision }
+  currentDecision: NS + "current_decision",   // id de la décision courante
+  myParticipants:  NS + "my_participants",    // { [decisionId]: participantId } (cet appareil)
+  savedLists:      NS + "saved_lists",        // listes envoyées par email
+  history:         NS + "history",            // historique de générations
+  comparisons:     NS + "comparisons",        // historique du comparateur
+  notifications:   NS + "notifications",      // notifications (simulées pour l'instant)
 };
 
-/* ========== PARTICIPANT & SESSION ========== */
-
-/**
- * Définit le participant actuel (role: creator | invited | family)
- * TODO: BACKEND — POST /api/participants avec Supabase auth
- */
-function saveParticipant(participant) {
-  // { email, name, role: "creator|invited|family", shortlistId }
+/* =============================================================================
+   PERSISTANCE bas niveau — LE SEUL endroit qui touche localStorage.
+   ⮕ À remplacer par des appels Supabase le jour venu.
+   ============================================================================= */
+function _read(key, fallback) {
   try {
-    localStorage.setItem(STORAGE_KEYS.PARTICIPANT, JSON.stringify(participant));
-  } catch (_) {}
+    const raw = localStorage.getItem(key);
+    return raw == null ? fallback : JSON.parse(raw);
+  } catch (_) { return fallback; }
+}
+function _write(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+}
+function _remove(key) {
+  try { localStorage.removeItem(key); } catch (_) {}
 }
 
-function getParticipant() {
-  try {
-    const data = localStorage.getItem(STORAGE_KEYS.PARTICIPANT);
-    return data ? JSON.parse(data) : null;
-  } catch (_) {
-    return null;
+/* =============================================================================
+   HELPERS
+   ============================================================================= */
+function uid(prefix = "id") {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
+/* Migration unique depuis les anciennes clés (v1/v2) → ne perd pas les données
+   des premiers visiteurs. S'exécute une fois au chargement de storage.js. */
+function _migrateLegacy() {
+  if (localStorage.getItem(KEYS.selection) == null) {
+    const oldFav = _read("namespark_v1_favorites", null);
+    if (Array.isArray(oldFav)) _write(KEYS.selection, oldFav);
+  }
+  if (localStorage.getItem(KEYS.user) == null) {
+    const oldUser = _read("namespark_v1_user", null);
+    if (oldUser && oldUser.email) _write(KEYS.user, oldUser);
+  }
+  if (localStorage.getItem(KEYS.surname) == null) {
+    const s = localStorage.getItem("namespark_v1_surname"); // ancien format : chaîne brute
+    if (s) _write(KEYS.surname, s);
+  }
+  if (localStorage.getItem(KEYS.lang) == null) {
+    const l = localStorage.getItem("namespark_v1_lang");    // ancien format : chaîne brute
+    if (l === "fr" || l === "en") _write(KEYS.lang, l);
   }
 }
+try { _migrateLegacy(); } catch (_) {}
 
-function clearParticipant() {
-  localStorage.removeItem(STORAGE_KEYS.PARTICIPANT);
+/* =============================================================================
+   PRÉFÉRENCES (langue, nom de famille)
+   ============================================================================= */
+function getLang()        { return _read(KEYS.lang, "fr"); }
+function saveLang(lang)   { _write(KEYS.lang, lang); }
+
+function getSurname()     { return _read(KEYS.surname, ""); }
+function saveSurname(s)   { _write(KEYS.surname, s || ""); }
+
+/* =============================================================================
+   UTILISATEUR
+   ============================================================================= */
+function getUser()        { return _read(KEYS.user, null); }
+function setUser(user)    { _write(KEYS.user, user); }
+function clearUser()      { _remove(KEYS.user); }
+
+/* Recherche d'un compte existant par email (mono-utilisateur en local ;
+   deviendra une vraie requête Supabase). */
+function findUserByEmail(email) {
+  const u = getUser();
+  return u && u.email === email ? u : null;
 }
 
-/* ========== SHORTLIST (= la sélection actuelle) ========== */
-
-/**
- * Sauvegarde la shortlist (liste de prénoms choisis pour voter)
- * TODO: BACKEND — PUT /api/shortlists/{id} sur Supabase
- */
-function saveShortlist(shortlist, shortlistId) {
-  // shortlist: [{ name, id: Date.now(), createdAt }]
-  try {
-    localStorage.setItem(STORAGE_KEYS.SHORTLIST, JSON.stringify(shortlist));
-    if (shortlistId) {
-      localStorage.setItem(STORAGE_KEYS.SHORTLIST_ID, shortlistId);
-    }
-  } catch (_) {}
+/* =============================================================================
+   SÉLECTION — concept UNIQUE (ex-favoris / ex-shortlist)
+   ============================================================================= */
+function getSelection()        { const s = _read(KEYS.selection, []); return Array.isArray(s) ? s : []; }
+function saveSelection(names)  { _write(KEYS.selection, Array.isArray(names) ? [...new Set(names)] : []); }
+function addToSelection(name) {
+  const s = getSelection();
+  if (!s.includes(name)) { s.push(name); saveSelection(s); }
+}
+function removeFromSelection(name) {
+  saveSelection(getSelection().filter((n) => n !== name));
 }
 
-function getShortlist() {
-  try {
-    const data = localStorage.getItem(STORAGE_KEYS.SHORTLIST);
-    return data ? JSON.parse(data) : [];
-  } catch (_) {
-    return [];
-  }
+/* =============================================================================
+   LISTES SAUVEGARDÉES (capture email — futur envoi par email côté serveur)
+   ============================================================================= */
+function getSavedLists()       { return _read(KEYS.savedLists, []); }
+function addSavedList(entry) {
+  const all = getSavedLists();
+  all.push(entry);
+  _write(KEYS.savedLists, all);
 }
 
-function getShortlistId() {
-  return localStorage.getItem(STORAGE_KEYS.SHORTLIST_ID) || null;
+/* =============================================================================
+   HISTORIQUE & COMPARAISONS (fonctions périphériques)
+   ============================================================================= */
+function getHistory()          { return _read(KEYS.history, []); }
+function addHistory(entry) {
+  const h = getHistory();
+  h.unshift(entry);
+  h.splice(20);
+  _write(KEYS.history, h);
 }
 
-function clearShortlist() {
-  localStorage.removeItem(STORAGE_KEYS.SHORTLIST);
-  localStorage.removeItem(STORAGE_KEYS.SHORTLIST_ID);
+function getComparisons()      { return _read(KEYS.comparisons, []); }
+function addComparison(entry) {
+  const c = getComparisons();
+  c.unshift(entry);
+  c.splice(10);
+  _write(KEYS.comparisons, c);
 }
 
-/* ========== INVITATION (lien partagé) ========== */
+/* =============================================================================
+   DÉCISIONS (session couple) — source de vérité du parcours "Décider ensemble"
+   ============================================================================= */
 
-/**
- * Crée + sauvegarde une invitation
- * TODO: BACKEND — POST /api/invitations sur Supabase
- */
-function createInvitation(creatorEmail, creatorName, familyMode = false) {
-  const shortlistId = generateShortlistId(); // UUID-like
-  const invitation = {
-    shortlistId,
-    creatorEmail,
-    creatorName,
-    createdAt: new Date().toISOString(),
-    familyMode, // true = famille, false = juste conjoint
+/* --- Accès interne à la table des décisions --- */
+function _allDecisions()       { return _read(KEYS.decisions, {}); }
+function _saveDecisions(all)   { _write(KEYS.decisions, all); }
+
+/* Crée une décision à partir de la sélection figée (items).
+   Le créateur devient le 1er participant.
+   → { decision, participantId } */
+function createDecision({ creatorName = null, creatorEmail = null, surname = null, familyMode = false, items = [] } = {}) {
+  const id  = uid("dec");
+  const pid = uid("p");
+  const now = new Date().toISOString();
+
+  const decision = {
+    id,
+    createdAt: now,
+    surname:   surname || null,
+    familyMode: !!familyMode,
+    items:     Array.isArray(items) ? [...items] : [],
+    participants: {
+      [pid]: { role: "creator", name: creatorName, email: creatorEmail, joinedAt: now },
+    },
+    votes: {},
   };
 
-  try {
-    localStorage.setItem(STORAGE_KEYS.INVITATION, JSON.stringify(invitation));
-  } catch (_) {}
+  const all = _allDecisions();
+  all[id] = decision;
+  _saveDecisions(all);
+  setCurrentDecisionId(id);
+  _setMyParticipant(id, pid);
 
-  return shortlistId;
+  return { decision, participantId: pid };
 }
 
-function getInvitation() {
-  try {
-    const data = localStorage.getItem(STORAGE_KEYS.INVITATION);
-    return data ? JSON.parse(data) : null;
-  } catch (_) {
-    return null;
-  }
+function getDecision(id) {
+  if (!id) return null;
+  return _allDecisions()[id] || null;
 }
 
-function getInvitationByShortlistId(shortlistId) {
-  const inv = getInvitation();
-  return inv && inv.shortlistId === shortlistId ? inv : null;
+function getCurrentDecisionId()      { return _read(KEYS.currentDecision, null); }
+function setCurrentDecisionId(id)    { _write(KEYS.currentDecision, id); }
+
+/* --- Participant de CET appareil pour une décision donnée --- */
+function _myParticipants()           { return _read(KEYS.myParticipants, {}); }
+function _setMyParticipant(decisionId, pid) {
+  const m = _myParticipants();
+  m[decisionId] = pid;
+  _write(KEYS.myParticipants, m);
+}
+function getMyParticipantId(decisionId) {
+  return _myParticipants()[decisionId] || null;
 }
 
-function clearInvitation() {
-  localStorage.removeItem(STORAGE_KEYS.INVITATION);
+/* Ajoute un participant à une décision (toujours nouveau). → participantId | null */
+function addParticipant(decisionId, { role = "partner", name = null, email = null } = {}) {
+  const all = _allDecisions();
+  const d = all[decisionId];
+  if (!d) return null;
+
+  const pid = uid("p");
+  d.participants[pid] = { role, name, email, joinedAt: new Date().toISOString() };
+  _saveDecisions(all);
+  return pid;
 }
 
-/* ========== VOTES (réactions : j'aime / je rejette) ========== */
+/* Rejoint une décision (get-or-create du participant pour CET appareil).
+   Utilisé par le partenaire qui ouvre ?invite=<id>. → participantId | null */
+function joinDecision(decisionId, opts = {}) {
+  const existing = getMyParticipantId(decisionId);
+  if (existing) return existing;
 
-/**
- * Enregistre un vote d'une personne sur un prénom de la shortlist
- * TODO: BACKEND — POST /api/votes sur Supabase
- */
-function saveVote(shortlistId, email, prenameName, reaction) {
+  const pid = addParticipant(decisionId, opts);
+  if (pid) _setMyParticipant(decisionId, pid);
+  return pid;
+}
+
+/* =============================================================================
+   VOTES
+   ============================================================================= */
+function saveVote(decisionId, participantId, name, reaction) {
   // reaction: "yes" | "no" | "maybe"
-  try {
-    let votes = JSON.parse(localStorage.getItem(STORAGE_KEYS.VOTES) || "{}");
-
-    if (!votes[shortlistId]) votes[shortlistId] = {};
-    if (!votes[shortlistId][email]) votes[shortlistId][email] = {};
-
-    votes[shortlistId][email][prenameName] = reaction;
-    localStorage.setItem(STORAGE_KEYS.VOTES, JSON.stringify(votes));
-  } catch (_) {}
+  const all = _allDecisions();
+  const d = all[decisionId];
+  if (!d) return;
+  if (!d.votes[participantId]) d.votes[participantId] = {};
+  d.votes[participantId][name] = reaction;
+  _saveDecisions(all);
 }
 
-function getVotes(shortlistId) {
-  try {
-    const data = localStorage.getItem(STORAGE_KEYS.VOTES) || "{}";
-    const votes = JSON.parse(data);
-    return votes[shortlistId] || {};
-  } catch (_) {
-    return {};
-  }
+/* → { [participantId]: { [name]: reaction } } */
+function getVotes(decisionId) {
+  const d = getDecision(decisionId);
+  return d ? d.votes : {};
 }
 
-function getVotesForParticipant(shortlistId, email) {
-  try {
-    const votes = getVotes(shortlistId);
-    return votes[email] || {};
-  } catch (_) {
-    return {};
-  }
+/* =============================================================================
+   MATCHS — DÉRIVÉS (jamais stockés). Moteur de matching UNIQUE.
+   Règle : un prénom est un match s'il a reçu ≥1 vote et que TOUS les votes
+   exprimés sur ce prénom sont "yes".
+   ============================================================================= */
+function computeMatches(decisionId) {
+  const d = getDecision(decisionId);
+  if (!d) return [];
+  return d.items.filter((name) => {
+    const reactions = Object.values(d.votes)
+      .map((byName) => byName[name])
+      .filter(Boolean);
+    return reactions.length > 0 && reactions.every((r) => r === "yes");
+  });
 }
 
-function clearVotes(shortlistId) {
-  try {
-    let votes = JSON.parse(localStorage.getItem(STORAGE_KEYS.VOTES) || "{}");
-    delete votes[shortlistId];
-    localStorage.setItem(STORAGE_KEYS.VOTES, JSON.stringify(votes));
-  } catch (_) {}
-}
-
-/* ========== MATCHS (prénoms où tout le monde a dit "oui") ========== */
-
-/**
- * Calcule et sauvegarde les matchs (consensus)
- * TODO: BACKEND — POST /api/matchs sur Supabase (ou calcul côté backend)
- */
-function calculateAndSaveMatchs(shortlistId) {
-  const votes = getVotes(shortlistId);
-  const shortlist = getShortlist();
-
-  const matchs = shortlist
-    .filter((name) => {
-      const allVotes = Object.values(votes).map((v) => v[name.name]);
-      // Tous ont dit "yes" ?
-      return allVotes.length > 0 && allVotes.every((v) => v === "yes");
-    })
-    .map((n) => n.name);
-
-  try {
-    let allMatchs = JSON.parse(localStorage.getItem(STORAGE_KEYS.MATCHS) || "{}");
-    allMatchs[shortlistId] = matchs;
-    localStorage.setItem(STORAGE_KEYS.MATCHS, JSON.stringify(allMatchs));
-  } catch (_) {}
-
-  return matchs;
-}
-
-function getMatchs(shortlistId) {
-  try {
-    const data = localStorage.getItem(STORAGE_KEYS.MATCHS) || "{}";
-    const matchs = JSON.parse(data);
-    return matchs[shortlistId] || [];
-  } catch (_) {
-    return [];
-  }
-}
-
-/* ========== NOTIFICATIONS SIMULÉES ========== */
-
-/**
- * Ajoute une notification (simulée côté front)
- * TODO: BACKEND — POST /api/notifications sur Supabase
- * + prévoir un polling/websocket pour recevoir les vraies notifications
- */
+/* =============================================================================
+   NOTIFICATIONS (simulées côté front pour l'instant)
+   ============================================================================= */
 function addNotification(type, text) {
-  // type: "partner_voted" | "match_found" | "weeks_left" | "custom"
-  const notification = {
-    id:        Date.now(),
-    type,
-    text,
-    timestamp: new Date().toISOString(),
-    read:      false,
-  };
-
-  try {
-    let notifs = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS) || "[]");
-    notifs.unshift(notification);
-    notifs.splice(20); // garder max 20
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifs));
-  } catch (_) {}
-
-  return notification;
+  const notif = { id: Date.now(), type, text, timestamp: new Date().toISOString(), read: false };
+  const all = _read(KEYS.notifications, []);
+  all.unshift(notif);
+  all.splice(20);
+  _write(KEYS.notifications, all);
+  return notif;
 }
-
-function getNotifications() {
-  try {
-    const data = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS) || "[]";
-    return JSON.parse(data);
-  } catch (_) {
-    return [];
-  }
+function getNotifications()          { return _read(KEYS.notifications, []); }
+function markNotificationRead(id) {
+  const all = _read(KEYS.notifications, []);
+  const n = all.find((x) => x.id === id);
+  if (n) { n.read = true; _write(KEYS.notifications, all); }
 }
+function clearNotifications()        { _remove(KEYS.notifications); }
 
-function markNotificationAsRead(notificationId) {
-  try {
-    let notifs = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS) || "[]");
-    const notif = notifs.find((n) => n.id === notificationId);
-    if (notif) notif.read = true;
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifs));
-  } catch (_) {}
-}
-
-function clearNotifications() {
-  localStorage.removeItem(STORAGE_KEYS.NOTIFICATIONS);
-}
-
-/* ========== LEGACY — Garder compatibilité ========== */
-
-// Favoris (existants)
-function saveFavoritesToStorage(favorites) {
-  try { localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify([...favorites])); } catch (_) {}
-}
-
-function getFavoritesFromStorage() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITES) || "[]");
-    return Array.isArray(saved) ? new Set(saved) : new Set();
-  } catch (_) { return new Set(); }
-}
-
-// Utilisateur
-function saveUserToStorage(user) {
-  try { localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user)); } catch (_) {}
-}
-
-function getUserFromStorage() {
-  try {
-    const data = localStorage.getItem(STORAGE_KEYS.USER);
-    return data ? JSON.parse(data) : null;
-  } catch (_) { return null; }
-}
-
-// Langue
-function saveLangToStorage(lang) {
-  try { localStorage.setItem(STORAGE_KEYS.LANG, lang); } catch (_) {}
-}
-
-function getLangFromStorage() {
-  return localStorage.getItem(STORAGE_KEYS.LANG) || "fr";
-}
-
-// Nom de famille
-function saveSurnameToStorage(surname) {
-  try { localStorage.setItem(STORAGE_KEYS.SURNAME, surname); } catch (_) {}
-}
-
-function getSurnameFromStorage() {
-  return localStorage.getItem(STORAGE_KEYS.SURNAME) || "";
-}
-
-/* ========== HELPER — Générer un shortlist ID ========== */
-
-function generateShortlistId() {
-  // Format simple : timestamp + random
-  return `sl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-/* ========== EXPORT ========== */
-
+/* =============================================================================
+   EXPORT (Node / tests). En navigateur, tout est déjà global.
+   ============================================================================= */
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
-    // Participant
-    saveParticipant, getParticipant, clearParticipant,
-    // Shortlist
-    saveShortlist, getShortlist, getShortlistId, clearShortlist,
-    // Invitation
-    createInvitation, getInvitation, getInvitationByShortlistId, clearInvitation,
-    // Votes
-    saveVote, getVotes, getVotesForParticipant, clearVotes,
-    // Matchs
-    calculateAndSaveMatchs, getMatchs,
-    // Notifications
-    addNotification, getNotifications, markNotificationAsRead, clearNotifications,
-    // Legacy
-    saveFavoritesToStorage, getFavoritesFromStorage,
-    saveUserToStorage, getUserFromStorage,
-    saveLangToStorage, getLangFromStorage,
-    saveSurnameToStorage, getSurnameFromStorage,
+    getLang, saveLang, getSurname, saveSurname,
+    getUser, setUser, clearUser, findUserByEmail,
+    getSelection, saveSelection, addToSelection, removeFromSelection,
+    getSavedLists, addSavedList,
+    getHistory, addHistory, getComparisons, addComparison,
+    createDecision, getDecision, getCurrentDecisionId, setCurrentDecisionId,
+    addParticipant, joinDecision, getMyParticipantId, saveVote, getVotes, computeMatches,
+    addNotification, getNotifications, markNotificationRead, clearNotifications,
+    uid,
   };
 }
