@@ -441,7 +441,7 @@ function t(key) {
 function applyLang(next) {
   lang = next;
   document.documentElement.lang = lang;
-  /* Persiste la langue pour ma-liste.html */
+  /* Persiste la langue (réutilisée sur les pages SEO et au prochain chargement) */
   try { localStorage.setItem("namespark_v1_lang", lang); } catch (_) {}
 
   document.querySelectorAll("[data-i18n]").forEach((el) => {
@@ -2046,15 +2046,11 @@ function generateShortlistId() {
   return `sl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-function getShortlist() {
-  if (typeof getShortlist === "function") return getShortlist(); // storage.js
-  return [...favorites].map((name) => ({ name, id: Date.now() + Math.random() }));
-}
-
-function getShortlistId() {
-  if (typeof getShortlistId === "function") return getShortlistId(); // storage.js
-  return decideState.shortlistId;
-}
+/* getShortlist() et getShortlistId() sont fournis par storage.js, chargé
+   AVANT app.js (voir index.html). On NE les redéfinit pas ici : une fonction
+   homonyme dans app.js écraserait celle de storage.js et s'appellerait
+   elle-même → récursion infinie (RangeError). La shortlist est garantie
+   sauvegardée par openDecide() avant tout vote. */
 
 /* =============================================================
    27) INIT

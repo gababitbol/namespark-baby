@@ -919,88 +919,6 @@ body { animation: pageIn .5s ease; }
 }
 #navListeWrap { display: none; }
 
-/* ---- Header simplifié (page ma-liste) ---- */
-.liste-header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 72px;
-  gap: 16px;
-}
-.liste-nav-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.btn-sm { padding: 8px 14px; font-size: .85rem; }
-
-/* ---- Hero compact (page ma-liste) ---- */
-.liste-hero {
-  padding: 52px 0 44px;
-  position: relative;
-  overflow: hidden;
-}
-.liste-hero::before {
-  content: "";
-  position: absolute;
-  inset: -40% 20% auto auto;
-  width: 420px; height: 420px;
-  background: radial-gradient(circle, var(--accent-soft), transparent 65%);
-  z-index: -1;
-}
-.liste-hero-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.liste-hero-text .eyebrow { margin-bottom: 14px; }
-.liste-title {
-  font-family: var(--serif);
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-  letter-spacing: -0.02em;
-  font-weight: 700;
-  line-height: 1.1;
-  margin-bottom: 12px;
-}
-.liste-subtitle {
-  color: var(--ink-soft);
-  font-size: 1.05rem;
-  max-width: 480px;
-}
-.liste-count {
-  display: inline-block;
-  font-size: .82rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-  margin-top: 8px;
-}
-.btn-save-liste {
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* ---- Section liste (cards) ---- */
-.liste-section { padding: 48px 0 72px; background: var(--bg-soft); }
-
-/* ---- État vide de la liste ---- */
-.liste-empty {
-  text-align: center;
-  padding: 80px 24px;
-}
-.liste-empty .empty-icon {
-  font-size: 3.5rem;
-  margin-bottom: 20px;
-  line-height: 1;
-}
-.liste-empty h2 {
-  font-family: var(--serif);
-  font-size: 1.8rem;
-  margin-bottom: 12px;
-}
-.liste-empty p { color: var(--ink-soft); font-size: 1.05rem; margin-bottom: 28px; }
-
 /* ---- Modal Sauvegarder ma liste ---- */
 .save-modal { max-width: 480px; }
 .save-modal-desc {
@@ -1054,12 +972,6 @@ body { animation: pageIn .5s ease; }
   display: none;
 }
 .field-error-msg.visible { display: block; }
-
-/* ---- Responsive liste ---- */
-@media (max-width: 720px) {
-  .liste-hero-inner { flex-direction: column; align-items: flex-start; }
-  .btn-save-liste { width: 100%; justify-content: center; }
-}
 
 /* =============================================================
    MODAL "VOTRE SÉLECTION EST PRÊTE" (unlock gate)
