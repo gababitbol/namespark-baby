@@ -115,6 +115,7 @@ const I18N = {
     sel_page_sub: "Retrouvez tous les prénoms que vous avez enregistrés.",
     sel_page_empty: "Cliquez sur ❤️ pour ajouter des prénoms à votre sélection.",
     sel_page_count: (n) => `${n} prénom${n > 1 ? "s" : ""} enregistré${n > 1 ? "s" : ""}`,
+    sel_decide_btn: "💑 Décider à deux",
     sel_premium_title: "Faites plus avec votre sélection",
     prem_pdf_title: "Télécharger en PDF",
     prem_pdf_desc: "Exportez votre liste de prénoms imprimable.",
@@ -293,6 +294,7 @@ const I18N = {
     sel_page_sub: "Find all the names you have saved.",
     sel_page_empty: "Click ❤️ to add names to your selection.",
     sel_page_count: (n) => `${n} name${n > 1 ? "s" : ""} saved`,
+    sel_decide_btn: "💑 Decide together",
     sel_premium_title: "Do more with your selection",
     prem_pdf_title: "Download as PDF",
     prem_pdf_desc: "Export your printable name list.",
@@ -2006,6 +2008,12 @@ function addNotificationUI(text) {
 
 /* ---- Wire boutons "Décider ensemble" ---- */
 function wireDecideButtons() {
+  /* Point d'entrée créateur : depuis l'overlay "Ma sélection" */
+  document.getElementById("openDecideBtn")?.addEventListener("click", () => {
+    closeSelection();
+    openDecide();
+  });
+
   document.getElementById("closeDecide")?.addEventListener("click", closeDecide);
   document.getElementById("copyInviteLinkBtn")?.addEventListener("click", copyInviteLink);
 

@@ -1545,6 +1545,7 @@ body { animation: pageIn .5s ease; }
   font-weight: 600;
   color: var(--accent-deep);
 }
+.sel-ov-decide { margin-top: 20px; }
 
 /* Actions premium */
 .sel-premium-wrap {
