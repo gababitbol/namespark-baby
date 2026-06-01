@@ -202,8 +202,9 @@ getSavedLists() / addSavedList(entry)
 getHistory() / addHistory(entry)
 getComparisons() / addComparison(entry)
 
-// Décisions (session couple)
-createDecision({ creatorName, creatorEmail, surname, familyMode, items }) -> { decision, participantId }
+// Décisions (couple OU famille — même modèle, champ `mode`)
+createDecision({ creatorName, creatorEmail, surname, mode, items }) -> { decision, participantId }
+  // mode: "couple" (défaut) | "family"
 getDecision(id)
 getCurrentDecisionId() / setCurrentDecisionId(id)
 addParticipant(decisionId, { role, name, email }) -> participantId
@@ -211,16 +212,32 @@ joinDecision(decisionId, { role, name, email }) -> participantId   // get-or-cre
 getMyParticipantId(decisionId)
 saveVote(decisionId, participantId, name, reaction)
 getVotes(decisionId) -> { [participantId]: { [name]: reaction } }
-computeMatches(decisionId) -> string[]    // DÉRIVÉ, jamais stocké
+computeMatches(decisionId) -> string[]    // COUPLE : DÉRIVÉ, jamais stocké
+computeRanking(decisionId) -> [{ name, yes, maybe, no, score, voters }]  // FAMILLE : DÉRIVÉ
 
 // Notifications
 addNotification(type, text) / getNotifications() / markNotificationRead(id) / clearNotifications()
 ```
 
-**Règle de match (unique, dans `computeMatches`)** : un prénom de `items` est un
+**Règle de match (couple, `computeMatches`)** : un prénom de `items` est un
 match s'il a reçu ≥1 vote et que **tous les votes exprimés** sur ce prénom sont `yes`.
-_Évolution possible : compter le vote implicite du créateur, ou distinguer match
-« fort » (yes/yes) vs « possible » (yes/maybe)._
+
+**Classement (famille, `computeRanking`)** : score = `❤️ ×2 + 🤔 ×1 + ❌ ×(−1)`,
+trié décroissant (égalités : plus de `yes`, puis moins de `no`, puis alphabétique).
+Renvoie aussi le détail « qui a voté quoi » (`voters.yes/maybe/no` = listes de prénoms).
+
+### 5.2 Deux modes, un seul modèle
+
+| | **Décider à deux** (`mode:"couple"`) | **Vote famille** (`mode:"family"`) |
+|---|---|---|
+| Participants | créateur + partenaire | créateur + N proches |
+| Identité votant | email optionnel | **prénom seul** (pas de compte) |
+| Lien | `?invite=<id>` | `?familyVote=<id>` |
+| Résultat | matchs (consensus `yes`) | classement + détail des votes |
+| Stockage | **identique** : `decisions` / `participants` / `votes` | idem |
+
+> Les deux expériences sont des UI distinctes par-dessus la **même** entité `Decision`.
+> Aucun store parallèle : on n'introduit pas la dette qu'on vient de supprimer.
 
 ## 6. Schéma Supabase cible (à implémenter plus tard — NON implémenté)
 
@@ -248,8 +265,8 @@ create table user_selections (
 create table decisions (
   id           uuid primary key default gen_random_uuid(),
   creator_id   uuid references users(id) on delete set null,
+  mode         text not null default 'couple' check (mode in ('couple','family')),
   surname      text,
-  family_mode  boolean not null default false,
   items        text[] not null default '{}',   -- snapshot des prénoms soumis au vote
   created_at   timestamptz not null default now()
 );

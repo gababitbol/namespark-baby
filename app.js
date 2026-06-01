@@ -195,7 +195,6 @@ const I18N = {
     decide_title: "Invitez votre partenaire",
     decide_invite_sub: "Partagez ce lien avec votre conjoint pour qu'il vote sur vos prénoms favoris.",
     decide_copy_link: "Copier le lien",
-    decide_family_mode: "📢 Activer le mode famille (inviter aussi les parents)",
     decide_continue: "Continuer",
     decide_waiting_sub: "Votre partenaire vote sur votre sélection...",
     decide_refresh: "🔄 Actualiser",
@@ -210,6 +209,24 @@ const I18N = {
     vote_yes: "💚 J'aime",
     vote_maybe: "🤷 Peut-être",
     vote_no: "❌ Non",
+    /* ---- Vote famille ---- */
+    sel_family_btn: "👨‍👩‍👧‍👦 Faire voter la famille",
+    family_pill_btn: "👨‍👩‍👧‍👦 Vote famille",
+    family_header_eyebrow: "Vote famille",
+    family_header_title: "Faites voter vos proches",
+    family_vote_sub: "Aidez-nous à choisir un prénom : votez sur chacun.",
+    family_finish_vote: "J'ai terminé",
+    family_name_sub: "Avant de voter, dites-nous qui vous êtes.",
+    family_name_required: "Merci d'indiquer votre prénom.",
+    family_no_votes: "Personne n'a encore voté. Partagez le lien à votre famille et vos amis !",
+    family_start_vote: "Commencer à voter",
+    family_thanks_title: "Merci pour votre participation !",
+    family_thanks_sub: "Vos votes ont bien été enregistrés.",
+    family_see_results: "Voir le classement",
+    family_results_sub: "Partagez le lien, puis suivez le classement en direct.",
+    family_copy_link: "Copier le lien",
+    family_refresh: "🔄 Actualiser les votes",
+    family_simulate: "Simuler des votes (démo)",
     decide_voted: (n) => `${n} prénom${n > 1 ? "s" : ""} voté${n > 1 ? "s" : ""}`,
     notif_partner_voted: (n) => `Votre partenaire a voté sur ${n} prénom${n > 1 ? "s" : ""} !`,
     notif_match_found: (n) => `🎉 ${n} nouveau${n > 1 ? "x" : ""} match${n > 1 ? "s" : ""} !`,
@@ -367,7 +384,6 @@ const I18N = {
     decide_title: "Invite your partner",
     decide_invite_sub: "Share this link with your spouse so they can vote on your favourite names.",
     decide_copy_link: "Copy link",
-    decide_family_mode: "📢 Enable family mode (invite parents too)",
     decide_continue: "Continue",
     decide_waiting_sub: "Your partner is voting on your selection...",
     decide_refresh: "🔄 Refresh",
@@ -382,6 +398,24 @@ const I18N = {
     vote_yes: "💚 Like",
     vote_maybe: "🤷 Maybe",
     vote_no: "❌ No",
+    /* ---- Family vote ---- */
+    sel_family_btn: "👨‍👩‍👧‍👦 Ask the family to vote",
+    family_pill_btn: "👨‍👩‍👧‍👦 Family vote",
+    family_header_eyebrow: "Family vote",
+    family_header_title: "Let your loved ones vote",
+    family_vote_sub: "Help us choose a name: vote on each one.",
+    family_finish_vote: "I'm done",
+    family_name_sub: "Before voting, tell us who you are.",
+    family_name_required: "Please enter your first name.",
+    family_no_votes: "No one has voted yet. Share the link with your family and friends!",
+    family_start_vote: "Start voting",
+    family_thanks_title: "Thanks for taking part!",
+    family_thanks_sub: "Your votes have been saved.",
+    family_see_results: "See the ranking",
+    family_results_sub: "Share the link, then follow the ranking live.",
+    family_copy_link: "Copy link",
+    family_refresh: "🔄 Refresh votes",
+    family_simulate: "Simulate votes (demo)",
     decide_voted: (n) => `${n} name${n > 1 ? "s" : ""} voted`,
     notif_partner_voted: (n) => `Your partner voted on ${n} name${n > 1 ? "s" : ""}!`,
     notif_match_found: (n) => `🎉 ${n} new match${n > 1 ? "es" : ""}!`,
@@ -961,6 +995,8 @@ function updateSelPanel() {
   if (seeBtn) seeBtn.textContent = t("sel_see_btn");
   const decideBtn = document.getElementById("selDecideBtn");
   if (decideBtn) decideBtn.textContent = t("sel_decide_btn");
+  const familyBtn = document.getElementById("selFamilyBtn");
+  if (familyBtn) familyBtn.textContent = t("family_pill_btn");
 
   if (count === 0) {
     panel.classList.remove("visible");
@@ -1130,8 +1166,8 @@ function showToast(msg, duration = 3200) {
 function applyQueryPrefill() {
   const p = new URLSearchParams(location.search);
 
-  // Lien d'invitation partenaire : géré par le module "Décider ensemble" (voir init)
-  if (p.get("invite")) return;
+  // Liens de vote (couple/famille) : gérés par le module "Décider ensemble" (voir init)
+  if (p.get("invite") || p.get("familyVote")) return;
 
   // Chargement d'une sélection partagée
   if (p.get("share")) {
@@ -1841,6 +1877,14 @@ function showDecideStep(stepId) {
   document.getElementById(stepId)?.classList.add("active");
 }
 
+/* En-tête de l'overlay selon le mode (couple / famille) */
+function setDecideHeader(mode) {
+  const eyebrow = document.querySelector(".decide-head .eyebrow");
+  const title   = document.querySelector(".decide-title");
+  if (eyebrow) eyebrow.textContent = t(mode === "family" ? "family_header_eyebrow" : "decide_eyebrow");
+  if (title)   title.textContent   = t(mode === "family" ? "family_header_title"   : "decide_title");
+}
+
 /* ---- Créateur : ouvrir le module et créer la décision ---- */
 function openDecide() {
   if (!favorites.size) {
@@ -1848,16 +1892,16 @@ function openDecide() {
     return;
   }
 
-  const familyMode = document.getElementById("familyModeCheckbox")?.checked || false;
   const { decision, participantId } = createDecision({
     creatorName:  currentUser?.firstName || null,
     creatorEmail: currentUser?.email || null,
     surname:      lastSurname || null,
-    familyMode,
+    mode:         "couple",
     items:        [...favorites],
   });
-  decideState = { decisionId: decision.id, role: "creator", participantId };
+  decideState = { decisionId: decision.id, role: "creator", participantId, mode: "couple" };
 
+  setDecideHeader("couple");
   showDecideStep("decideInvite");
   document.getElementById("decideOverlay").classList.add("open");
   document.body.style.overflow = "hidden";
@@ -1902,10 +1946,11 @@ function openDecideAsPartner(decisionId) {
     name:  currentUser?.firstName || null,
     email: currentUser?.email || null,
   });
-  decideState = { decisionId, role: "partner", participantId };
+  decideState = { decisionId, role: "partner", participantId, mode: "couple" };
 
   if (decision.surname) lastSurname = decision.surname;
 
+  setDecideHeader("couple");
   renderDecideVote(decision);
   showDecideStep("decideVote");
   document.getElementById("decideOverlay").classList.add("open");
@@ -1913,9 +1958,14 @@ function openDecideAsPartner(decisionId) {
   return true;
 }
 
-/* ---- Partenaire : rendu de la liste de vote ---- */
+/* ---- Rendu de la liste de vote (partenaire OU votant famille) ---- */
 function renderDecideVote(decision) {
-  document.getElementById("decideVoteSub").textContent = t("decide_vote_sub");
+  const isFamily = decideState.mode === "family";
+  document.getElementById("decideVoteSub").textContent =
+    isFamily ? t("family_vote_sub") : t("decide_vote_sub");
+  const seeBtn = document.getElementById("seeMatchsBtn");
+  if (seeBtn) seeBtn.textContent = isFamily ? t("family_finish_vote") : t("decide_see_matchs");
+
   const myVotes = getVotes(decideState.decisionId)[decideState.participantId] || {};
   const reactions = [
     { r: "yes",   txt: t("vote_yes")   },
@@ -2035,10 +2085,14 @@ function wireDecideButtons() {
   /* Démo : simuler le vote d'un partenaire (passe par storage) */
   document.getElementById("simulatePartnerBtn")?.addEventListener("click", simulatePartnerVoting);
 
-  /* Partenaire : voir les prénoms en commun après avoir voté */
+  /* Après vote : couple → matchs ; famille → écran de remerciement */
   document.getElementById("seeMatchsBtn")?.addEventListener("click", () => {
-    showToast(t("decide_thanks"));
-    showDecideResults();
+    if (decideState.mode === "family") {
+      finishFamilyVote();
+    } else {
+      showToast(t("decide_thanks"));
+      showDecideResults();
+    }
   });
 
   /* Partager les matchs */
@@ -2046,6 +2100,24 @@ function wireDecideButtons() {
     if (computeMatches(decideState.decisionId).length) shareSelection();
     closeDecide();
   });
+
+  /* ===== VOTE FAMILLE ===== */
+  document.getElementById("openFamilyBtn")?.addEventListener("click", () => {
+    closeSelection();
+    openFamilyVote();
+  });
+  document.getElementById("familyNameForm")?.addEventListener("submit", handleFamilyNameSubmit);
+  document.getElementById("familyVoterName")?.addEventListener("input", () => {
+    document.getElementById("familyVoterName").classList.remove("field-error");
+    document.getElementById("familyNameError").classList.remove("visible");
+  });
+  document.getElementById("familySeeResultsBtn")?.addEventListener("click", () => {
+    renderFamilyResults();
+    showDecideStep("familyResults");
+  });
+  document.getElementById("copyFamilyLinkBtn")?.addEventListener("click", copyFamilyLink);
+  document.getElementById("refreshFamilyBtn")?.addEventListener("click", renderFamilyResults);
+  document.getElementById("simulateFamilyBtn")?.addEventListener("click", simulateFamilyVotes);
 }
 
 /* ---- Démo : simule un partenaire DISTINCT qui vote (via storage) ---- */
@@ -2068,6 +2140,143 @@ function simulatePartnerVoting() {
 }
 
 /* =============================================================
+   26b) VOTE FAMILLE — N votants identifiés par prénom (pas d'email)
+   Même modèle Decision (mode:"family"), même couche storage.
+   ============================================================= */
+
+/* ---- Créateur : ouvre une session de vote famille ---- */
+function openFamilyVote() {
+  if (!favorites.size) {
+    showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
+    return;
+  }
+  const { decision, participantId } = createDecision({
+    creatorName:  currentUser?.firstName || null,
+    creatorEmail: currentUser?.email || null,
+    surname:      lastSurname || null,
+    mode:         "family",
+    items:        [...favorites],
+  });
+  decideState = { decisionId: decision.id, role: "creator", participantId, mode: "family" };
+
+  setDecideHeader("family");
+  generateFamilyLink();
+  renderFamilyResults();
+  showDecideStep("familyResults");
+  document.getElementById("decideOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+/* ---- Lien partageable : ?familyVote=<decisionId> ---- */
+function generateFamilyLink() {
+  const baseUrl = window.location.href.split("?")[0].split("#")[0];
+  const url = `${baseUrl}?familyVote=${decideState.decisionId}&lang=${lang}`;
+  const input = document.getElementById("familyLinkInput");
+  if (input) input.value = url;
+}
+function copyFamilyLink() {
+  const input = document.getElementById("familyLinkInput");
+  input.select();
+  try { document.execCommand("copy"); showToast(t("share_copied")); }
+  catch (_) { showToast(lang === "fr" ? "Copie échouée" : "Copy failed"); }
+}
+
+/* ---- Votant : ouvre via ?familyVote=<decisionId> ---- */
+function openFamilyVoteAsVoter(decisionId) {
+  const decision = getDecision(decisionId);
+  if (!decision) { showToast(t("decide_invite_invalid")); return false; }
+
+  decideState = { decisionId, role: "family", participantId: null, mode: "family" };
+  if (decision.surname) lastSurname = decision.surname;
+
+  setDecideHeader("family");
+  document.getElementById("familyNameSub").textContent = t("family_name_sub");
+  showDecideStep("familyName");
+  document.getElementById("decideOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => document.getElementById("familyVoterName").focus(), 220);
+  return true;
+}
+
+/* ---- Votant : valide son prénom puis passe au vote ---- */
+function handleFamilyNameSubmit(e) {
+  e.preventDefault();
+  const input = document.getElementById("familyVoterName");
+  const name = input.value.trim();
+  if (!name) {
+    input.classList.add("field-error");
+    const err = document.getElementById("familyNameError");
+    err.textContent = t("family_name_required");
+    err.classList.add("visible");
+    input.focus();
+    return;
+  }
+  const pid = addParticipant(decideState.decisionId, { role: "family", name });
+  decideState.participantId = pid;
+
+  renderDecideVote(getDecision(decideState.decisionId));
+  showDecideStep("decideVote");
+}
+
+/* ---- Votant : termine → remerciement ---- */
+function finishFamilyVote() {
+  showDecideStep("familyThanks");
+}
+
+/* ---- Résultats famille : classement + détail (qui a voté quoi) ---- */
+function renderFamilyResults() {
+  if (decideState.role === "creator") generateFamilyLink();
+
+  const rows = computeRanking(decideState.decisionId);
+  const wrap = document.getElementById("familyRanking");
+  const hasVotes = rows.some((r) => r.yes + r.maybe + r.no > 0);
+
+  if (!hasVotes) {
+    wrap.innerHTML = `<div class="results-empty" style="text-align:center;padding:36px;color:var(--ink-soft)">
+      <div style="font-size:2rem;margin-bottom:10px">🗳️</div>
+      <p>${t("family_no_votes")}</p>
+    </div>`;
+    return;
+  }
+
+  const medals = ["🥇", "🥈", "🥉"];
+  const chipRow = (emoji, names) => names.length
+    ? `<div class="fam-chip-row"><span class="fam-emoji">${emoji}</span>${names.map((n) => `<span class="fam-voter">${n}</span>`).join("")}</div>`
+    : "";
+
+  wrap.innerHTML = rows.map((r, i) => `
+    <div class="fam-row${i === 0 ? " fam-row-top" : ""}">
+      <div class="fam-row-head">
+        <span class="fam-rank">${medals[i] || "#" + (i + 1)}</span>
+        <span class="fam-name">${r.name}</span>
+        <span class="fam-tally">${r.yes} ❤️ · ${r.maybe} 🤔 · ${r.no} ❌</span>
+      </div>
+      <div class="fam-voters">
+        ${chipRow("❤️", r.voters.yes)}
+        ${chipRow("🤔", r.voters.maybe)}
+        ${chipRow("❌", r.voters.no)}
+      </div>
+    </div>`).join("");
+}
+
+/* ---- Démo : simule plusieurs votants famille (via storage) ---- */
+function simulateFamilyVotes() {
+  const decision = getDecision(decideState.decisionId);
+  if (!decision || !decision.items.length) return;
+  const demo = lang === "fr"
+    ? ["Mamie", "Papa", "Léa", "Tonton"]
+    : ["Grandma", "Dad", "Lea", "Uncle"];
+  demo.forEach((nm) => {
+    const pid = addParticipant(decideState.decisionId, { role: "family", name: nm });
+    decision.items.forEach((name) => {
+      const r = ["yes", "yes", "maybe", "no"][Math.floor(Math.random() * 4)];
+      saveVote(decideState.decisionId, pid, name, r);
+    });
+  });
+  renderFamilyResults();
+}
+
+/* =============================================================
    27) INIT
    ============================================================= */
 document.addEventListener("DOMContentLoaded", () => {
@@ -2081,6 +2290,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("selSeeBtn").addEventListener("click", openSelection);
   // Widget compact → lance directement "Décider à deux"
   document.getElementById("selDecideBtn").addEventListener("click", openDecide);
+  // Widget compact → lance "Vote famille"
+  document.getElementById("selFamilyBtn").addEventListener("click", openFamilyVote);
 
   // Comparateur + Sauvegarder + Mon espace
   initCompare();
@@ -2105,12 +2316,15 @@ document.addEventListener("DOMContentLoaded", () => {
   /* Module "Décider ensemble" */
   wireDecideButtons();
 
-  /* Parcours partenaire : ?invite=<decisionId> a priorité sur le prefill */
-  const inviteId = new URLSearchParams(location.search).get("invite");
-  if (inviteId) {
-    const il = new URLSearchParams(location.search).get("lang");
-    if (il === "fr" || il === "en") applyLang(il);
-    openDecideAsPartner(inviteId);
+  /* Liens de vote : ?invite= (couple) et ?familyVote= (famille) ont la priorité */
+  const params      = new URLSearchParams(location.search);
+  const inviteId    = params.get("invite");
+  const familyVoteId = params.get("familyVote");
+  const urlLang     = params.get("lang");
+  if (inviteId || familyVoteId) {
+    if (urlLang === "fr" || urlLang === "en") applyLang(urlLang);
+    if (familyVoteId) openFamilyVoteAsVoter(familyVoteId);
+    else openDecideAsPartner(inviteId);
   } else {
     applyQueryPrefill();
   }

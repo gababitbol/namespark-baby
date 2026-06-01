@@ -297,6 +297,7 @@
     </span>
     <button class="sel-see-btn" id="selSeeBtn">Voir ma sélection</button>
     <button class="sel-decide-btn" id="selDecideBtn">💑 Décider à deux</button>
+    <button class="sel-decide-btn sel-family-btn" id="selFamilyBtn">👨‍👩‍👧‍👦 Vote famille</button>
   </aside>
 
   <!-- ============================ PAGE MA SÉLECTION (overlay pleine page) ============================ -->
@@ -323,6 +324,7 @@
           <span class="sel-ov-count" id="selPageCount"></span>
           <div class="sel-ov-decide">
             <button class="btn btn-primary" id="openDecideBtn" data-i18n="sel_decide_btn">💑 Décider à deux</button>
+            <button class="btn btn-ghost" id="openFamilyBtn" data-i18n="sel_family_btn">👨‍👩‍👧‍👦 Faire voter la famille</button>
           </div>
         </div>
 
@@ -425,10 +427,6 @@
             <input type="text" id="inviteLinkInput" readonly class="invite-link-input" />
             <button class="btn btn-primary" id="copyInviteLinkBtn" data-i18n="decide_copy_link">Copier le lien</button>
           </div>
-          <label class="checkbox-group">
-            <input type="checkbox" id="familyModeCheckbox" />
-            <span data-i18n="decide_family_mode">📢 Activer le mode famille (inviter aussi les parents)</span>
-          </label>
           <button class="btn btn-ghost" id="continueAfterInviteBtn" data-i18n="decide_continue">Continuer</button>
         </div>
 
@@ -461,6 +459,41 @@
           </p>
           <div class="results" id="decideMatchsGrid"></div>
           <button class="btn btn-primary" id="shareMatchsBtn" data-i18n="decide_share_matchs">🔗 Partager ces matchs</button>
+        </div>
+
+        <!-- FAMILLE — saisie du prénom du votant (ouverte via ?familyVote=) -->
+        <div class="decide-step" id="familyName">
+          <p class="decide-subtitle" id="familyNameSub">Avant de voter, dites-nous qui vous êtes.</p>
+          <form id="familyNameForm" novalidate>
+            <div class="field">
+              <label for="familyVoterName" id="familyVoterLabel">Votre prénom</label>
+              <input type="text" id="familyVoterName" autocomplete="given-name" placeholder="Mamie, Papa, Léa…" required />
+              <div class="field-error-msg" id="familyNameError" role="alert"></div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="familyNameSubmit" data-i18n="family_start_vote">Commencer à voter</button>
+          </form>
+        </div>
+
+        <!-- FAMILLE — remerciement après vote -->
+        <div class="decide-step" id="familyThanks">
+          <div class="family-thanks">
+            <div class="family-thanks-icon" aria-hidden="true">🎉</div>
+            <h3 id="familyThanksTitle" data-i18n="family_thanks_title">Merci pour votre participation&nbsp;!</h3>
+            <p id="familyThanksSub" data-i18n="family_thanks_sub">Vos votes ont bien été enregistrés.</p>
+            <button class="btn btn-primary" id="familySeeResultsBtn" data-i18n="family_see_results">Voir le classement</button>
+          </div>
+        </div>
+
+        <!-- FAMILLE — résultats : classement + détail -->
+        <div class="decide-step" id="familyResults">
+          <p class="decide-subtitle" id="familyResultsSub" data-i18n="family_results_sub">Voici ce que pense votre entourage.</p>
+          <div class="family-share-box">
+            <input type="text" id="familyLinkInput" readonly class="invite-link-input" />
+            <button class="btn btn-primary" id="copyFamilyLinkBtn" data-i18n="family_copy_link">Copier le lien</button>
+          </div>
+          <div class="family-ranking" id="familyRanking"></div>
+          <button class="btn btn-ghost" id="refreshFamilyBtn" data-i18n="family_refresh">🔄 Actualiser les votes</button>
+          <button class="btn btn-ghost btn-sm" id="simulateFamilyBtn" data-i18n="family_simulate">Simuler des votes (démo)</button>
         </div>
 
       </div>
@@ -598,9 +631,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <!-- Storage abstrait doit être chargé AVANT app.js -->
-  <script src="storage.js"></script>
+  <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
+  <script src="storage.js?v=3"></script>
   <!-- data.js et app.js (data.js en premier) -->
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="data.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

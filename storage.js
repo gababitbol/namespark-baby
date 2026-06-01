@@ -164,8 +164,9 @@ function _saveDecisions(all)   { _write(KEYS.decisions, all); }
 
 /* Crée une décision à partir de la sélection figée (items).
    Le créateur devient le 1er participant.
+   mode : "couple" (décider à deux) | "family" (vote famille à N votants)
    → { decision, participantId } */
-function createDecision({ creatorName = null, creatorEmail = null, surname = null, familyMode = false, items = [] } = {}) {
+function createDecision({ creatorName = null, creatorEmail = null, surname = null, mode = "couple", items = [] } = {}) {
   const id  = uid("dec");
   const pid = uid("p");
   const now = new Date().toISOString();
@@ -173,8 +174,8 @@ function createDecision({ creatorName = null, creatorEmail = null, surname = nul
   const decision = {
     id,
     createdAt: now,
+    mode:      mode === "family" ? "family" : "couple",
     surname:   surname || null,
-    familyMode: !!familyMode,
     items:     Array.isArray(items) ? [...items] : [],
     participants: {
       [pid]: { role: "creator", name: creatorName, email: creatorEmail, joinedAt: now },
@@ -268,6 +269,41 @@ function computeMatches(decisionId) {
   });
 }
 
+/* =============================================================
+   CLASSEMENT FAMILLE — DÉRIVÉ (jamais stocké). Moteur de scoring UNIQUE.
+   Score = ❤️ (yes) ×2 + 🤔 (maybe) ×1 + ❌ (no) ×(−1).
+   Renvoie un tableau trié (meilleur d'abord) :
+     [{ name, yes, maybe, no, score, voters:{ yes:[noms], maybe:[noms], no:[noms] } }]
+   Égalités : plus de "yes", puis moins de "no", puis ordre alphabétique.
+   ============================================================= */
+function computeRanking(decisionId) {
+  const d = getDecision(decisionId);
+  if (!d) return [];
+
+  const nameOf = (pid) => {
+    const p = d.participants[pid];
+    return (p && p.name) ? p.name : "?";
+  };
+
+  const rows = d.items.map((name) => {
+    const voters = { yes: [], maybe: [], no: [] };
+    Object.entries(d.votes).forEach(([pid, byName]) => {
+      const r = byName[name];
+      if (r === "yes" || r === "maybe" || r === "no") voters[r].push(nameOf(pid));
+    });
+    const yes = voters.yes.length, maybe = voters.maybe.length, no = voters.no.length;
+    return { name, yes, maybe, no, score: yes * 2 + maybe - no, voters };
+  });
+
+  rows.sort((a, b) =>
+    b.score - a.score ||
+    b.yes - a.yes ||
+    a.no - b.no ||
+    a.name.localeCompare(b.name)
+  );
+  return rows;
+}
+
 /* =============================================================================
    NOTIFICATIONS (simulées côté front pour l'instant)
    ============================================================================= */
@@ -298,7 +334,7 @@ if (typeof module !== "undefined" && module.exports) {
     getSavedLists, addSavedList,
     getHistory, addHistory, getComparisons, addComparison,
     createDecision, getDecision, getCurrentDecisionId, setCurrentDecisionId,
-    addParticipant, joinDecision, getMyParticipantId, saveVote, getVotes, computeMatches,
+    addParticipant, joinDecision, getMyParticipantId, saveVote, getVotes, computeMatches, computeRanking,
     addNotification, getNotifications, markNotificationRead, clearNotifications,
     uid,
   };
