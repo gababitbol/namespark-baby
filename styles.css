@@ -1473,12 +1473,32 @@ body { animation: pageIn .5s ease; }
 }
 .sel-see-btn:hover { background: var(--accent-deep); transform: scale(1.04); }
 
+/* Bouton principal "Décider à deux" sur la pastille — l'action cœur du produit */
+.sel-decide-btn {
+  padding: 7px 14px;
+  background: #fff;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--accent-deep);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
+  flex-shrink: 0;
+}
+.sel-decide-btn:hover { transform: scale(1.04); box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+
 @media (max-width: 480px) {
   .sel-panel {
     left: 14px !important;
     right: 14px !important;
-    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    row-gap: 8px !important;
   }
+  .sel-see-btn, .sel-decide-btn { flex: 1 1 auto; text-align: center; }
 }
 
 /* ---- Overlay pleine page "Ma sélection" ---- */

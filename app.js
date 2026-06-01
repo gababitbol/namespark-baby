@@ -956,9 +956,11 @@ function updateSelPanel() {
   /* Persiste le nom de famille */
   saveSurname(lastSurname);
 
-  /* Texte du bouton "Voir ma sélection" */
+  /* Texte des boutons de la pastille */
   const seeBtn = document.getElementById("selSeeBtn");
   if (seeBtn) seeBtn.textContent = t("sel_see_btn");
+  const decideBtn = document.getElementById("selDecideBtn");
+  if (decideBtn) decideBtn.textContent = t("sel_decide_btn");
 
   if (count === 0) {
     panel.classList.remove("visible");
@@ -2077,6 +2079,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Widget compact → ouvre Ma sélection
   document.getElementById("selSeeBtn").addEventListener("click", openSelection);
+  // Widget compact → lance directement "Décider à deux"
+  document.getElementById("selDecideBtn").addEventListener("click", openDecide);
 
   // Comparateur + Sauvegarder + Mon espace
   initCompare();
