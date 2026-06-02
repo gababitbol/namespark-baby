@@ -244,6 +244,12 @@ const I18N = {
     vote_gate_skip: "Passer, je le ferai plus tard →",
     vote_gate_email_invalid: "Cette adresse email semble invalide.",
     save_results_email: "📩 Recevoir par email",
+    err_network:       "Erreur de connexion. Vérifiez votre réseau et réessayez.",
+    err_vote_failed:   "Vote non enregistré. Réessayez.",
+    err_session_load:  "Impossible de charger cette session. Vérifiez votre connexion.",
+    err_session_create:"Impossible de créer la session. Réessayez.",
+    err_generic:       "Une erreur est survenue. Réessayez.",
+    loading_session:   "Chargement de votre session…",
     admin_wrong_pass: "Mot de passe admin incorrect.",
     decide_voted: (n) => `${n} prénom${n > 1 ? "s" : ""} voté${n > 1 ? "s" : ""}`,
     notif_partner_voted: (n) => `Votre partenaire a voté sur ${n} prénom${n > 1 ? "s" : ""} !`,
@@ -451,6 +457,12 @@ const I18N = {
     vote_gate_skip: "Skip, I'll do it later →",
     vote_gate_email_invalid: "This email address looks invalid.",
     save_results_email: "📩 Receive by email",
+    err_network:       "Connection error. Check your network and try again.",
+    err_vote_failed:   "Vote not saved. Please try again.",
+    err_session_load:  "Unable to load this session. Check your connection.",
+    err_session_create:"Unable to create the session. Please try again.",
+    err_generic:       "An error occurred. Please try again.",
+    loading_session:   "Loading your session…",
     admin_wrong_pass: "Wrong admin password.",
     decide_voted: (n) => `${n} name${n > 1 ? "s" : ""} voted`,
     notif_partner_voted: (n) => `Your partner voted on ${n} name${n > 1 ? "s" : ""}!`,
@@ -1185,6 +1197,36 @@ function copyFallback(text) {
 }
 
 /* =============================================================
+   20b) HELPERS ROBUSTESSE
+   ============================================================= */
+
+/* Écran de chargement pleine page — utilisé pendant le chargement d'une invitation */
+function showLoadingScreen(msg) {
+  const el  = document.getElementById("loadingScreen");
+  const txt = document.getElementById("loadingMsg");
+  if (txt) txt.textContent = msg || t("loading_session");
+  el?.classList.add("visible");
+}
+function hideLoadingScreen() {
+  document.getElementById("loadingScreen")?.classList.remove("visible");
+}
+
+/* Désactive un bouton + affiche "…" pendant une opération async, restaure après.
+   Usage : await _withBtnLoading(btn, async () => { ... }); */
+async function _withBtnLoading(btn, asyncFn) {
+  if (!btn) return asyncFn();
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "…";
+  try {
+    return await asyncFn();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
+}
+
+/* =============================================================
    21) ★ TOAST
    ============================================================= */
 let _toastTimer;
@@ -1589,7 +1631,6 @@ async function handleAuthSubmit(e) {
   const email     = document.getElementById("authEmail").value.trim();
   const firstName = document.getElementById("authFirstName").value.trim();
 
-  /* Accès admin secret : email="admin" + prénom=mot de passe */
   if (tryAdminLogin(email, firstName)) return;
 
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -1605,8 +1646,15 @@ async function handleAuthSubmit(e) {
   const btn = document.getElementById("authSubmit");
   btn.disabled = true; btn.textContent = "…";
 
-  /* Cherche l'utilisateur cross-appareil via Supabase */
-  const existing = await findUserByEmail(email);
+  let existing;
+  try {
+    existing = await findUserByEmail(email);
+  } catch (err) {
+    console.error("[NameSpark] handleAuthSubmit:", err);
+    showToast(t("err_network"));
+    btn.disabled = false; btn.textContent = t("create_space_btn");
+    return;
+  }
 
   if (existing) {
     currentUser = existing;
@@ -1756,7 +1804,15 @@ async function handleUnlockSubmit(e) {
   btn.disabled = true;
   btn.textContent = "…";
 
-  const existing = await findUserByEmail(email);
+  let existing;
+  try {
+    existing = await findUserByEmail(email);
+  } catch (err) {
+    console.error("[NameSpark] handleUnlockSubmit:", err);
+    showToast(t("err_network"));
+    btn.disabled = false; btn.textContent = t("unlock_submit");
+    return;
+  }
   currentUser = existing || {
     email,
     firstName: firstName || null,
@@ -1983,10 +2039,17 @@ async function handleVoteStartSubmit(e) {
       document.getElementById("voteStartEmailError").classList.add("visible");
       return;
     }
-    const existing = await findUserByEmail(email);
-    currentUser = existing || {
-      email, firstName: firstName || null, createdAt: new Date().toISOString(), surname: lastSurname || null,
-    };
+    try {
+      const existing = await findUserByEmail(email);
+      currentUser = existing || {
+        email, firstName: firstName || null, createdAt: new Date().toISOString(), surname: lastSurname || null,
+      };
+    } catch (_) {
+      /* Réseau indisponible — on crée quand même un user local */
+      currentUser = {
+        email, firstName: firstName || null, createdAt: new Date().toISOString(), surname: lastSurname || null,
+      };
+    }
     saveUser();
     registerLead(email, firstName || currentUser.firstName, favorites.size);
     updateEspaceButton();
@@ -2002,22 +2065,26 @@ async function openDecide() {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
     return;
   }
+  try {
+    const { decision, participantId } = await createDecision({
+      creatorName:  currentUser?.firstName || null,
+      creatorEmail: currentUser?.email || null,
+      surname:      lastSurname || null,
+      mode:         "couple",
+      items:        [...favorites],
+    });
+    decideState = { decisionId: decision.id, role: "creator", participantId, mode: "couple" };
+    if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
 
-  const { decision, participantId } = await createDecision({
-    creatorName:  currentUser?.firstName || null,
-    creatorEmail: currentUser?.email || null,
-    surname:      lastSurname || null,
-    mode:         "couple",
-    items:        [...favorites],
-  });
-  decideState = { decisionId: decision.id, role: "creator", participantId, mode: "couple" };
-  if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
-
-  setDecideHeader("couple");
-  showDecideStep("decideInvite");
-  document.getElementById("decideOverlay").classList.add("open");
-  document.body.style.overflow = "hidden";
-  generateInviteLink();
+    setDecideHeader("couple");
+    showDecideStep("decideInvite");
+    document.getElementById("decideOverlay").classList.add("open");
+    document.body.style.overflow = "hidden";
+    generateInviteLink();
+  } catch (err) {
+    console.error("[NameSpark] openDecide:", err);
+    showToast(t("err_session_create"));
+  }
 }
 
 function closeDecide() {
@@ -2049,26 +2116,32 @@ function copyInviteLink() {
 
 /* ---- Partenaire : ouvrir via ?invite=<decisionId> ---- */
 async function openDecideAsPartner(decisionId) {
-  const decision = await getDecision(decisionId);
-  if (!decision) {
-    showToast(t("decide_invite_invalid"));
+  try {
+    const decision = await getDecision(decisionId);
+    if (!decision) {
+      showToast(t("decide_invite_invalid"));
+      return false;
+    }
+    const participantId = await joinDecision(decisionId, {
+      role:  "partner",
+      name:  currentUser?.firstName || null,
+      email: currentUser?.email || null,
+    });
+    decideState = { decisionId, role: "partner", participantId, mode: "couple" };
+
+    if (decision.surname) lastSurname = decision.surname;
+
+    setDecideHeader("couple");
+    renderDecideVote(decision);
+    showDecideStep("decideVote");
+    document.getElementById("decideOverlay").classList.add("open");
+    document.body.style.overflow = "hidden";
+    return true;
+  } catch (err) {
+    console.error("[NameSpark] openDecideAsPartner:", err);
+    showToast(t("err_session_load"));
     return false;
   }
-  const participantId = await joinDecision(decisionId, {
-    role:  "partner",
-    name:  currentUser?.firstName || null,
-    email: currentUser?.email || null,
-  });
-  decideState = { decisionId, role: "partner", participantId, mode: "couple" };
-
-  if (decision.surname) lastSurname = decision.surname;
-
-  setDecideHeader("couple");
-  renderDecideVote(decision);
-  showDecideStep("decideVote");
-  document.getElementById("decideOverlay").classList.add("open");
-  document.body.style.overflow = "hidden";
-  return true;
 }
 
 /* ---- Rendu de la liste de vote (partenaire OU votant famille) ---- */
@@ -2103,10 +2176,17 @@ function renderDecideVote(decision) {
   wrap.querySelectorAll(".vote-item").forEach((item) => {
     const name = item.dataset.voteName;
     item.querySelectorAll("[data-react]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        handleVote(name, btn.dataset.react);
+      btn.addEventListener("click", async () => {
+        /* Mise à jour optimiste immédiate */
         item.querySelectorAll("[data-react]").forEach((b) => b.classList.remove("selected"));
         btn.classList.add("selected");
+        try {
+          await handleVote(name, btn.dataset.react);
+        } catch (_) {
+          /* Annule la mise à jour optimiste si l'enregistrement Supabase échoue */
+          btn.classList.remove("selected");
+          showToast(t("err_vote_failed"));
+        }
       });
     });
   });
@@ -2206,25 +2286,31 @@ function renderCoupleVoteDetail() {
 
 /* ---- Créateur : rafraîchir l'état des votes reçus depuis Supabase ---- */
 async function refreshWaiting() {
-  /* Re-fetch depuis Supabase → met à jour le cache local */
-  const decision = await getDecision(decideState.decisionId);
-  const votes = decision ? decision.votes : getVotes(decideState.decisionId);
+  try {
+    /* Re-fetch depuis Supabase → met à jour le cache local */
+    const decision = await getDecision(decideState.decisionId);
+    const votes = decision ? decision.votes : getVotes(decideState.decisionId);
 
-  let yes = 0, no = 0, maybe = 0, voteCount = 0;
-  Object.entries(votes).forEach(([pid, byName]) => {
-    if (pid === decideState.participantId) return; // ignore les votes du créateur
-    Object.values(byName).forEach((r) => {
-      voteCount++;
-      if (r === "yes") yes++; else if (r === "no") no++; else maybe++;
+    let yes = 0, no = 0, maybe = 0, voteCount = 0;
+    Object.entries(votes).forEach(([pid, byName]) => {
+      if (pid === decideState.participantId) return;
+      Object.values(byName).forEach((r) => {
+        voteCount++;
+        if (r === "yes") yes++; else if (r === "no") no++; else maybe++;
+      });
     });
-  });
 
-  document.getElementById("votingStats").innerHTML = `
-    <div class="voting-stat-item"><div class="voting-stat-num">${yes}</div><div class="voting-stat-label">${t("vote_yes")}</div></div>
-    <div class="voting-stat-item"><div class="voting-stat-num">${maybe}</div><div class="voting-stat-label">${t("vote_maybe")}</div></div>
-    <div class="voting-stat-item"><div class="voting-stat-num">${no}</div><div class="voting-stat-label">${t("vote_no")}</div></div>`;
+    document.getElementById("votingStats").innerHTML = `
+      <div class="voting-stat-item"><div class="voting-stat-num">${yes}</div><div class="voting-stat-label">${t("vote_yes")}</div></div>
+      <div class="voting-stat-item"><div class="voting-stat-num">${maybe}</div><div class="voting-stat-label">${t("vote_maybe")}</div></div>
+      <div class="voting-stat-item"><div class="voting-stat-num">${no}</div><div class="voting-stat-label">${t("vote_no")}</div></div>`;
 
-  return voteCount;
+    return voteCount;
+  } catch (err) {
+    console.error("[NameSpark] refreshWaiting:", err);
+    showToast(t("err_network"));
+    return 0;
+  }
 }
 
 /* ---- Ajouter une notification dans l'UI ---- */
@@ -2256,8 +2342,8 @@ function wireDecideButtons() {
   });
 
   /* Créateur : actualise les votes reçus → résultats si votes présents */
-  document.getElementById("refreshVotesBtn")?.addEventListener("click", async () => {
-    const count = await refreshWaiting();
+  document.getElementById("refreshVotesBtn")?.addEventListener("click", async (e) => {
+    const count = await _withBtnLoading(e.currentTarget, refreshWaiting);
     if (count > 0) showDecideResults();
     else showToast(t("decide_no_votes_yet"));
   });
@@ -2317,9 +2403,11 @@ function wireDecideButtons() {
     showDecideStep("familyResults");
   });
   document.getElementById("copyFamilyLinkBtn")?.addEventListener("click", copyFamilyLink);
-  document.getElementById("refreshFamilyBtn")?.addEventListener("click", async () => {
-    await getDecision(decideState.decisionId); /* re-fetch Supabase → met à jour le cache */
-    renderFamilyResults();
+  document.getElementById("refreshFamilyBtn")?.addEventListener("click", async (e) => {
+    await _withBtnLoading(e.currentTarget, async () => {
+      await getDecision(decideState.decisionId);
+      renderFamilyResults();
+    });
   });
 
   /* Recevoir classement famille par email (post-vote, non bloquant) */
@@ -2361,22 +2449,27 @@ async function openFamilyVote() {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
     return;
   }
-  const { decision, participantId } = await createDecision({
-    creatorName:  currentUser?.firstName || null,
-    creatorEmail: currentUser?.email || null,
-    surname:      lastSurname || null,
-    mode:         "family",
-    items:        [...favorites],
-  });
-  decideState = { decisionId: decision.id, role: "creator", participantId, mode: "family" };
-  if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
+  try {
+    const { decision, participantId } = await createDecision({
+      creatorName:  currentUser?.firstName || null,
+      creatorEmail: currentUser?.email || null,
+      surname:      lastSurname || null,
+      mode:         "family",
+      items:        [...favorites],
+    });
+    decideState = { decisionId: decision.id, role: "creator", participantId, mode: "family" };
+    if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
 
-  setDecideHeader("family");
-  generateFamilyLink();
-  renderFamilyResults();
-  showDecideStep("familyResults");
-  document.getElementById("decideOverlay").classList.add("open");
-  document.body.style.overflow = "hidden";
+    setDecideHeader("family");
+    generateFamilyLink();
+    renderFamilyResults();
+    showDecideStep("familyResults");
+    document.getElementById("decideOverlay").classList.add("open");
+    document.body.style.overflow = "hidden";
+  } catch (err) {
+    console.error("[NameSpark] openFamilyVote:", err);
+    showToast(t("err_session_create"));
+  }
 }
 
 /* ---- Lien partageable : ?familyVote=<decisionId> ---- */
@@ -2400,19 +2493,25 @@ function copyFamilyLink() {
 
 /* ---- Votant : ouvre via ?familyVote=<decisionId> ---- */
 async function openFamilyVoteAsVoter(decisionId) {
-  const decision = await getDecision(decisionId);
-  if (!decision) { showToast(t("decide_invite_invalid")); return false; }
+  try {
+    const decision = await getDecision(decisionId);
+    if (!decision) { showToast(t("decide_invite_invalid")); return false; }
 
-  decideState = { decisionId, role: "family", participantId: null, mode: "family" };
-  if (decision.surname) lastSurname = decision.surname;
+    decideState = { decisionId, role: "family", participantId: null, mode: "family" };
+    if (decision.surname) lastSurname = decision.surname;
 
-  setDecideHeader("family");
-  document.getElementById("familyNameSub").textContent = t("family_name_sub");
-  showDecideStep("familyName");
-  document.getElementById("decideOverlay").classList.add("open");
-  document.body.style.overflow = "hidden";
-  setTimeout(() => document.getElementById("familyVoterName").focus(), 220);
-  return true;
+    setDecideHeader("family");
+    document.getElementById("familyNameSub").textContent = t("family_name_sub");
+    showDecideStep("familyName");
+    document.getElementById("decideOverlay").classList.add("open");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => document.getElementById("familyVoterName").focus(), 220);
+    return true;
+  } catch (err) {
+    console.error("[NameSpark] openFamilyVoteAsVoter:", err);
+    showToast(t("err_session_load"));
+    return false;
+  }
 }
 
 /* ---- Votant : valide son prénom puis passe au vote ---- */
@@ -2428,13 +2527,21 @@ async function handleFamilyNameSubmit(e) {
     input.focus();
     return;
   }
-  const pid = await addParticipant(decideState.decisionId, { role: "family", name });
-  decideState.participantId = pid;
-
-  /* La décision est déjà en cache (chargée par openFamilyVoteAsVoter) */
-  const decision = await getDecision(decideState.decisionId);
-  renderDecideVote(decision);
-  showDecideStep("decideVote");
+  const btn = document.getElementById("familyNameSubmit");
+  try {
+    btn.disabled = true; btn.textContent = "…";
+    const pid = await addParticipant(decideState.decisionId, { role: "family", name });
+    decideState.participantId = pid;
+    /* La décision est déjà en cache depuis openFamilyVoteAsVoter */
+    const decision = await getDecision(decideState.decisionId);
+    renderDecideVote(decision);
+    showDecideStep("decideVote");
+  } catch (err) {
+    console.error("[NameSpark] handleFamilyNameSubmit:", err);
+    showToast(t("err_network"));
+    btn.disabled = false;
+    btn.textContent = t("family_start_vote");
+  }
 }
 
 /* ---- Votant : termine → remerciement.
@@ -2502,6 +2609,13 @@ async function simulateFamilyVotes() {
    27) INIT
    ============================================================= */
 document.addEventListener("DOMContentLoaded", () => {
+  /* Risque 6 — masque les boutons "Simuler (démo)" en production.
+     Activables via ?demo=1 dans l'URL (usage interne uniquement). */
+  if (new URLSearchParams(location.search).get("demo") !== "1") {
+    document.getElementById("simulatePartnerBtn")?.remove();
+    document.getElementById("simulateFamilyBtn")?.remove();
+  }
+
   // Switch FR / EN
   document.getElementById("langSwitch").addEventListener("click", (e) => {
     const btn = e.target.closest("button");
@@ -2545,8 +2659,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const urlLang      = params.get("lang");
   if (inviteId || familyVoteId) {
     if (urlLang === "fr" || urlLang === "en") applyLang(urlLang);
-    if (familyVoteId) openFamilyVoteAsVoter(familyVoteId);
-    else openDecideAsPartner(inviteId);
+    /* Risque 3 fix — loading screen + catch explicite */
+    showLoadingScreen(t("loading_session"));
+    const bootPromise = familyVoteId
+      ? openFamilyVoteAsVoter(familyVoteId)
+      : openDecideAsPartner(inviteId);
+    bootPromise
+      .catch(() => showToast(t("err_session_load")))
+      .finally(() => hideLoadingScreen());
   } else {
     applyQueryPrefill();
   }
