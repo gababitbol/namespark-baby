@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NameSpark Baby — Trouvez le prénom parfait pour votre bébé</title>
-  <meta name="description" content="Générateur de prénoms bébé : découvrez des milliers d'idées selon l'origine, la signification et le style. Hébreu, français, arabe, italien et plus." />
+  <title>NameSpark Baby — Choisissez le prénom de votre bébé, ensemble</title>
+  <meta name="description" content="Découvrez des prénoms bébé ensemble : votez en couple ou faites voter la famille, et trouvez le prénom sur lequel vous êtes vraiment d'accord." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <!-- Analytics — Plausible (RGPD, sans cookie, sans bannière)
+       Remplace YOUR_DOMAIN par votre domaine réel (ex: namespark.baby)
+       dans les Project Settings de plausible.io -->
+  <script defer data-domain="YOUR_DOMAIN" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
 
@@ -72,19 +76,19 @@
         </div>
         <div class="grid grid-3">
           <div class="card reveal">
+            <div class="ico">💑</div>
+            <h3 data-i18n="why_1_t">Votez en couple</h3>
+            <p data-i18n="why_1_d">Partagez un lien. Votre partenaire vote de son côté. On vous montre les prénoms où vous êtes vraiment d'accord.</p>
+          </div>
+          <div class="card reveal">
+            <div class="ico">👨‍👩‍👧‍👦</div>
+            <h3 data-i18n="why_2_t">Faites voter la famille</h3>
+            <p data-i18n="why_2_d">Envoyez le lien aux grands-parents, à vos proches. Suivez le classement en direct avec le détail de qui a voté quoi.</p>
+          </div>
+          <div class="card reveal">
             <div class="ico">🎯</div>
-            <h3 data-i18n="why_1_t">Des résultats sur-mesure</h3>
-            <p data-i18n="why_1_d">Filtrez par genre, origine, style, signification, première lettre et longueur pour des idées vraiment adaptées.</p>
-          </div>
-          <div class="card reveal">
-            <div class="ico">📖</div>
-            <h3 data-i18n="why_2_t">Le sens derrière chaque prénom</h3>
-            <p data-i18n="why_2_d">Signification, origine et explication : vous comprenez pourquoi chaque prénom vous correspond.</p>
-          </div>
-          <div class="card reveal">
-            <div class="ico">✨</div>
-            <h3 data-i18n="why_3_t">Des idées qui s'enchaînent</h3>
-            <p data-i18n="why_3_d">Un prénom vous plaît ? Découvrez en un clic des prénoms similaires en style et en origine.</p>
+            <h3 data-i18n="why_3_t">Des idées sur-mesure</h3>
+            <p data-i18n="why_3_d">Filtres précis par genre, origine, style, signification. Compatibilité avec votre nom de famille incluse.</p>
           </div>
         </div>
       </div>
@@ -282,7 +286,6 @@
       </div>
       <div class="footer-bottom">
         <span>© 2026 NameSpark Baby</span>
-        <span data-i18n="foot_demo">Mode démo — génération locale, sans API.</span>
         <a href="admin.html" style="font-size:.75rem;color:rgba(0,0,0,.2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='rgba(0,0,0,.4)'" onmouseout="this.style.color='rgba(0,0,0,.2)'">admin</a>
       </div>
     </div>
@@ -466,6 +469,7 @@
           </div>
 
           <button class="btn btn-primary" id="shareMatchsBtn" data-i18n="decide_share_matchs">🔗 Partager ces matchs</button>
+          <button class="btn btn-ghost btn-sm" id="saveMatchsBtn" data-i18n="save_results_email">📩 Recevoir par email</button>
         </div>
 
         <!-- FAMILLE — saisie du prénom du votant (ouverte via ?familyVote=) -->
@@ -500,6 +504,7 @@
           </div>
           <div class="family-ranking" id="familyRanking"></div>
           <button class="btn btn-ghost" id="refreshFamilyBtn" data-i18n="family_refresh">🔄 Actualiser les votes</button>
+          <button class="btn btn-ghost btn-sm" id="saveResultsFamilyBtn" data-i18n="save_results_email">📩 Recevoir le classement par email</button>
           <button class="btn btn-ghost btn-sm" id="simulateFamilyBtn" data-i18n="family_simulate">Simuler des votes (démo)</button>
         </div>
 

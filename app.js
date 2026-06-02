@@ -39,19 +39,19 @@ const I18N = {
     nav_how: "Comment ça marche", nav_faq: "FAQ",
     nav_favs: "Mes favoris",
     /* ---- hero ---- */
-    hero_eyebrow: "Générateur de prénoms bébé",
-    hero_title: "Trouvez le prénom parfait pour votre bébé",
-    hero_subtitle: "Découvrez des milliers d'idées de prénoms selon leur origine, leur signification et leur style.",
-    hero_cta: "Lancer le générateur", hero_cta2: "Comment ça marche",
+    hero_eyebrow: "Pour les futurs parents",
+    hero_title: "Le prénom de votre bébé, choisi ensemble",
+    hero_subtitle: "Générez des idées, votez chacun de votre côté, et découvrez les prénoms où vous êtes vraiment d'accord.",
+    hero_cta: "Découvrir les prénoms", hero_cta2: "Comment ça marche",
     /* ---- pourquoi ---- */
-    why_title: "Pourquoi utiliser NameSpark Baby",
-    why_sub: "Un outil pensé pour les futurs parents, simple, élégant et précis.",
-    why_1_t: "Des résultats sur-mesure",
-    why_1_d: "Filtrez par genre, origine, style, signification, première lettre et longueur pour des idées vraiment adaptées.",
-    why_2_t: "Le sens derrière chaque prénom",
-    why_2_d: "Signification, origine et explication : vous comprenez pourquoi chaque prénom vous correspond.",
-    why_3_t: "Des idées qui s'enchaînent",
-    why_3_d: "Un prénom vous plaît ? Découvrez en un clic des prénoms similaires en style et en origine.",
+    why_title: "Pas juste un générateur de prénoms",
+    why_sub: "NameSpark Baby est conçu pour décider ensemble — pas seulement explorer chacun de son côté.",
+    why_1_t: "Votez en couple",
+    why_1_d: "Partagez un lien. Votre partenaire vote de son côté. On vous montre les prénoms où vous êtes vraiment d'accord.",
+    why_2_t: "Faites voter la famille",
+    why_2_d: "Envoyez le lien aux grands-parents, à vos proches. Suivez le classement en direct avec le détail de qui a voté quoi.",
+    why_3_t: "Des idées sur-mesure",
+    why_3_d: "Filtres précis par genre, origine, style, signification. Compatibilité avec votre nom de famille incluse.",
     /* ---- générateur ---- */
     gen_title: "Le générateur de prénoms", gen_sub: "Renseignez vos préférences, on s'occupe du reste.",
     f_gender: "Genre", g_boy: "Garçon", g_girl: "Fille", g_mixte: "Mixte",
@@ -180,16 +180,16 @@ const I18N = {
     /* ---- PDF ---- */
     pdf_header: "Ma sélection de prénoms",
     /* ---- comment / populaires / FAQ ---- */
-    how_title: "Comment ça fonctionne", how_sub: "Trois étapes simples pour trouver le prénom de votre bébé.",
-    how_1_t: "Définissez vos envies", how_1_d: "Genre, origine, style, signification… affinez selon ce qui compte pour vous.",
-    how_2_t: "Générez des idées", how_2_d: "Recevez une sélection de prénoms avec leur sens, leur origine et pourquoi ils fonctionnent.",
-    how_3_t: "Explorez les similaires", how_3_d: "Un coup de cœur ? Découvrez des prénoms proches pour affiner votre choix.",
+    how_title: "Comment ça fonctionne", how_sub: "De l'idée à la décision partagée, en trois étapes.",
+    how_1_t: "Ajoutez vos coups de cœur", how_1_d: "Parcourez les prénoms, filtrez selon vos envies et ajoutez ceux qui vous touchent à votre sélection.",
+    how_2_t: "Partagez en un clic", how_2_d: "Envoyez un lien à votre partenaire ou à toute la famille. Chacun vote de son côté, sans se concerter.",
+    how_3_t: "Découvrez votre accord", how_3_d: "Voyez quels prénoms vous réunissent vraiment. Couple : les matchs ❤️. Famille : le classement complet.",
     pop_title: "Exemples de prénoms populaires", pop_sub: "Cliquez sur un prénom pour voir des idées similaires dans le générateur.",
     faq_title: "Questions fréquentes",
     /* ---- footer ---- */
-    foot_tag: "Le générateur de prénoms bébé pensé pour les futurs parents.",
+    foot_tag: "Choisissez le prénom de votre bébé, ensemble.",
     foot_explore: "Explorer", foot_nav: "Navigation",
-    foot_demo: "Mode démo — génération locale, sans API.",
+    foot_demo: "",
     /* ---- décider ensemble (boucle virale) ---- */
     decide_eyebrow: "Décidez ensemble",
     decide_title: "Invitez votre partenaire",
@@ -243,6 +243,7 @@ const I18N = {
     vote_gate_continue: "Continuer",
     vote_gate_skip: "Passer, je le ferai plus tard →",
     vote_gate_email_invalid: "Cette adresse email semble invalide.",
+    save_results_email: "📩 Recevoir par email",
     admin_wrong_pass: "Mot de passe admin incorrect.",
     decide_voted: (n) => `${n} prénom${n > 1 ? "s" : ""} voté${n > 1 ? "s" : ""}`,
     notif_partner_voted: (n) => `Votre partenaire a voté sur ${n} prénom${n > 1 ? "s" : ""} !`,
@@ -257,18 +258,18 @@ const I18N = {
     nav_home: "Home", nav_generator: "Generator",
     nav_how: "How it works", nav_faq: "FAQ",
     nav_favs: "Favourites",
-    hero_eyebrow: "Baby name generator",
-    hero_title: "Find the perfect name for your baby",
-    hero_subtitle: "Discover thousands of name ideas based on their origin, meaning and style.",
-    hero_cta: "Open the generator", hero_cta2: "How it works",
-    why_title: "Why use NameSpark Baby",
-    why_sub: "A tool made for parents-to-be: simple, elegant and precise.",
-    why_1_t: "Tailored results",
-    why_1_d: "Filter by gender, origin, style, meaning, first letter and length for ideas that truly fit.",
-    why_2_t: "The meaning behind each name",
-    why_2_d: "Meaning, origin and explanation: understand why each name suits you.",
-    why_3_t: "Ideas that flow",
-    why_3_d: "Love a name? Discover similar names in style and origin with one click.",
+    hero_eyebrow: "For parents-to-be",
+    hero_title: "Your baby's name, chosen together",
+    hero_subtitle: "Generate ideas, vote separately, and discover the names you truly agree on.",
+    hero_cta: "Explore names", hero_cta2: "How it works",
+    why_title: "Not just a name generator",
+    why_sub: "NameSpark Baby is built to decide together — not just explore alone.",
+    why_1_t: "Vote as a couple",
+    why_1_d: "Share a link. Your partner votes on their side. We show you the names you both truly agreed on.",
+    why_2_t: "Ask the whole family",
+    why_2_d: "Send the link to grandparents and loved ones. Follow the live ranking with the full breakdown of who voted what.",
+    why_3_t: "Tailored ideas",
+    why_3_d: "Precise filters by gender, origin, style, meaning. Compatibility with your last name included.",
     gen_title: "The name generator", gen_sub: "Tell us your preferences, we'll handle the rest.",
     f_gender: "Gender", g_boy: "Boy", g_girl: "Girl", g_mixte: "Unisex",
     f_origin: "Origin", o_all: "All", o_hebreu: "Hebrew", o_francais: "French",
@@ -387,15 +388,15 @@ const I18N = {
     share_copied: "✓ Link copied to clipboard!",
     share_no_fav: "Add names to favourites first.",
     pdf_header: "My name selection",
-    how_title: "How it works", how_sub: "Three simple steps to find your baby's name.",
-    how_1_t: "Set your preferences", how_1_d: "Gender, origin, style, meaning… refine what matters to you.",
-    how_2_t: "Generate ideas", how_2_d: "Get a selection of names with their meaning, origin and why they work.",
-    how_3_t: "Explore similar ones", how_3_d: "A favourite? Discover close names to refine your choice.",
+    how_title: "How it works", how_sub: "From idea to shared decision, in three steps.",
+    how_1_t: "Save your favourites", how_1_d: "Browse names, filter by your preferences and add the ones that speak to you.",
+    how_2_t: "Share in one tap", how_2_d: "Send a link to your partner or the whole family. Everyone votes on their own, no influence.",
+    how_3_t: "Find your agreement", how_3_d: "See which names bring you together. Couple: the ❤️ matches. Family: the full ranking.",
     pop_title: "Popular name examples", pop_sub: "Click a name to see similar ideas in the generator.",
     faq_title: "Frequently asked questions",
-    foot_tag: "The baby name generator made for parents-to-be.",
+    foot_tag: "Choose your baby's name, together.",
     foot_explore: "Explore", foot_nav: "Navigation",
-    foot_demo: "Demo mode — local generation, no API.",
+    foot_demo: "",
     /* ---- decide together (viral loop) ---- */
     decide_eyebrow: "Decide together",
     decide_title: "Invite your partner",
@@ -449,6 +450,7 @@ const I18N = {
     vote_gate_continue: "Continue",
     vote_gate_skip: "Skip, I'll do it later →",
     vote_gate_email_invalid: "This email address looks invalid.",
+    save_results_email: "📩 Receive by email",
     admin_wrong_pass: "Wrong admin password.",
     decide_voted: (n) => `${n} name${n > 1 ? "s" : ""} voted`,
     notif_partner_voted: (n) => `Your partner voted on ${n} name${n > 1 ? "s" : ""}!`,
@@ -464,22 +466,22 @@ const I18N = {
    ============================================================= */
 const FAQ_DATA = {
   fr: [
-    { q: "NameSpark Baby est-il gratuit ?", a: "Oui. Le générateur est entièrement gratuit et pensé pour accompagner les futurs parents dans leur recherche du prénom idéal." },
-    { q: "D'où viennent les prénoms proposés ?", a: "En mode démo, les prénoms proviennent d'une liste locale soigneusement constituée. Prochainement, ils seront générés par une IA via une fonction backend sécurisée pour des résultats encore plus riches." },
-    { q: "Comment fonctionne le bouton « prénoms similaires » ?", a: "Il analyse l'origine, le style et l'ambiance du prénom choisi, puis vous propose des prénoms proches pour affiner votre sélection." },
-    { q: "Comment fonctionnent les favoris ?", a: "Cliquez sur ❤️ pour sauvegarder un prénom. Vos favoris sont enregistrés dans votre navigateur (localStorage) : ils restent disponibles même si vous fermez et rouvrez la page." },
+    { q: "NameSpark Baby est-il gratuit ?", a: "Oui, entièrement gratuit. Créez votre sélection, votez en couple ou faites voter la famille — sans inscription obligatoire." },
+    { q: "En quoi NameSpark Baby est-il différent de ChatGPT ?", a: "ChatGPT vous donne une liste de prénoms. NameSpark Baby vous permet de décider à deux : votre partenaire vote de son côté sur votre sélection, et on vous montre les prénoms où vous êtes vraiment d'accord. C'est un outil de décision partagée, pas juste une recherche." },
+    { q: "Comment fonctionne le vote en couple ?", a: "Générez des prénoms, ajoutez vos coups de cœur, puis cliquez sur « Décider à deux ». Un lien est créé : envoyez-le à votre partenaire. Il vote de son côté, vous de votre côté. NameSpark vous montre ensuite les prénoms que vous avez tous les deux adorés." },
+    { q: "Comment fonctionne le vote famille ?", a: "Même principe : vous créez une session et partagez un lien. Chaque membre de la famille vote (juste avec son prénom, sans compte). Vous voyez le classement complet en temps réel — qui a voté quoi, pour chaque prénom." },
     { q: "Comment fonctionne le score de compatibilité ?", a: "Si vous renseignez un nom de famille, chaque prénom reçoit un score de 1 à 10 estimant la fluidité de la combinaison (longueur totale, équilibre syllabique, enchaînement sonore). C'est une estimation locale, purement indicative." },
-    { q: "Comment partager ma sélection ?", a: "Cliquez sur « Partager » dans la section Favoris ou dans le panneau de sélection. Un lien est copié dans votre presse-papier. Envoyez-le à votre partenaire — en l'ouvrant, il verra exactement votre sélection." },
-    { q: "Mes données sont-elles enregistrées ?", a: "Non. Vos favoris restent dans votre navigateur. Aucune donnée personnelle n'est collectée ni envoyée à un serveur." }
+    { q: "Comment fonctionne le bouton « prénoms similaires » ?", a: "Il analyse l'origine, le style et l'ambiance du prénom choisi, puis vous propose des prénoms proches pour affiner votre sélection." },
+    { q: "Mes données sont-elles enregistrées ?", a: "Vos favoris sont sauvegardés dans votre navigateur et persistent entre les sessions. Si vous laissez votre email, vos résultats de vote pourront être récupérés. Aucune donnée n'est vendue ni partagée." }
   ],
   en: [
-    { q: "Is NameSpark Baby free?", a: "Yes. The generator is completely free and designed to help parents-to-be find their ideal name." },
-    { q: "Where do the names come from?", a: "In demo mode, names come from a carefully curated local list. Soon, they will be generated by an AI through a secure backend function for even richer results." },
-    { q: "How does the 'similar names' button work?", a: "It analyses the origin, style and mood of the chosen name, then suggests close names to refine your selection." },
-    { q: "How do favourites work?", a: "Click ❤️ to save a name. Your favourites are stored in your browser (localStorage) and remain available even after you close and reopen the page." },
+    { q: "Is NameSpark Baby free?", a: "Yes, completely free. Build your selection, vote as a couple or with the whole family — no mandatory sign-up." },
+    { q: "How is NameSpark Baby different from ChatGPT?", a: "ChatGPT gives you a list of names. NameSpark Baby helps you decide together: your partner votes on your selection separately, and we show you the names you both truly agreed on. It's a shared decision tool, not just a search." },
+    { q: "How does the couple vote work?", a: "Generate names, add your favourites, then click 'Decide together'. A link is created — send it to your partner. They vote on their side, you vote on yours. NameSpark then shows you the names you both loved." },
+    { q: "How does the family vote work?", a: "Same idea: you create a session and share a link. Each family member votes (just with their first name, no account needed). You see the full real-time ranking — who voted what, for each name." },
     { q: "How does the compatibility score work?", a: "If you enter a last name, each first name receives a score from 1 to 10 estimating the flow of the combination (total length, syllable balance, sound transition). It's a local, purely indicative estimate." },
-    { q: "How do I share my selection?", a: "Click 'Share' in the favourites section or the selection panel. A link is copied to your clipboard. Send it to your partner — opening it will show your exact selection." },
-    { q: "Is my data stored?", a: "No. Your favourites stay in your browser. No personal data is collected or sent to a server." }
+    { q: "How does the 'similar names' button work?", a: "It analyses the origin, style and mood of the chosen name, then suggests close names to refine your selection." },
+    { q: "Is my data stored?", a: "Your favourites are saved in your browser and persist between sessions. If you leave your email, your vote results can be retrieved. No data is sold or shared." }
   ]
 };
 
@@ -843,6 +845,7 @@ function wireCards(container, scrollTarget = "generateur") {
       const nowFaved = !favorites.has(name);
       if (nowFaved) favorites.add(name); else favorites.delete(name);
       saveFavorites();
+      if (nowFaved) window.plausible?.("Favori ajouté");
 
       // Mise à jour immédiate de tous les boutons cœur pour ce prénom
       document.querySelectorAll(`[data-heart="${name}"]`).forEach((b) => {
@@ -925,6 +928,7 @@ function initForm() {
     const results = generateDemo(f, 8); // ← mode démo (remplacer par generateViaBackend)
     renderResults(results, t("res_title"));
     addToHistory(f, results);            // ← sauvegarde dans l'historique
+    window.plausible?.("Génération", { props: { genre: f.gender || "tous", origine: f.origin || "toutes" } });
     if (favorites.size > 0) renderFavorites();
     updateSelPanel();
   });
@@ -1619,6 +1623,7 @@ function handleAuthSubmit(e) {
     btn.disabled = false;
     closeAuthModal();
     updateEspaceButton();
+    if (!existing) window.plausible?.("Espace créé", { props: { source: "auth" } });
 
     /* Exécute l'action premium qui a déclenché l'inscription */
     const action = pendingAction;
@@ -1773,6 +1778,7 @@ function handleUnlockSubmit(e) {
     closeUnlockModal();
     updateEspaceButton();
     showToast(t("save_space_confirm"));
+    window.plausible?.("Espace créé", { props: { source: "unlock" } });
 
     /* Ouvre maintenant la sélection complète */
     renderSelectionPage();
@@ -1783,8 +1789,9 @@ function handleUnlockSubmit(e) {
 
 /* ---- Ouverture / Fermeture de l'overlay Ma sélection ---- */
 function openSelection() {
-  /* Non connecté : montre d'abord la modal "Votre sélection est prête !" */
-  if (!currentUser) { openUnlockModal(); return; }
+  /* Accès direct — pas de gate email. L'email est proposé plus tard,
+     dans des moments où il apporte une vraie valeur (post-vote, sauvegarde). */
+  window.plausible?.("Sélection ouverte");
   renderSelectionPage();
   document.getElementById("selectionOverlay").classList.add("open");
   document.body.style.overflow = "hidden";
@@ -1947,6 +1954,7 @@ function startVote(mode) {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
     return;
   }
+  window.plausible?.("Vote lancé", { props: { mode } });
   pendingVoteMode = mode;
   if (currentUser) { launchVote(mode); return; }
   openVoteStartModal();
@@ -2044,6 +2052,7 @@ function copyInviteLink() {
   try {
     document.execCommand("copy");
     showToast(t("share_copied"));
+    window.plausible?.("Lien partagé", { props: { type: "couple" } });
   } catch (_) {
     showToast(lang === "fr" ? "Copie échouée" : "Copy failed");
   }
@@ -2117,6 +2126,7 @@ function renderDecideVote(decision) {
 /* ---- Enregistrer un vote (créateur OU partenaire) ---- */
 function handleVote(prenameName, reaction) {
   saveVote(decideState.decisionId, decideState.participantId, prenameName, reaction);
+  window.plausible?.("Vote effectué", { props: { mode: decideState.mode, reaction } });
 }
 
 /* ---- Afficher les résultats (matchs DÉRIVÉS via storage.computeMatches) ---- */
@@ -2279,6 +2289,12 @@ function wireDecideButtons() {
     closeDecide();
   });
 
+  /* Recevoir résultats couple par email (post-vote, non bloquant) */
+  document.getElementById("saveMatchsBtn")?.addEventListener("click", () => {
+    window.plausible?.("Email capturé", { props: { contexte: "matchs-couple" } });
+    openSaveListeModal();
+  });
+
   /* ===== VOTE FAMILLE ===== */
   document.getElementById("openFamilyBtn")?.addEventListener("click", () => {
     closeSelection();
@@ -2309,6 +2325,13 @@ function wireDecideButtons() {
   });
   document.getElementById("copyFamilyLinkBtn")?.addEventListener("click", copyFamilyLink);
   document.getElementById("refreshFamilyBtn")?.addEventListener("click", renderFamilyResults);
+
+  /* Recevoir classement famille par email (post-vote, non bloquant) */
+  document.getElementById("saveResultsFamilyBtn")?.addEventListener("click", () => {
+    window.plausible?.("Email capturé", { props: { contexte: "classement-famille" } });
+    openSaveListeModal();
+  });
+
   document.getElementById("simulateFamilyBtn")?.addEventListener("click", simulateFamilyVotes);
 }
 
@@ -2370,8 +2393,13 @@ function generateFamilyLink() {
 function copyFamilyLink() {
   const input = document.getElementById("familyLinkInput");
   input.select();
-  try { document.execCommand("copy"); showToast(t("share_copied")); }
-  catch (_) { showToast(lang === "fr" ? "Copie échouée" : "Copy failed"); }
+  try {
+    document.execCommand("copy");
+    showToast(t("share_copied"));
+    window.plausible?.("Lien partagé", { props: { type: "famille" } });
+  } catch (_) {
+    showToast(lang === "fr" ? "Copie échouée" : "Copy failed");
+  }
 }
 
 /* ---- Votant : ouvre via ?familyVote=<decisionId> ---- */
