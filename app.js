@@ -228,6 +228,15 @@ const I18N = {
     family_refresh: "🔄 Actualiser les votes",
     family_simulate: "Simuler des votes (démo)",
     /* ---- Gate email au lancement d'un vote ---- */
+    /* ---- Détail votes couple (vue créateur) ---- */
+    couple_detail_title: "Détail complet des votes",
+    couple_detail_you: "Vous",
+    couple_detail_partner: "Conjoint·e",
+    couple_detail_match: "✅ Match",
+    couple_detail_no_match: "❌ Pas d'accord",
+    couple_detail_pending: "⏳ En attente",
+    couple_detail_no_votes: "Aucun vote du conjoint pour l'instant.",
+    /* ---- Gate email au lancement d'un vote ---- */
     vote_gate_title: "Recevez les résultats par email",
     vote_gate_desc: "Laissez votre email pour suivre les votes et recevoir le résultat. C'est facultatif.",
     vote_gate_email: "Votre adresse email (facultatif)",
@@ -425,6 +434,15 @@ const I18N = {
     family_refresh: "🔄 Refresh votes",
     family_simulate: "Simulate votes (demo)",
     /* ---- Email gate when starting a vote ---- */
+    /* ---- Couple detail view ---- */
+    couple_detail_title: "Full vote breakdown",
+    couple_detail_you: "You",
+    couple_detail_partner: "Partner",
+    couple_detail_match: "✅ Match",
+    couple_detail_no_match: "❌ No match",
+    couple_detail_pending: "⏳ Pending",
+    couple_detail_no_votes: "No votes from your partner yet.",
+    /* ---- Gate email au lancement d'un vote ---- */
     vote_gate_title: "Get the results by email",
     vote_gate_desc: "Leave your email to follow the votes and receive the result. It's optional.",
     vote_gate_email: "Your email address (optional)",
@@ -2106,22 +2124,85 @@ function showDecideResults() {
   showDecideStep("decideResults");
   const matchs = computeMatches(decideState.decisionId);
 
+  /* ---- Grille des matchs ---- */
   const grid = document.getElementById("decideMatchsGrid");
   if (!matchs.length) {
     grid.innerHTML = `<div class="results-empty" style="text-align:center;padding:40px;color:var(--ink-soft)">
       <div style="font-size:2rem;margin-bottom:10px">💭</div>
       <p>${lang === "fr" ? "Aucun prénom en commun pour l'instant" : "No names in common yet"}</p>
     </div>`;
+  } else {
+    const fn  = t("notif_match_found");
+    const msg = typeof fn === "function" ? fn(matchs.length) : fn;
+    addNotification("match_found", msg);
+    const names = matchs.map((n) => NAMES.find((x) => x.name === n)).filter(Boolean);
+    grid.innerHTML = names.map((n, i) => nameCardHTML(n, i, lastSurname)).join("");
+    wireCards(grid, "generateur");
+  }
+
+  /* ---- Détail complet (créateur couple uniquement) ---- */
+  const detailWrap = document.getElementById("coupleVoteDetail");
+  if (!detailWrap) return;
+
+  if (decideState.mode !== "couple" || decideState.role !== "creator") {
+    detailWrap.style.display = "none";
     return;
   }
 
-  const fn  = t("notif_match_found");
-  const msg = typeof fn === "function" ? fn(matchs.length) : fn;
-  if (typeof addNotification === "function") addNotification("match_found", msg);
+  renderCoupleVoteDetail();
+  detailWrap.style.display = "";
+}
 
-  const names = matchs.map((n) => NAMES.find((x) => x.name === n)).filter(Boolean);
-  grid.innerHTML = names.map((n, i) => nameCardHTML(n, i, lastSurname)).join("");
-  wireCards(grid, "generateur");
+/* Tableau de détail : pour chaque prénom, vote du créateur vs vote du conjoint */
+function renderCoupleVoteDetail() {
+  const d = getDecision(decideState.decisionId);
+  if (!d) return;
+
+  const votes = d.votes;
+  const myPid = decideState.participantId;
+
+  /* Participants autres que le créateur (= conjoint(s)) */
+  const partners = Object.entries(d.participants)
+    .filter(([pid]) => pid !== myPid)
+    .map(([pid, p]) => ({ pid, name: p.name || t("couple_detail_partner") }));
+
+  document.getElementById("coupleDetailTitle").textContent = t("couple_detail_title");
+
+  if (!partners.length || !Object.keys(votes).some((pid) => pid !== myPid)) {
+    document.getElementById("coupleDetailList").innerHTML =
+      `<p class="couple-detail-empty">${t("couple_detail_no_votes")}</p>`;
+    return;
+  }
+
+  const reactionIcon = (r) => r === "yes" ? "❤️" : r === "maybe" ? "🤔" : r === "no" ? "❌" : "—";
+
+  const html = d.items.map((name) => {
+    const myVote      = (votes[myPid]  || {})[name];
+    const partnerVote = (votes[partners[0].pid] || {})[name]; // 1 conjoint en couple
+
+    const isMatch = myVote === "yes" && partnerVote === "yes";
+    const isPending = !partnerVote;
+    const statusLabel = isPending ? t("couple_detail_pending")
+                      : isMatch   ? t("couple_detail_match")
+                      : t("couple_detail_no_match");
+    const statusCls = isPending ? "cd-pending" : isMatch ? "cd-match" : "cd-nomatch";
+
+    return `
+      <div class="cd-row ${statusCls}">
+        <span class="cd-name">${name}</span>
+        <span class="cd-vote">
+          <span class="cd-voter-lbl">${t("couple_detail_you")}</span>
+          <span class="cd-icon">${reactionIcon(myVote)}</span>
+        </span>
+        <span class="cd-vote">
+          <span class="cd-voter-lbl">${partners[0].name}</span>
+          <span class="cd-icon">${reactionIcon(partnerVote)}</span>
+        </span>
+        <span class="cd-status">${statusLabel}</span>
+      </div>`;
+  }).join("");
+
+  document.getElementById("coupleDetailList").innerHTML = html;
 }
 
 /* ---- Créateur : rafraîchir l'état des votes reçus ---- */

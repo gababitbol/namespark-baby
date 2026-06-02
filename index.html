@@ -458,6 +458,13 @@
             Voici les prénoms où vous êtes d'accord !
           </p>
           <div class="results" id="decideMatchsGrid"></div>
+
+          <!-- Détail complet des votes (visible uniquement pour le créateur couple) -->
+          <div id="coupleVoteDetail" style="display:none">
+            <div class="couple-detail-head" id="coupleDetailTitle"></div>
+            <div class="couple-detail-list" id="coupleDetailList"></div>
+          </div>
+
           <button class="btn btn-primary" id="shareMatchsBtn" data-i18n="decide_share_matchs">🔗 Partager ces matchs</button>
         </div>
 
@@ -659,9 +666,9 @@
 
   <!-- Storage abstrait doit être chargé AVANT app.js -->
   <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
-  <script src="storage.js?v=4"></script>
+  <script src="storage.js?v=5"></script>
   <!-- data.js et app.js (data.js en premier) -->
-  <script src="data.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <script src="data.js?v=5"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
