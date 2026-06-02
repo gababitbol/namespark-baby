@@ -560,6 +560,38 @@ body { animation: pageIn .5s ease; }
   }
   .nav-links.open { transform: translateY(0); }
   .nav-links a { padding: 14px 8px; border-radius: 12px; font-size: 1.05rem; }
+
+  /* ── Compactage global mobile ── */
+  section { padding: 40px 0; }
+  .hero { padding: 48px 0 32px; }
+  .hero p.subtitle { margin-bottom: 22px; }
+  .hero-actions { gap: 10px; }
+  .section-head { margin-bottom: 24px; }
+
+  /* Cartes "pourquoi" / "comment" */
+  .card { padding: 18px 16px; }
+  .card .ico { width: 38px; height: 38px; font-size: 1.1rem; margin-bottom: 12px; }
+
+  /* Formulaire + générateur */
+  .generator-wrap { gap: 20px; }
+  .form-card { padding: 16px; }
+  .field { margin-bottom: 14px; }
+
+  /* Cartes résultats */
+  .name-card { padding: 14px; }
+  .name-card h4 { font-size: 1.25rem; }
+  .name-card dt { margin-top: 7px; }
+  .name-card dd { font-size: .9rem; }
+  .name-card .card-foot { margin-top: 10px; padding-top: 8px; }
+  .results-head { margin-bottom: 12px; }
+  .results { gap: 12px; }
+
+  /* FAQ */
+  .faq-q { padding: 15px 36px 15px 0; font-size: 1rem; }
+  .faq-item.open .faq-a { padding-bottom: 14px; }
+
+  /* Footer */
+  .site-footer { padding: 36px 0 22px; }
 }
 
 /* =============================================================

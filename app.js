@@ -905,7 +905,8 @@ function wireCards(container, scrollTarget = "generateur") {
       const name = btn.dataset.similar;
       const similar = getSimilarDemo(name);
       renderResults(similar, t("similar_title")(name));
-      document.getElementById(scrollTarget).scrollIntoView({ behavior: "smooth" });
+      /* Scroll vers le titre des résultats, pas le haut du générateur */
+      document.querySelector(".results-head")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 
