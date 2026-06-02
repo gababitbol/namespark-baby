@@ -99,6 +99,14 @@ const I18N = {
     fav_download: "📄 Télécharger PDF",
     fav_share: "🔗 Partager",
     fav_loaded: "Sélection partagée chargée !",
+    share_btn:             "📤 Partager",
+    share_invite_text:     "Mon partenaire m'invite à voter sur des prénoms de bébé ✨",
+    share_family_text:     "Votez pour le prénom de notre bébé ! Dites-nous votre préféré 👶",
+    share_selection_text:  "Voici mes prénoms préférés pour notre bébé ❤️",
+    hero_hint:             "Ajoutez vos coups de cœur, puis votez ensemble.",
+    sel_hint_ready:        "Prêts à voter ensemble ?",
+    filters_toggle:        "Affiner les critères",
+    filters_active:        (n) => `${n} filtre${n > 1 ? "s" : ""} actif${n > 1 ? "s" : ""}`,
     /* ---- mon espace ---- */
     mon_espace: "Mon espace",
     bonjour: (n) => n ? `Bonjour ${n} 👋` : "Mon espace",
@@ -323,6 +331,14 @@ const I18N = {
     fav_download: "📄 Download PDF",
     fav_share: "🔗 Share",
     fav_loaded: "Shared selection loaded!",
+    share_btn:             "📤 Share",
+    share_invite_text:     "My partner invited me to vote on baby names ✨",
+    share_family_text:     "Vote for our baby's name! Tell us your favourite 👶",
+    share_selection_text:  "Here are my favourite baby names ❤️",
+    hero_hint:             "Save your favourites, then vote together.",
+    sel_hint_ready:        "Ready to vote together?",
+    filters_toggle:        "Refine criteria",
+    filters_active:        (n) => `${n} filter${n > 1 ? "s" : ""} active`,
     /* ---- mon espace ---- */
     mon_espace: "My space",
     bonjour: (n) => n ? `Hello ${n} 👋` : "My space",
@@ -1054,11 +1070,70 @@ function updateSelPanel() {
   const familyBtn = document.getElementById("selFamilyBtn");
   if (familyBtn) familyBtn.textContent = t("family_pill_btn");
 
+  /* Hint contextuel : invite à voter ensemble dès 3 favoris */
+  const hint = document.getElementById("selHint");
+  if (hint) {
+    hint.textContent = count >= 3 ? t("sel_hint_ready") : "";
+    hint.style.display = count >= 3 ? "" : "none";
+  }
+
   if (count === 0) {
     panel.classList.remove("visible");
     return;
   }
   panel.classList.add("visible");
+}
+
+/* =============================================================
+   17b) FILTRES PROGRESSIFS — toggle sur mobile
+   ============================================================= */
+function initFiltersToggle() {
+  const btn    = document.getElementById("filtersToggle");
+  const panel  = document.getElementById("advancedFilters");
+  const label  = document.getElementById("filtersToggleLabel");
+  const chevron = document.getElementById("filtersChevron");
+  if (!btn || !panel) return;
+
+  btn.addEventListener("click", () => {
+    const expanded = panel.classList.toggle("expanded");
+    chevron.textContent = expanded ? "▲" : "▼";
+
+    /* Badge : compte les filtres actifs */
+    _updateFiltersLabel();
+  });
+
+  /* Met à jour le libellé quand les selects changent */
+  ["origin","style","meaning","letter","length","surname"].forEach(id => {
+    document.getElementById(id)?.addEventListener("change", _updateFiltersLabel);
+    document.getElementById(id)?.addEventListener("input",  _updateFiltersLabel);
+  });
+
+  /* Segments (longueur) */
+  document.querySelectorAll('[data-segmented="length"] button').forEach(b =>
+    b.addEventListener("click", () => setTimeout(_updateFiltersLabel, 50))
+  );
+}
+
+function _updateFiltersLabel() {
+  const label = document.getElementById("filtersToggleLabel");
+  if (!label) return;
+  const active = _countActiveFilters();
+  const fn = t("filters_active");
+  label.textContent = active > 0
+    ? (typeof fn === "function" ? fn(active) : fn)
+    : t("filters_toggle");
+}
+
+function _countActiveFilters() {
+  let n = 0;
+  if (document.getElementById("origin")?.value)  n++;
+  if (document.getElementById("style")?.value)   n++;
+  if (document.getElementById("meaning")?.value) n++;
+  if (document.getElementById("letter")?.value.trim()) n++;
+  if (document.getElementById("surname")?.value.trim()) n++;
+  const lengthActive = document.querySelector('[data-segmented="length"] button.active')?.dataset.value;
+  if (lengthActive) n++;
+  return n;
 }
 
 /* =============================================================
@@ -1166,25 +1241,41 @@ function shareSelection() {
   if (favorites.size === 0) { showToast(t("share_no_fav")); return; }
 
   const url = new URL(window.location.href);
-  // Nettoyer les anciens params de partage
   url.searchParams.delete("share");
   url.searchParams.delete("surname");
   url.searchParams.delete("lang");
-
   url.searchParams.set("share", [...favorites].join(","));
   if (lastSurname) url.searchParams.set("surname", lastSurname);
   url.searchParams.set("lang", lang);
-
-  // Retirer le fragment (#section) pour un lien propre
   url.hash = "";
-  const shareUrl = url.toString();
 
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => showToast(t("share_copied")))
-      .catch(() => copyFallback(shareUrl));
+  shareLink(url.toString(), t("share_selection_text"));
+}
+
+/* Partage natif (navigator.share) avec fallback clipboard → fallback execCommand.
+   Sur mobile : ouvre la feuille de partage native (WhatsApp, Messages, Mail…).
+   Sur desktop : copie dans le presse-papiers + toast. */
+async function shareLink(url, text) {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "NameSpark Baby", text, url });
+      window.plausible?.("Lien partagé", { props: { type: "natif" } });
+    } catch (e) {
+      /* AbortError = l'utilisateur a annulé le sélecteur — pas une erreur */
+      if (e.name !== "AbortError") await _copyToClipboard(url);
+    }
   } else {
-    copyFallback(shareUrl);
+    await _copyToClipboard(url);
+  }
+}
+
+async function _copyToClipboard(url) {
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast(t("share_copied"));
+    window.plausible?.("Lien partagé", { props: { type: "clipboard" } });
+  } catch (_) {
+    copyFallback(url);
   }
 }
 
@@ -2124,17 +2215,10 @@ function generateInviteLink() {
   input.select();
 }
 
-/* ---- Copier le lien ---- */
+/* ---- Partager le lien d'invitation ---- */
 function copyInviteLink() {
-  const input = document.getElementById("inviteLinkInput");
-  input.select();
-  try {
-    document.execCommand("copy");
-    showToast(t("share_copied"));
-    window.plausible?.("Lien partagé", { props: { type: "couple" } });
-  } catch (_) {
-    showToast(lang === "fr" ? "Copie échouée" : "Copy failed");
-  }
+  const url = document.getElementById("inviteLinkInput").value;
+  shareLink(url, t("share_invite_text"));
 }
 
 /* ---- Partenaire : ouvrir via ?invite=<decisionId> ---- */
@@ -2502,16 +2586,10 @@ function generateFamilyLink() {
   const input = document.getElementById("familyLinkInput");
   if (input) input.value = url;
 }
+/* ---- Partager le lien famille ---- */
 function copyFamilyLink() {
-  const input = document.getElementById("familyLinkInput");
-  input.select();
-  try {
-    document.execCommand("copy");
-    showToast(t("share_copied"));
-    window.plausible?.("Lien partagé", { props: { type: "famille" } });
-  } catch (_) {
-    showToast(lang === "fr" ? "Copie échouée" : "Copy failed");
-  }
+  const url = document.getElementById("familyLinkInput").value;
+  shareLink(url, t("share_family_text"));
 }
 
 /* ---- Votant : ouvre via ?familyVote=<decisionId> ---- */
@@ -2656,6 +2734,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initCompare();
   initSaveListeModal();
   initMonEspace();
+  initFiltersToggle();
 
   loadFavorites();
   loadUser();                       // ← charge le profil utilisateur
