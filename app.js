@@ -193,6 +193,10 @@ const I18N = {
     /* ---- décider ensemble (boucle virale) ---- */
     decide_eyebrow: "Décidez ensemble",
     decide_title: "Invitez votre partenaire",
+    partner_eyebrow: "Décidez ensemble",
+    partner_title: "À vous de voter",
+    family_voter_eyebrow: "Vote famille",
+    family_voter_title: "À vous de voter",
     decide_invite_sub: "Partagez ce lien avec votre conjoint pour qu'il vote sur vos prénoms favoris.",
     decide_copy_link: "Copier le lien",
     decide_continue: "Continuer",
@@ -406,6 +410,10 @@ const I18N = {
     /* ---- decide together (viral loop) ---- */
     decide_eyebrow: "Decide together",
     decide_title: "Invite your partner",
+    partner_eyebrow: "Decide together",
+    partner_title: "Your turn to vote",
+    family_voter_eyebrow: "Family vote",
+    family_voter_title: "Your turn to vote",
     decide_invite_sub: "Share this link with your spouse so they can vote on your favourite names.",
     decide_copy_link: "Copy link",
     decide_continue: "Continue",
@@ -1968,11 +1976,19 @@ function showDecideStep(stepId) {
 }
 
 /* En-tête de l'overlay selon le mode (couple / famille) */
-function setDecideHeader(mode) {
+/* context : "couple_creator" | "couple_partner" | "family_creator" | "family_voter" */
+function setDecideHeader(context) {
   const eyebrow = document.querySelector(".decide-head .eyebrow");
   const title   = document.querySelector(".decide-title");
-  if (eyebrow) eyebrow.textContent = t(mode === "family" ? "family_header_eyebrow" : "decide_eyebrow");
-  if (title)   title.textContent   = t(mode === "family" ? "family_header_title"   : "decide_title");
+  const MAP = {
+    couple_creator: ["decide_eyebrow",       "decide_title"      ],
+    couple_partner: ["partner_eyebrow",       "partner_title"     ],
+    family_creator: ["family_header_eyebrow", "family_header_title"],
+    family_voter:   ["family_voter_eyebrow",  "family_voter_title" ],
+  };
+  const [ek, tk] = MAP[context] || MAP.couple_creator;
+  if (eyebrow) eyebrow.textContent = t(ek);
+  if (title)   title.textContent   = t(tk);
 }
 
 /* =============================================================
@@ -1992,18 +2008,25 @@ function tryAdminLogin(email, password) {
   return true;
 }
 
-let pendingVoteMode = null; // "couple" | "family"
+let pendingVoteMode  = null;   // "couple" | "family"
+let _voteInProgress = false;  // garde contre le double-clic pendant Supabase
 
 /* Point d'entrée unique des votes : propose l'email (facultatif) si non connecté */
 async function startVote(mode) {
+  if (_voteInProgress) return;          // double-clic ou appel concurrent
   if (!favorites.size) {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
     return;
   }
-  window.plausible?.("Vote lancé", { props: { mode } });
-  pendingVoteMode = mode;
-  if (currentUser) { await launchVote(mode); return; }
-  openVoteStartModal();
+  _voteInProgress = true;
+  try {
+    window.plausible?.("Vote lancé", { props: { mode } });
+    pendingVoteMode = mode;
+    if (currentUser) { await launchVote(mode); return; }
+    openVoteStartModal();
+  } finally {
+    _voteInProgress = false;
+  }
 }
 
 async function launchVote(mode) {
@@ -2076,7 +2099,7 @@ async function openDecide() {
     decideState = { decisionId: decision.id, role: "creator", participantId, mode: "couple" };
     if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
 
-    setDecideHeader("couple");
+    setDecideHeader("couple_creator");
     showDecideStep("decideInvite");
     document.getElementById("decideOverlay").classList.add("open");
     document.body.style.overflow = "hidden";
@@ -2131,7 +2154,7 @@ async function openDecideAsPartner(decisionId) {
 
     if (decision.surname) lastSurname = decision.surname;
 
-    setDecideHeader("couple");
+    setDecideHeader("couple_partner");
     renderDecideVote(decision);
     showDecideStep("decideVote");
     document.getElementById("decideOverlay").classList.add("open");
@@ -2460,7 +2483,7 @@ async function openFamilyVote() {
     decideState = { decisionId: decision.id, role: "creator", participantId, mode: "family" };
     if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
 
-    setDecideHeader("family");
+    setDecideHeader("family_creator");
     generateFamilyLink();
     renderFamilyResults();
     showDecideStep("familyResults");
@@ -2500,7 +2523,7 @@ async function openFamilyVoteAsVoter(decisionId) {
     decideState = { decisionId, role: "family", participantId: null, mode: "family" };
     if (decision.surname) lastSurname = decision.surname;
 
-    setDecideHeader("family");
+    setDecideHeader("family_voter");
     document.getElementById("familyNameSub").textContent = t("family_name_sub");
     showDecideStep("familyName");
     document.getElementById("decideOverlay").classList.add("open");
