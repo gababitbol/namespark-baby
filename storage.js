@@ -230,21 +230,21 @@ async function createDecision({ creatorName = null, creatorEmail = null, surname
   setCurrentDecisionId(id);
   _setMyParticipant(id, pid);
 
-  /* Persistance Supabase */
+  /* Persistance Supabase — séquentiel : le participant référence la décision (FK) */
   if (_sb) {
     const creatorId = getUser()?.id || null;
-    const [decRes, partRes] = await Promise.all([
-      _sb.from("decisions").insert({
-        id, creator_id: creatorId, mode: decision.mode,
-        surname: decision.surname, items: decision.items, created_at: now,
-      }),
-      _sb.from("participants").insert({
+    const decRes = await _sb.from("decisions").insert({
+      id, creator_id: creatorId, mode: decision.mode,
+      surname: decision.surname, items: decision.items, created_at: now,
+    });
+    if (decRes.error) { console.warn("[NameSpark] createDecision:", decRes.error); }
+    else {
+      const partRes = await _sb.from("participants").insert({
         id: pid, decision_id: id, role: "creator",
         name: creatorName || null, email: creatorEmail || null, joined_at: now,
-      }),
-    ]);
-    if (decRes.error)  console.warn("[NameSpark] createDecision:", decRes.error);
-    if (partRes.error) console.warn("[NameSpark] createParticipant:", partRes.error);
+      });
+      if (partRes.error) console.warn("[NameSpark] createParticipant:", partRes.error);
+    }
   }
 
   return { decision, participantId: pid };
