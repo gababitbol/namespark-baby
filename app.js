@@ -1584,7 +1584,7 @@ function closeAuthModal() {
   document.getElementById("authModal").classList.remove("open");
   document.body.style.overflow = "";
 }
-function handleAuthSubmit(e) {
+async function handleAuthSubmit(e) {
   e.preventDefault();
   const email     = document.getElementById("authEmail").value.trim();
   const firstName = document.getElementById("authFirstName").value.trim();
@@ -1592,7 +1592,7 @@ function handleAuthSubmit(e) {
   /* Accès admin secret : email="admin" + prénom=mot de passe */
   if (tryAdminLogin(email, firstName)) return;
 
-  const emailOk   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   if (!emailOk) {
     document.getElementById("authEmail").classList.add("field-error");
@@ -1605,36 +1605,33 @@ function handleAuthSubmit(e) {
   const btn = document.getElementById("authSubmit");
   btn.disabled = true; btn.textContent = "…";
 
-  setTimeout(() => {
-    /* Vérifie si un espace existait déjà pour cet email */
-    const existing = findUserByEmail(email);
+  /* Cherche l'utilisateur cross-appareil via Supabase */
+  const existing = await findUserByEmail(email);
 
-    if (existing) {
-      currentUser = existing;
-      const fn = t("space_welcome_back");
-      showToast(typeof fn === "function" ? fn(existing.firstName) : fn);
-    } else {
-      currentUser = { email, firstName: firstName || null, createdAt: new Date().toISOString(), surname: lastSurname || null };
-      showToast(t("space_created"));
-    }
+  if (existing) {
+    currentUser = existing;
+    const fn = t("space_welcome_back");
+    showToast(typeof fn === "function" ? fn(existing.firstName) : fn);
+  } else {
+    currentUser = { email, firstName: firstName || null, createdAt: new Date().toISOString(), surname: lastSurname || null };
+    showToast(t("space_created"));
+  }
 
-    saveUser();
-    registerLead(currentUser.email, currentUser.firstName, favorites.size);
-    btn.disabled = false;
-    closeAuthModal();
-    updateEspaceButton();
-    if (!existing) window.plausible?.("Espace créé", { props: { source: "auth" } });
+  saveUser();
+  registerLead(currentUser.email, currentUser.firstName, favorites.size);
+  btn.disabled = false;
+  closeAuthModal();
+  updateEspaceButton();
+  if (!existing) window.plausible?.("Espace créé", { props: { source: "auth" } });
 
-    /* Exécute l'action premium qui a déclenché l'inscription */
-    const action = pendingAction;
-    pendingAction = null;
-    if (action) {
-      setTimeout(() => executePremiumAction(action), 300);
-    } else {
-      /* Accès direct à Mon espace : ouvre le drawer profil */
-      openEspace();
-    }
-  }, 420);
+  /* Exécute l'action premium qui a déclenché l'inscription */
+  const action = pendingAction;
+  pendingAction = null;
+  if (action) {
+    setTimeout(() => executePremiumAction(action), 300);
+  } else {
+    openEspace();
+  }
 }
 
 function initMonEspace() {
@@ -1738,15 +1735,14 @@ function closeUnlockModal() {
   document.body.style.overflow = "";
 }
 
-function handleUnlockSubmit(e) {
+async function handleUnlockSubmit(e) {
   e.preventDefault();
   const email     = document.getElementById("unlockEmail").value.trim();
   const firstName = document.getElementById("unlockFirstName").value.trim();
 
-  /* Accès admin secret : email="admin" + prénom=mot de passe */
   if (tryAdminLogin(email, firstName)) return;
 
-  const emailOk   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   if (!emailOk) {
     document.getElementById("unlockEmail").classList.add("field-error");
@@ -1760,31 +1756,25 @@ function handleUnlockSubmit(e) {
   btn.disabled = true;
   btn.textContent = "…";
 
-  setTimeout(() => {
-    /* Espace existant ou création */
-    const existing = findUserByEmail(email);
+  const existing = await findUserByEmail(email);
+  currentUser = existing || {
+    email,
+    firstName: firstName || null,
+    createdAt: new Date().toISOString(),
+    surname: lastSurname || null,
+  };
+  saveUser();
+  registerLead(email, firstName || null, favorites.size);
 
-    currentUser = existing || {
-      email,
-      firstName: firstName || null,
-      createdAt: new Date().toISOString(),
-      surname: lastSurname || null
-    };
-    saveUser();
-    registerLead(email, firstName || null, favorites.size);
+  btn.disabled = false;
+  closeUnlockModal();
+  updateEspaceButton();
+  showToast(t("save_space_confirm"));
+  window.plausible?.("Espace créé", { props: { source: "unlock" } });
 
-    btn.disabled = false;
-
-    closeUnlockModal();
-    updateEspaceButton();
-    showToast(t("save_space_confirm"));
-    window.plausible?.("Espace créé", { props: { source: "unlock" } });
-
-    /* Ouvre maintenant la sélection complète */
-    renderSelectionPage();
-    document.getElementById("selectionOverlay").classList.add("open");
-    document.body.style.overflow = "hidden";
-  }, 480);
+  renderSelectionPage();
+  document.getElementById("selectionOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
 }
 
 /* ---- Ouverture / Fermeture de l'overlay Ma sélection ---- */
@@ -1949,20 +1939,20 @@ function tryAdminLogin(email, password) {
 let pendingVoteMode = null; // "couple" | "family"
 
 /* Point d'entrée unique des votes : propose l'email (facultatif) si non connecté */
-function startVote(mode) {
+async function startVote(mode) {
   if (!favorites.size) {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
     return;
   }
   window.plausible?.("Vote lancé", { props: { mode } });
   pendingVoteMode = mode;
-  if (currentUser) { launchVote(mode); return; }
+  if (currentUser) { await launchVote(mode); return; }
   openVoteStartModal();
 }
 
-function launchVote(mode) {
-  if (mode === "family") openFamilyVote();
-  else openDecide();
+async function launchVote(mode) {
+  if (mode === "family") await openFamilyVote();
+  else await openDecide();
 }
 
 function openVoteStartModal() {
@@ -1979,15 +1969,13 @@ function closeVoteStartModal() {
   document.body.style.overflow = "";
 }
 
-function handleVoteStartSubmit(e) {
+async function handleVoteStartSubmit(e) {
   e.preventDefault();
-  const email = document.getElementById("voteStartEmail").value.trim();
+  const email     = document.getElementById("voteStartEmail").value.trim();
   const firstName = document.getElementById("voteStartFirstName").value.trim();
 
-  /* Accès admin secret */
   if (tryAdminLogin(email, firstName)) return;
 
-  /* Email facultatif : s'il est saisi, il doit être valide */
   if (email) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       document.getElementById("voteStartEmail").classList.add("field-error");
@@ -1995,7 +1983,8 @@ function handleVoteStartSubmit(e) {
       document.getElementById("voteStartEmailError").classList.add("visible");
       return;
     }
-    currentUser = findUserByEmail(email) || {
+    const existing = await findUserByEmail(email);
+    currentUser = existing || {
       email, firstName: firstName || null, createdAt: new Date().toISOString(), surname: lastSurname || null,
     };
     saveUser();
@@ -2004,17 +1993,17 @@ function handleVoteStartSubmit(e) {
   }
 
   closeVoteStartModal();
-  launchVote(pendingVoteMode);
+  await launchVote(pendingVoteMode);
 }
 
 /* ---- Créateur : ouvrir le module et créer la décision ---- */
-function openDecide() {
+async function openDecide() {
   if (!favorites.size) {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
     return;
   }
 
-  const { decision, participantId } = createDecision({
+  const { decision, participantId } = await createDecision({
     creatorName:  currentUser?.firstName || null,
     creatorEmail: currentUser?.email || null,
     surname:      lastSurname || null,
@@ -2059,13 +2048,13 @@ function copyInviteLink() {
 }
 
 /* ---- Partenaire : ouvrir via ?invite=<decisionId> ---- */
-function openDecideAsPartner(decisionId) {
-  const decision = getDecision(decisionId);
+async function openDecideAsPartner(decisionId) {
+  const decision = await getDecision(decisionId);
   if (!decision) {
     showToast(t("decide_invite_invalid"));
     return false;
   }
-  const participantId = joinDecision(decisionId, {
+  const participantId = await joinDecision(decisionId, {
     role:  "partner",
     name:  currentUser?.firstName || null,
     email: currentUser?.email || null,
@@ -2124,8 +2113,8 @@ function renderDecideVote(decision) {
 }
 
 /* ---- Enregistrer un vote (créateur OU partenaire) ---- */
-function handleVote(prenameName, reaction) {
-  saveVote(decideState.decisionId, decideState.participantId, prenameName, reaction);
+async function handleVote(prenameName, reaction) {
+  await saveVote(decideState.decisionId, decideState.participantId, prenameName, reaction);
   window.plausible?.("Vote effectué", { props: { mode: decideState.mode, reaction } });
 }
 
@@ -2215,9 +2204,12 @@ function renderCoupleVoteDetail() {
   document.getElementById("coupleDetailList").innerHTML = html;
 }
 
-/* ---- Créateur : rafraîchir l'état des votes reçus ---- */
-function refreshWaiting() {
-  const votes = getVotes(decideState.decisionId);
+/* ---- Créateur : rafraîchir l'état des votes reçus depuis Supabase ---- */
+async function refreshWaiting() {
+  /* Re-fetch depuis Supabase → met à jour le cache local */
+  const decision = await getDecision(decideState.decisionId);
+  const votes = decision ? decision.votes : getVotes(decideState.decisionId);
+
   let yes = 0, no = 0, maybe = 0, voteCount = 0;
   Object.entries(votes).forEach(([pid, byName]) => {
     if (pid === decideState.participantId) return; // ignore les votes du créateur
@@ -2264,8 +2256,8 @@ function wireDecideButtons() {
   });
 
   /* Créateur : actualise les votes reçus → résultats si votes présents */
-  document.getElementById("refreshVotesBtn")?.addEventListener("click", () => {
-    const count = refreshWaiting();
+  document.getElementById("refreshVotesBtn")?.addEventListener("click", async () => {
+    const count = await refreshWaiting();
     if (count > 0) showDecideResults();
     else showToast(t("decide_no_votes_yet"));
   });
@@ -2319,12 +2311,16 @@ function wireDecideButtons() {
     document.getElementById("familyVoterName").classList.remove("field-error");
     document.getElementById("familyNameError").classList.remove("visible");
   });
-  document.getElementById("familySeeResultsBtn")?.addEventListener("click", () => {
+  document.getElementById("familySeeResultsBtn")?.addEventListener("click", async () => {
+    await getDecision(decideState.decisionId); /* re-fetch pour avoir les derniers votes */
     renderFamilyResults();
     showDecideStep("familyResults");
   });
   document.getElementById("copyFamilyLinkBtn")?.addEventListener("click", copyFamilyLink);
-  document.getElementById("refreshFamilyBtn")?.addEventListener("click", renderFamilyResults);
+  document.getElementById("refreshFamilyBtn")?.addEventListener("click", async () => {
+    await getDecision(decideState.decisionId); /* re-fetch Supabase → met à jour le cache */
+    renderFamilyResults();
+  });
 
   /* Recevoir classement famille par email (post-vote, non bloquant) */
   document.getElementById("saveResultsFamilyBtn")?.addEventListener("click", () => {
@@ -2336,21 +2332,21 @@ function wireDecideButtons() {
 }
 
 /* ---- Démo : simule un partenaire DISTINCT qui vote (via storage) ---- */
-function simulatePartnerVoting() {
-  const decision = getDecision(decideState.decisionId);
+async function simulatePartnerVoting() {
+  const decision = await getDecision(decideState.decisionId);
   if (!decision || !decision.items.length) return;
 
-  const partnerPid = addParticipant(decideState.decisionId, {
+  const partnerPid = await addParticipant(decideState.decisionId, {
     role: "partner",
     name: lang === "fr" ? "Partenaire (démo)" : "Partner (demo)",
   });
-  decision.items.forEach((name) => {
+  for (const name of decision.items) {
     const r = ["yes", "no", "maybe"][Math.floor(Math.random() * 3)];
-    saveVote(decideState.decisionId, partnerPid, name, r);
-  });
+    await saveVote(decideState.decisionId, partnerPid, name, r);
+  }
 
   showDecideStep("decideWaiting");
-  refreshWaiting();
+  await refreshWaiting();
   setTimeout(() => showDecideResults(), 900);
 }
 
@@ -2360,12 +2356,12 @@ function simulatePartnerVoting() {
    ============================================================= */
 
 /* ---- Créateur : ouvre une session de vote famille ---- */
-function openFamilyVote() {
+async function openFamilyVote() {
   if (!favorites.size) {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
     return;
   }
-  const { decision, participantId } = createDecision({
+  const { decision, participantId } = await createDecision({
     creatorName:  currentUser?.firstName || null,
     creatorEmail: currentUser?.email || null,
     surname:      lastSurname || null,
@@ -2403,8 +2399,8 @@ function copyFamilyLink() {
 }
 
 /* ---- Votant : ouvre via ?familyVote=<decisionId> ---- */
-function openFamilyVoteAsVoter(decisionId) {
-  const decision = getDecision(decisionId);
+async function openFamilyVoteAsVoter(decisionId) {
+  const decision = await getDecision(decisionId);
   if (!decision) { showToast(t("decide_invite_invalid")); return false; }
 
   decideState = { decisionId, role: "family", participantId: null, mode: "family" };
@@ -2420,7 +2416,7 @@ function openFamilyVoteAsVoter(decisionId) {
 }
 
 /* ---- Votant : valide son prénom puis passe au vote ---- */
-function handleFamilyNameSubmit(e) {
+async function handleFamilyNameSubmit(e) {
   e.preventDefault();
   const input = document.getElementById("familyVoterName");
   const name = input.value.trim();
@@ -2432,10 +2428,12 @@ function handleFamilyNameSubmit(e) {
     input.focus();
     return;
   }
-  const pid = addParticipant(decideState.decisionId, { role: "family", name });
+  const pid = await addParticipant(decideState.decisionId, { role: "family", name });
   decideState.participantId = pid;
 
-  renderDecideVote(getDecision(decideState.decisionId));
+  /* La décision est déjà en cache (chargée par openFamilyVoteAsVoter) */
+  const decision = await getDecision(decideState.decisionId);
+  renderDecideVote(decision);
   showDecideStep("decideVote");
 }
 
@@ -2484,19 +2482,19 @@ function renderFamilyResults() {
 }
 
 /* ---- Démo : simule plusieurs votants famille (via storage) ---- */
-function simulateFamilyVotes() {
-  const decision = getDecision(decideState.decisionId);
+async function simulateFamilyVotes() {
+  const decision = await getDecision(decideState.decisionId);
   if (!decision || !decision.items.length) return;
   const demo = lang === "fr"
     ? ["Mamie", "Papa", "Léa", "Tonton"]
     : ["Grandma", "Dad", "Lea", "Uncle"];
-  demo.forEach((nm) => {
-    const pid = addParticipant(decideState.decisionId, { role: "family", name: nm });
-    decision.items.forEach((name) => {
+  for (const nm of demo) {
+    const pid = await addParticipant(decideState.decisionId, { role: "family", name: nm });
+    for (const name of decision.items) {
       const r = ["yes", "yes", "maybe", "no"][Math.floor(Math.random() * 4)];
-      saveVote(decideState.decisionId, pid, name, r);
-    });
-  });
+      await saveVote(decideState.decisionId, pid, name, r);
+    }
+  }
   renderFamilyResults();
 }
 
@@ -2541,10 +2539,10 @@ document.addEventListener("DOMContentLoaded", () => {
   wireDecideButtons();
 
   /* Liens de vote : ?invite= (couple) et ?familyVote= (famille) ont la priorité */
-  const params      = new URLSearchParams(location.search);
-  const inviteId    = params.get("invite");
+  const params       = new URLSearchParams(location.search);
+  const inviteId     = params.get("invite");
   const familyVoteId = params.get("familyVote");
-  const urlLang     = params.get("lang");
+  const urlLang      = params.get("lang");
   if (inviteId || familyVoteId) {
     if (urlLang === "fr" || urlLang === "en") applyLang(urlLang);
     if (familyVoteId) openFamilyVoteAsVoter(familyVoteId);
