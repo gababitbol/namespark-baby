@@ -1415,6 +1415,15 @@ body { animation: pageIn .5s ease; }
   font-size: .8rem;
   margin-top: 14px;
 }
+/* Bouton "Passer" (skip) dans les modals à email facultatif */
+.auth-hint-btn {
+  display: block; width: 100%;
+  background: none; border: none; cursor: pointer;
+  font: inherit; font-size: .8rem;
+  color: var(--ink-soft);
+  text-align: center; padding: 0; margin-top: 14px;
+}
+.auth-hint-btn:hover { color: var(--accent-deep); text-decoration: underline; }
 
 /* Responsive drawer */
 @media (max-width: 480px) {

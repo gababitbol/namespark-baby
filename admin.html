@@ -10,122 +10,208 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <style>
-    /* ---- Styles admin-spécifiques ---- */
-    body { background: var(--bg); }
-    .admin-container { max-width: 1200px; margin: 0 auto; padding: 28px; }
-    .admin-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
-    .admin-title { font-family: var(--serif); font-size: 2rem; font-weight: 700; }
-    .admin-logout { padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: none; cursor: pointer; font-size: .9rem; color: var(--ink-soft); transition: all .2s; }
-    .admin-logout:hover { color: #c05050; border-color: #e05050; background: #fef2f2; }
+    body { background: var(--bg-soft); }
 
-    /* ---- Auth screen ---- */
-    .admin-auth { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-    .auth-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 40px; max-width: 380px; width: 100%; box-shadow: 0 10px 40px -12px rgba(0,0,0,.1); }
-    .auth-title { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 8px; }
-    .auth-subtitle { color: var(--ink-soft); margin-bottom: 24px; font-size: .95rem; }
-    .auth-form { display: flex; flex-direction: column; gap: 14px; }
-    .auth-form input { padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); font: inherit; font-size: .95rem; background: var(--bg); color: var(--ink); }
-    .auth-form button { padding: 14px; background: linear-gradient(135deg, var(--accent), var(--accent-deep)); border: 0; border-radius: var(--radius-sm); color: #fff; font-weight: 700; cursor: pointer; font-size: .95rem; }
-    .auth-form button:hover { filter: brightness(1.08); }
-    .auth-error { color: #c05050; font-size: .85rem; margin-top: -10px; }
+    /* ---- Écran de connexion ---- */
+    .admin-login-wrap {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px;
+    }
+    .admin-login-card {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 44px 40px;
+      max-width: 380px; width: 100%;
+      box-shadow: 0 12px 48px -12px rgba(0,0,0,.12);
+    }
+    .admin-login-logo { font-size: 2rem; margin-bottom: 12px; }
+    .admin-login-title { font-family: var(--serif); font-size: 1.7rem; font-weight: 700; margin-bottom: 6px; }
+    .admin-login-sub { color: var(--ink-soft); font-size: .9rem; margin-bottom: 28px; }
+    .admin-login-card .field { margin-bottom: 14px; }
+    .admin-login-card input {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--line);
+      border-radius: var(--radius-sm); font: inherit; font-size: .95rem;
+      background: var(--bg); color: var(--ink); box-sizing: border-box;
+    }
+    .admin-login-card input:focus { outline: none; border-color: var(--accent); }
+    .admin-error { color: #c05050; font-size: .85rem; margin-top: 8px; min-height: 20px; }
 
     /* ---- Dashboard ---- */
-    .admin-hidden { display: none; }
-    .admin-panel { display: flex; flex-direction: column; gap: 28px; }
-    .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
-    .stat-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px; }
-    .stat-label { font-size: .8rem; color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
-    .stat-value { font-size: 2.2rem; font-weight: 700; font-family: var(--serif); color: var(--accent-deep); }
+    .admin-hidden { display: none !important; }
+    .admin-wrap { max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
 
-    /* ---- Controls ---- */
-    .admin-controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    .search-box { flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); font: inherit; font-size: .9rem; }
-    .export-btn { padding: 10px 18px; background: var(--accent-soft); border: 1.5px solid var(--accent); border-radius: var(--radius-sm); color: var(--accent-deep); font: inherit; font-weight: 600; cursor: pointer; transition: all .2s; }
-    .export-btn:hover { background: var(--accent); color: #fff; }
+    .admin-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 40px; flex-wrap: wrap; gap: 12px;
+    }
+    .admin-brand { display: flex; align-items: center; gap: 10px; }
+    .admin-brand-logo { font-size: 1.4rem; }
+    .admin-brand-name { font-family: var(--serif); font-size: 1.6rem; font-weight: 700; }
+    .admin-brand-badge {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      background: var(--accent); color: #fff; padding: 3px 8px;
+      border-radius: 999px; letter-spacing: .08em;
+    }
+
+    /* ---- Stat cards ---- */
+    .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 36px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 18px 20px; }
+    .stat-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin-bottom: 8px; }
+    .stat-value { font-size: 2rem; font-weight: 800; font-family: var(--serif); color: var(--accent-deep); }
+    .stat-sub { font-size: .78rem; color: var(--ink-soft); margin-top: 4px; }
+
+    /* ---- Sections ---- */
+    .admin-section { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 28px; box-shadow: 0 2px 8px -4px rgba(0,0,0,.06); }
+    .admin-section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--line); gap: 12px; flex-wrap: wrap;
+    }
+    .admin-section-title { font-weight: 700; font-size: 1rem; }
+    .admin-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .admin-search {
+      padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+      font: inherit; font-size: .88rem; min-width: 220px;
+    }
 
     /* ---- Table ---- */
-    .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 12px -4px rgba(0,0,0,.08); }
     table { width: 100%; border-collapse: collapse; }
-    th { background: var(--bg-soft); padding: 14px; text-align: left; font-weight: 700; font-size: .85rem; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft); border-bottom: 1px solid var(--line); cursor: pointer; user-select: none; }
-    th:hover { background: var(--bg); }
-    th.sortable::after { content: " ↕"; opacity: .5; font-size: .7rem; }
-    th.active { color: var(--accent-deep); }
-    th.active::after { opacity: 1; }
-    td { padding: 14px; border-bottom: 1px solid var(--line); font-size: .9rem; }
+    th {
+      background: var(--bg-soft); padding: 12px 16px;
+      text-align: left; font-size: .78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft);
+      border-bottom: 1px solid var(--line); white-space: nowrap;
+    }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { color: var(--accent-deep); }
+    th.sort-asc::after  { content: " ↑"; }
+    th.sort-desc::after { content: " ↓"; }
+    td { padding: 13px 16px; border-bottom: 1px solid var(--line); font-size: .88rem; vertical-align: top; }
     tr:last-child td { border-bottom: 0; }
-    tr:hover { background: var(--bg-soft); }
+    tr:hover td { background: var(--bg-soft); }
+    .td-email { font-weight: 600; }
+    .td-badge {
+      display: inline-block; font-size: .72rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px;
+    }
+    .td-badge-couple { background: #fef3e2; color: #a16207; }
+    .td-badge-family { background: #ecfdf5; color: #065f46; }
+    .empty-row td { text-align: center; padding: 40px; color: var(--ink-soft); font-size: .9rem; }
 
-    .table-empty { text-align: center; padding: 40px 20px; color: var(--ink-soft); }
-    .table-empty-big { font-size: 2rem; margin-bottom: 10px; }
+    /* ---- Sessions ---- */
+    .session-items { padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .session-card {
+      border: 1px solid var(--line); border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+    .session-card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .session-id { font-family: monospace; font-size: .78rem; color: var(--ink-soft); }
+    .session-meta { font-size: .8rem; color: var(--ink-soft); margin-bottom: 8px; }
+    .session-items-list { display: flex; gap: 6px; flex-wrap: wrap; }
+    .session-item-pill {
+      font-size: .78rem; padding: 3px 10px; border-radius: 999px;
+      border: 1px solid var(--line); background: var(--bg-soft);
+    }
+    .session-votes { margin-top: 10px; }
+    .voter-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+    .voter-name { font-weight: 600; font-size: .82rem; min-width: 90px; }
+    .voter-votes { display: flex; gap: 4px; flex-wrap: wrap; }
+    .voter-vote { font-size: .75rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+    .voter-vote-yes   { background: #ecfdf5; border-color: #86efac; color: #065f46; }
+    .voter-vote-maybe { background: #fefce8; border-color: #fde047; color: #854d0e; }
+    .voter-vote-no    { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 640px) {
+      .admin-wrap { padding: 20px 14px 60px; }
+      .admin-login-card { padding: 32px 20px; }
+      th, td { padding: 10px; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- ====== AUTH SCREEN ====== -->
-  <div class="admin-auth" id="authScreen">
-    <div class="auth-card">
-      <h1 class="auth-title">Admin</h1>
-      <p class="auth-subtitle">Connectez-vous pour voir les utilisateurs</p>
-      <form class="auth-form" id="authForm" onsubmit="handleAuthSubmit(event); return false;">
-        <input type="password" id="adminPassword" placeholder="Mot de passe" autofocus />
-        <button type="submit">Se connecter</button>
-        <p class="auth-error" id="authError"></p>
+  <!-- ====== CONNEXION ====== -->
+  <div id="loginScreen" class="admin-login-wrap">
+    <div class="admin-login-card">
+      <div class="admin-login-logo">✶</div>
+      <h1 class="admin-login-title">NameSpark Admin</h1>
+      <p class="admin-login-sub">Entrez le mot de passe administrateur pour accéder au dashboard.</p>
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <input type="password" id="loginPassword" placeholder="Mot de passe" autofocus autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Se connecter</button>
+        <p class="admin-error" id="loginError"></p>
       </form>
     </div>
   </div>
 
   <!-- ====== DASHBOARD ====== -->
-  <div id="adminDash" class="admin-hidden">
-    <div class="admin-container">
+  <div id="dashboard" class="admin-hidden">
+    <div class="admin-wrap">
 
-      <!-- En-tête + logout -->
-      <div class="admin-head">
-        <h1 class="admin-title">Admin Dashboard</h1>
-        <button class="admin-logout" id="logoutBtn" onclick="handleLogout()">Se déconnecter</button>
-      </div>
-
-      <!-- Statistiques -->
-      <div class="admin-stats">
-        <div class="stat-card">
-          <div class="stat-label">Total utilisateurs</div>
-          <div class="stat-value" id="totalUsers">0</div>
+      <!-- Header -->
+      <div class="admin-header">
+        <div class="admin-brand">
+          <span class="admin-brand-logo">✶</span>
+          <span class="admin-brand-name">NameSpark Baby</span>
+          <span class="admin-brand-badge">Admin</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Prénoms enregistrés (tous)</div>
-          <div class="stat-value" id="totalFavorites">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Utilisateurs avec prénoms</div>
-          <div class="stat-value" id="activeUsers">0</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn btn-ghost btn-sm" id="refreshBtn">🔄 Actualiser</button>
+          <button class="btn btn-ghost btn-sm" id="exportBtn">📥 Export CSV</button>
+          <button class="btn btn-ghost btn-sm" id="logoutBtn" style="color:#c05050">Déconnexion</button>
         </div>
       </div>
 
-      <!-- Contrôles -->
-      <div class="admin-controls">
-        <input type="text" class="search-box" id="searchBox" placeholder="Chercher par email…" />
-        <button class="export-btn" onclick="exportCSV()">📥 Exporter CSV</button>
+      <!-- KPIs -->
+      <div class="admin-stats" id="statsGrid"></div>
+
+      <!-- Section : Leads (emails captés) -->
+      <div class="admin-section">
+        <div class="admin-section-head">
+          <span class="admin-section-title">📬 Emails captés</span>
+          <div class="admin-controls">
+            <input type="text" class="admin-search" id="leadSearch" placeholder="Rechercher par email…" />
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="leadsTable">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="email">Email</th>
+                <th class="sortable" data-sort="firstName">Prénom</th>
+                <th class="sortable" data-sort="createdAt">1ère visite</th>
+                <th class="sortable" data-sort="lastSeen">Dernière activité</th>
+                <th class="sortable" data-sort="favorites">Favoris</th>
+                <th class="sortable" data-sort="sessions">Sessions vote</th>
+              </tr>
+            </thead>
+            <tbody id="leadsBody"></tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- Tableau -->
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="sortable" data-sort="email">Email</th>
-              <th class="sortable" data-sort="firstName">Prénom</th>
-              <th class="sortable" data-sort="createdAt">Date d'inscription</th>
-              <th class="sortable" data-sort="favoriteCount">Favoris</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody">
-            <tr><td colspan="4" class="table-empty"><div class="table-empty-big">—</div>Aucun utilisateur</td></tr>
-          </tbody>
-        </table>
+      <!-- Section : Sessions de vote -->
+      <div class="admin-section">
+        <div class="admin-section-head">
+          <span class="admin-section-title">🗳️ Sessions de vote</span>
+          <div class="admin-controls">
+            <label style="display:flex;gap:6px;align-items:center;font-size:.85rem">
+              <input type="checkbox" id="filterFamily" /> Famille seulement
+            </label>
+            <label style="display:flex;gap:6px;align-items:center;font-size:.85rem">
+              <input type="checkbox" id="filterCouple" /> Couple seulement
+            </label>
+          </div>
+        </div>
+        <div id="sessionsList" class="session-items"></div>
       </div>
 
     </div>
   </div>
 
-  <script src="admin.js"></script>
+  <!-- storage.js DOIT être chargé AVANT admin.js -->
+  <script src="storage.js?v=3"></script>
+  <script src="admin.js?v=3"></script>
 </body>
 </html>

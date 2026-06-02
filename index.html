@@ -568,6 +568,33 @@
     </div>
   </div>
 
+  <!-- ============================ MODAL DÉMARRER UN VOTE (email facultatif) ============================ -->
+  <div class="modal-overlay" id="voteStartModal" role="dialog" aria-modal="true" aria-labelledby="voteStartTitle">
+    <div class="modal auth-modal">
+      <div class="modal-head">
+        <h3 id="voteStartTitle" data-i18n="vote_gate_title">Recevez les résultats par email</h3>
+        <button class="btn-close" id="closeVoteStart" aria-label="Fermer">✕</button>
+      </div>
+      <div class="auth-modal-icon" aria-hidden="true">📨</div>
+      <p class="auth-modal-desc" id="voteStartDesc" data-i18n="vote_gate_desc">
+        Laissez votre email pour suivre les votes et recevoir le résultat. C'est facultatif.
+      </p>
+      <form id="voteStartForm" novalidate>
+        <div class="field">
+          <label for="voteStartFirstName" data-i18n="save_field_fname">Votre prénom (optionnel)</label>
+          <input type="text" id="voteStartFirstName" placeholder="Marie…" autocomplete="given-name" />
+        </div>
+        <div class="field">
+          <label for="voteStartEmail" data-i18n="vote_gate_email">Votre adresse email (facultatif)</label>
+          <input type="email" id="voteStartEmail" placeholder="marie@exemple.com" autocomplete="email" inputmode="email" />
+          <div class="field-error-msg" id="voteStartEmailError" role="alert"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="voteStartSubmit" data-i18n="vote_gate_continue">Continuer</button>
+      </form>
+      <button class="auth-hint auth-hint-btn" id="voteStartSkip" data-i18n="vote_gate_skip">Passer, je le ferai plus tard →</button>
+    </div>
+  </div>
+
   <!-- ============================ MODAL SAUVEGARDER MA LISTE ============================ -->
   <div class="modal-overlay" id="saveListeModal" role="dialog" aria-modal="true" aria-labelledby="saveListeTitle">
     <div class="modal save-modal">
@@ -632,9 +659,9 @@
 
   <!-- Storage abstrait doit être chargé AVANT app.js -->
   <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
-  <script src="storage.js?v=3"></script>
+  <script src="storage.js?v=4"></script>
   <!-- data.js et app.js (data.js en premier) -->
-  <script src="data.js?v=3"></script>
-  <script src="app.js?v=3"></script>
+  <script src="data.js?v=4"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

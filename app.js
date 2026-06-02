@@ -227,6 +227,14 @@ const I18N = {
     family_copy_link: "Copier le lien",
     family_refresh: "🔄 Actualiser les votes",
     family_simulate: "Simuler des votes (démo)",
+    /* ---- Gate email au lancement d'un vote ---- */
+    vote_gate_title: "Recevez les résultats par email",
+    vote_gate_desc: "Laissez votre email pour suivre les votes et recevoir le résultat. C'est facultatif.",
+    vote_gate_email: "Votre adresse email (facultatif)",
+    vote_gate_continue: "Continuer",
+    vote_gate_skip: "Passer, je le ferai plus tard →",
+    vote_gate_email_invalid: "Cette adresse email semble invalide.",
+    admin_wrong_pass: "Mot de passe admin incorrect.",
     decide_voted: (n) => `${n} prénom${n > 1 ? "s" : ""} voté${n > 1 ? "s" : ""}`,
     notif_partner_voted: (n) => `Votre partenaire a voté sur ${n} prénom${n > 1 ? "s" : ""} !`,
     notif_match_found: (n) => `🎉 ${n} nouveau${n > 1 ? "x" : ""} match${n > 1 ? "s" : ""} !`,
@@ -416,6 +424,14 @@ const I18N = {
     family_copy_link: "Copy link",
     family_refresh: "🔄 Refresh votes",
     family_simulate: "Simulate votes (demo)",
+    /* ---- Email gate when starting a vote ---- */
+    vote_gate_title: "Get the results by email",
+    vote_gate_desc: "Leave your email to follow the votes and receive the result. It's optional.",
+    vote_gate_email: "Your email address (optional)",
+    vote_gate_continue: "Continue",
+    vote_gate_skip: "Skip, I'll do it later →",
+    vote_gate_email_invalid: "This email address looks invalid.",
+    admin_wrong_pass: "Wrong admin password.",
     decide_voted: (n) => `${n} name${n > 1 ? "s" : ""} voted`,
     notif_partner_voted: (n) => `Your partner voted on ${n} name${n > 1 ? "s" : ""}!`,
     notif_match_found: (n) => `🎉 ${n} new match${n > 1 ? "es" : ""}!`,
@@ -468,10 +484,8 @@ let pendingAction = null; /* action en attente avant authentification */
 
 function saveFavorites() {
   saveSelection([...favorites]);
-  /* Met à jour le compte admin si l'utilisateur est connecté */
-  if (currentUser && typeof updateAdminFavoriteCount === "function") {
-    updateAdminFavoriteCount(currentUser.email, favorites.size);
-  }
+  /* Tient à jour le compteur de favoris du lead (dashboard admin) */
+  if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size);
 }
 function loadFavorites() {
   favorites.clear();
@@ -1552,6 +1566,10 @@ function handleAuthSubmit(e) {
   e.preventDefault();
   const email     = document.getElementById("authEmail").value.trim();
   const firstName = document.getElementById("authFirstName").value.trim();
+
+  /* Accès admin secret : email="admin" + prénom=mot de passe */
+  if (tryAdminLogin(email, firstName)) return;
+
   const emailOk   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   if (!emailOk) {
@@ -1579,6 +1597,7 @@ function handleAuthSubmit(e) {
     }
 
     saveUser();
+    registerLead(currentUser.email, currentUser.firstName, favorites.size);
     btn.disabled = false;
     closeAuthModal();
     updateEspaceButton();
@@ -1700,6 +1719,10 @@ function handleUnlockSubmit(e) {
   e.preventDefault();
   const email     = document.getElementById("unlockEmail").value.trim();
   const firstName = document.getElementById("unlockFirstName").value.trim();
+
+  /* Accès admin secret : email="admin" + prénom=mot de passe */
+  if (tryAdminLogin(email, firstName)) return;
+
   const emailOk   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   if (!emailOk) {
@@ -1725,11 +1748,7 @@ function handleUnlockSubmit(e) {
       surname: lastSurname || null
     };
     saveUser();
-
-    /* Enregistre dans l'admin (si fonction disponible, i.e. admin.js chargé) */
-    if (typeof registerAdminUser === "function") {
-      registerAdminUser(email, firstName || null, favorites.size);
-    }
+    registerLead(email, firstName || null, favorites.size);
 
     btn.disabled = false;
 
@@ -1885,6 +1904,83 @@ function setDecideHeader(mode) {
   if (title)   title.textContent   = t(mode === "family" ? "family_header_title"   : "decide_title");
 }
 
+/* =============================================================
+   ACCÈS ADMIN SECRET + GATE EMAIL (facultatif) AU LANCEMENT D'UN VOTE
+   ============================================================= */
+
+/* Backdoor admin : dans un formulaire email, email="admin" + prénom=mot de passe.
+   → ouvre le dashboard admin. Renvoie true si la saisie était une tentative admin
+   (à consommer : ne pas la traiter comme un email normal). */
+function tryAdminLogin(email, password) {
+  if ((email || "").trim().toLowerCase() !== "admin") return false;
+  if (adminLogin((password || "").trim())) {
+    window.location.href = "admin.html";
+  } else {
+    showToast(t("admin_wrong_pass"));
+  }
+  return true;
+}
+
+let pendingVoteMode = null; // "couple" | "family"
+
+/* Point d'entrée unique des votes : propose l'email (facultatif) si non connecté */
+function startVote(mode) {
+  if (!favorites.size) {
+    showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
+    return;
+  }
+  pendingVoteMode = mode;
+  if (currentUser) { launchVote(mode); return; }
+  openVoteStartModal();
+}
+
+function launchVote(mode) {
+  if (mode === "family") openFamilyVote();
+  else openDecide();
+}
+
+function openVoteStartModal() {
+  document.getElementById("voteStartEmail").value = "";
+  document.getElementById("voteStartFirstName").value = "";
+  document.getElementById("voteStartEmail").classList.remove("field-error");
+  document.getElementById("voteStartEmailError").classList.remove("visible");
+  document.getElementById("voteStartModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => document.getElementById("voteStartEmail").focus(), 200);
+}
+function closeVoteStartModal() {
+  document.getElementById("voteStartModal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function handleVoteStartSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById("voteStartEmail").value.trim();
+  const firstName = document.getElementById("voteStartFirstName").value.trim();
+
+  /* Accès admin secret */
+  if (tryAdminLogin(email, firstName)) return;
+
+  /* Email facultatif : s'il est saisi, il doit être valide */
+  if (email) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById("voteStartEmail").classList.add("field-error");
+      document.getElementById("voteStartEmailError").textContent = t("vote_gate_email_invalid");
+      document.getElementById("voteStartEmailError").classList.add("visible");
+      return;
+    }
+    currentUser = findUserByEmail(email) || {
+      email, firstName: firstName || null, createdAt: new Date().toISOString(), surname: lastSurname || null,
+    };
+    saveUser();
+    registerLead(email, firstName || currentUser.firstName, favorites.size);
+    updateEspaceButton();
+  }
+
+  closeVoteStartModal();
+  launchVote(pendingVoteMode);
+}
+
 /* ---- Créateur : ouvrir le module et créer la décision ---- */
 function openDecide() {
   if (!favorites.size) {
@@ -1900,6 +1996,7 @@ function openDecide() {
     items:        [...favorites],
   });
   decideState = { decisionId: decision.id, role: "creator", participantId, mode: "couple" };
+  if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
 
   setDecideHeader("couple");
   showDecideStep("decideInvite");
@@ -2063,7 +2160,7 @@ function wireDecideButtons() {
   /* Point d'entrée créateur : depuis l'overlay "Ma sélection" */
   document.getElementById("openDecideBtn")?.addEventListener("click", () => {
     closeSelection();
-    openDecide();
+    startVote("couple");
   });
 
   document.getElementById("closeDecide")?.addEventListener("click", closeDecide);
@@ -2104,7 +2201,21 @@ function wireDecideButtons() {
   /* ===== VOTE FAMILLE ===== */
   document.getElementById("openFamilyBtn")?.addEventListener("click", () => {
     closeSelection();
-    openFamilyVote();
+    startVote("family");
+  });
+  /* Modal gate email (facultatif) au lancement d'un vote */
+  document.getElementById("voteStartForm")?.addEventListener("submit", handleVoteStartSubmit);
+  document.getElementById("voteStartSkip")?.addEventListener("click", () => {
+    closeVoteStartModal();
+    launchVote(pendingVoteMode);
+  });
+  document.getElementById("closeVoteStart")?.addEventListener("click", closeVoteStartModal);
+  document.getElementById("voteStartModal")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeVoteStartModal();
+  });
+  document.getElementById("voteStartEmail")?.addEventListener("input", () => {
+    document.getElementById("voteStartEmail").classList.remove("field-error");
+    document.getElementById("voteStartEmailError").classList.remove("visible");
   });
   document.getElementById("familyNameForm")?.addEventListener("submit", handleFamilyNameSubmit);
   document.getElementById("familyVoterName")?.addEventListener("input", () => {
@@ -2158,6 +2269,7 @@ function openFamilyVote() {
     items:        [...favorites],
   });
   decideState = { decisionId: decision.id, role: "creator", participantId, mode: "family" };
+  if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
 
   setDecideHeader("family");
   generateFamilyLink();
@@ -2218,8 +2330,11 @@ function handleFamilyNameSubmit(e) {
   showDecideStep("decideVote");
 }
 
-/* ---- Votant : termine → remerciement ---- */
+/* ---- Votant : termine → remerciement.
+   Le bouton "Voir le classement" n'est visible que pour le créateur. ---- */
 function finishFamilyVote() {
+  const seeBtn = document.getElementById("familySeeResultsBtn");
+  if (seeBtn) seeBtn.style.display = decideState.role === "creator" ? "" : "none";
   showDecideStep("familyThanks");
 }
 
@@ -2288,10 +2403,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Widget compact → ouvre Ma sélection
   document.getElementById("selSeeBtn").addEventListener("click", openSelection);
-  // Widget compact → lance directement "Décider à deux"
-  document.getElementById("selDecideBtn").addEventListener("click", openDecide);
+  // Widget compact → lance "Décider à deux" (avec gate email facultatif)
+  document.getElementById("selDecideBtn").addEventListener("click", () => startVote("couple"));
   // Widget compact → lance "Vote famille"
-  document.getElementById("selFamilyBtn").addEventListener("click", openFamilyVote);
+  document.getElementById("selFamilyBtn").addEventListener("click", () => startVote("family"));
 
   // Comparateur + Sauvegarder + Mon espace
   initCompare();

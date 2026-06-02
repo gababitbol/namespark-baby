@@ -41,7 +41,19 @@ const KEYS = {
   history:         NS + "history",            // historique de générations
   comparisons:     NS + "comparisons",        // historique du comparateur
   notifications:   NS + "notifications",      // notifications (simulées pour l'instant)
+  leads:           NS + "leads",              // emails capturés (dashboard admin)
+  adminSession:    NS + "admin_session",      // session admin ouverte
 };
+
+/* =============================================================
+   CONFIG ADMIN
+   -------------------------------------------------------------
+   ⚠️  Mot de passe admin EN DUR (mode démo). À CHANGER ICI.
+   En production : auth serveur + hash + JWT (jamais côté client).
+   Accès : sur le site, formulaire email → taper "admin" comme email
+   et CE mot de passe comme prénom.
+   ============================================================= */
+const ADMIN_PASSWORD = "namespark-admin-2026";
 
 /* =============================================================================
    PERSISTANCE bas niveau — LE SEUL endroit qui touche localStorage.
@@ -323,6 +335,42 @@ function markNotificationRead(id) {
 }
 function clearNotifications()        { _remove(KEYS.notifications); }
 
+/* =============================================================
+   LEADS (emails capturés) + DASHBOARD ADMIN
+   Mode démo localStorage. À remplacer par une table `users` + auth
+   serveur (RLS Supabase). Voir docs/unification.md.
+   ============================================================= */
+
+/* Upsert d'un lead (email capturé). `bumpSession` = +1 session de vote créée. */
+function registerLead(email, firstName, favoritesCount = 0, bumpSession = false) {
+  if (!email || email.trim().toLowerCase() === "admin") return;
+  const all = _read(KEYS.leads, []);
+  const now = new Date().toISOString();
+  let u = all.find((x) => x.email === email);
+  if (!u) {
+    u = { email, firstName: firstName || null, createdAt: now, lastSeen: now, favorites: favoritesCount, sessions: 0 };
+    all.push(u);
+  } else {
+    if (firstName) u.firstName = firstName;
+    u.lastSeen = now;
+    u.favorites = Math.max(u.favorites || 0, favoritesCount || 0);
+  }
+  if (bumpSession) u.sessions = (u.sessions || 0) + 1;
+  _write(KEYS.leads, all);
+}
+function getLeads() { return _read(KEYS.leads, []); }
+
+/* Toutes les décisions (pour les stats du dashboard) */
+function getAllDecisions() { return Object.values(_allDecisions()); }
+
+/* ---- Auth admin (mot de passe fixe, mode démo) ---- */
+function adminLogin(password) {
+  if (password === ADMIN_PASSWORD) { _write(KEYS.adminSession, "1"); return true; }
+  return false;
+}
+function hasAdminSession()  { return _read(KEYS.adminSession, null) === "1"; }
+function clearAdminSession() { _remove(KEYS.adminSession); }
+
 /* =============================================================================
    EXPORT (Node / tests). En navigateur, tout est déjà global.
    ============================================================================= */
@@ -336,6 +384,7 @@ if (typeof module !== "undefined" && module.exports) {
     createDecision, getDecision, getCurrentDecisionId, setCurrentDecisionId,
     addParticipant, joinDecision, getMyParticipantId, saveVote, getVotes, computeMatches, computeRanking,
     addNotification, getNotifications, markNotificationRead, clearNotifications,
+    registerLead, getLeads, getAllDecisions, adminLogin, hasAdminSession, clearAdminSession,
     uid,
   };
 }
