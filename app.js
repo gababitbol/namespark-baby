@@ -2154,6 +2154,10 @@ async function handleVoteStartSubmit(e) {
       document.getElementById("voteStartEmailError").classList.add("visible");
       return;
     }
+    const btn = document.getElementById("voteStartSubmit");
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "…";
     try {
       const existing = await findUserByEmail(email);
       currentUser = existing || {
@@ -2164,6 +2168,9 @@ async function handleVoteStartSubmit(e) {
       currentUser = {
         email, firstName: firstName || null, createdAt: new Date().toISOString(), surname: lastSurname || null,
       };
+    } finally {
+      btn.disabled = false;
+      btn.textContent = origText;
     }
     saveUser();
     registerLead(email, firstName || currentUser.firstName, favorites.size);

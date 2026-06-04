@@ -230,21 +230,23 @@ async function createDecision({ creatorName = null, creatorEmail = null, surname
   setCurrentDecisionId(id);
   _setMyParticipant(id, pid);
 
-  /* Persistance Supabase — séquentiel : le participant référence la décision (FK) */
+  /* Persistance Supabase — fire-and-forget pour ne pas bloquer l'UI.
+     Le cache local (ci-dessus) est la source de vérité immédiate.
+     Supabase se synchronise en arrière-plan sans bloquer l'overlay. */
   if (_sb) {
     const creatorId = getUser()?.id || null;
-    const decRes = await _sb.from("decisions").insert({
+    _sb.from("decisions").insert({
       id, creator_id: creatorId, mode: decision.mode,
       surname: decision.surname, items: decision.items, created_at: now,
-    });
-    if (decRes.error) { console.warn("[NameSpark] createDecision:", decRes.error); }
-    else {
-      const partRes = await _sb.from("participants").insert({
+    }).then(({ error }) => {
+      if (error) { console.warn("[NameSpark] createDecision:", error); return; }
+      _sb.from("participants").insert({
         id: pid, decision_id: id, role: "creator",
         name: creatorName || null, email: creatorEmail || null, joined_at: now,
-      });
-      if (partRes.error) console.warn("[NameSpark] createParticipant:", partRes.error);
-    }
+      }).then(({ error: e2 }) => {
+        if (e2) console.warn("[NameSpark] createParticipant:", e2);
+      }).catch(console.warn);
+    }).catch(console.warn);
   }
 
   return { decision, participantId: pid };
