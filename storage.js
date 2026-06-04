@@ -132,27 +132,29 @@ function setUser(user) {
   }
 }
 
-/* Recherche cross-appareil : cache local d'abord, puis Supabase */
+/* Recherche cross-appareil : cache local d'abord, puis Supabase avec timeout 4s */
 async function findUserByEmail(email) {
   const local = getUser();
   if (local && local.email === email) return local;
 
   if (_sb) {
-    const { data, error } = await _sb
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .maybeSingle();
-    if (!error && data) {
-      const user = {
-        id:        data.id,
-        email:     data.email,
-        firstName: data.first_name,
-        surname:   data.surname,
-        createdAt: data.created_at,
-      };
-      _write(KEYS.user, user);
-      return user;
+    try {
+      const query = _sb.from("users").select("*").eq("email", email).maybeSingle();
+      const timeout = new Promise((resolve) => setTimeout(() => resolve({ data: null, error: "timeout" }), 4000));
+      const { data, error } = await Promise.race([query, timeout]);
+      if (!error && data) {
+        const user = {
+          id:        data.id,
+          email:     data.email,
+          firstName: data.first_name,
+          surname:   data.surname,
+          createdAt: data.created_at,
+        };
+        _write(KEYS.user, user);
+        return user;
+      }
+    } catch (_) {
+      /* Réseau indisponible ou timeout — fallback local */
     }
   }
   return null;
@@ -232,21 +234,26 @@ async function createDecision({ creatorName = null, creatorEmail = null, surname
 
   /* Persistance Supabase — fire-and-forget pour ne pas bloquer l'UI.
      Le cache local (ci-dessus) est la source de vérité immédiate.
-     Supabase se synchronise en arrière-plan sans bloquer l'overlay. */
+     Supabase se synchronise en arrière-plan sans bloquer l'overlay.
+     Enveloppé en try/catch pour éviter toute propagation d'erreur. */
   if (_sb) {
-    const creatorId = getUser()?.id || null;
-    _sb.from("decisions").insert({
-      id, creator_id: creatorId, mode: decision.mode,
-      surname: decision.surname, items: decision.items, created_at: now,
-    }).then(({ error }) => {
-      if (error) { console.warn("[NameSpark] createDecision:", error); return; }
-      _sb.from("participants").insert({
-        id: pid, decision_id: id, role: "creator",
-        name: creatorName || null, email: creatorEmail || null, joined_at: now,
-      }).then(({ error: e2 }) => {
-        if (e2) console.warn("[NameSpark] createParticipant:", e2);
+    try {
+      const creatorId = getUser()?.id || null;
+      _sb.from("decisions").insert({
+        id, creator_id: creatorId, mode: decision.mode,
+        surname: decision.surname, items: decision.items, created_at: now,
+      }).then(({ error }) => {
+        if (error) { console.warn("[NameSpark] createDecision:", error); return; }
+        _sb.from("participants").insert({
+          id: pid, decision_id: id, role: "creator",
+          name: creatorName || null, email: creatorEmail || null, joined_at: now,
+        }).then(({ error: e2 }) => {
+          if (e2) console.warn("[NameSpark] createParticipant:", e2);
+        }).catch(console.warn);
       }).catch(console.warn);
-    }).catch(console.warn);
+    } catch (e) {
+      console.warn("[NameSpark] createDecision (sync error):", e);
+    }
   }
 
   return { decision, participantId: pid };

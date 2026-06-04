@@ -2200,8 +2200,8 @@ async function openDecide() {
 
     setDecideHeader("couple_creator");
     showDecideStep("decideInvite");
-    document.getElementById("decideOverlay").classList.add("open");
-    document.body.style.overflow = "hidden";
+    const overlay = document.getElementById("decideOverlay");
+    if (overlay) { overlay.classList.add("open"); document.body.style.overflow = "hidden"; }
     generateInviteLink();
   } catch (err) {
     console.error("[NameSpark] openDecide:", err);
@@ -2216,16 +2216,26 @@ function closeDecide() {
 
 /* ---- Lien d'invitation : ?invite=<decisionId> ---- */
 function generateInviteLink() {
+  if (!decideState.decisionId) return;
   const baseUrl = window.location.href.split("?")[0].split("#")[0];
   const inviteUrl = `${baseUrl}?invite=${decideState.decisionId}&lang=${lang}`;
   const input = document.getElementById("inviteLinkInput");
+  if (!input) return; /* null-safe — ne jette plus d'exception */
   input.value = inviteUrl;
-  input.select();
+  try { input.select(); } catch (_) {} /* input.select() peut échouer sur iOS */
 }
 
 /* ---- Partager le lien d'invitation ---- */
 function copyInviteLink() {
-  const url = document.getElementById("inviteLinkInput").value;
+  const input = document.getElementById("inviteLinkInput");
+  let url = input?.value || "";
+  /* Si l'URL est vide (generateInviteLink a échoué), on la reconstruit */
+  if (!url && decideState.decisionId) {
+    const baseUrl = window.location.href.split("?")[0].split("#")[0];
+    url = `${baseUrl}?invite=${decideState.decisionId}&lang=${lang}`;
+    if (input) input.value = url;
+  }
+  if (!url) { showToast(t("err_generic")); return; }
   shareLink(url, t("share_invite_text"));
 }
 
@@ -2579,8 +2589,8 @@ async function openFamilyVote() {
     generateFamilyLink();
     renderFamilyResults();
     showDecideStep("familyResults");
-    document.getElementById("decideOverlay").classList.add("open");
-    document.body.style.overflow = "hidden";
+    const fOverlay = document.getElementById("decideOverlay");
+    if (fOverlay) { fOverlay.classList.add("open"); document.body.style.overflow = "hidden"; }
   } catch (err) {
     console.error("[NameSpark] openFamilyVote:", err);
     showToast(t("err_session_create"));
