@@ -107,7 +107,9 @@ function saveSurname(s)   { _write(KEYS.surname, s || ""); }
 function getUser()   { return _read(KEYS.user, null); }
 function clearUser() { _remove(KEYS.user); }
 
-/* Écriture locale immédiate + sync Supabase en arrière-plan */
+/* Écriture locale immédiate + sync Supabase en arrière-plan.
+   Utilise async IIFE car .catch() n'existe PAS directement sur les
+   query builders Supabase JS v2 récents (depuis postgrest-js 1.9+). */
 function setUser(user) {
   _write(KEYS.user, user);
   if (_sb && user?.email) {
@@ -119,16 +121,17 @@ function setUser(user) {
     };
     if (user.id) payload.id = user.id;
 
-    _sb.from("users")
-      .upsert(payload, { onConflict: "email" })
-      .select("id")
-      .then(({ data, error }) => {
+    (async () => {
+      try {
+        const { data, error } = await _sb
+          .from("users")
+          .upsert(payload, { onConflict: "email" })
+          .select("id");
         if (!error && data?.[0]?.id && !user.id) {
-          /* Stocke l'UUID Supabase pour les prochains appels */
           _write(KEYS.user, { ...user, id: data[0].id });
         }
-      })
-      .catch(console.warn);
+      } catch (e) { console.warn("[NameSpark] setUser:", e); }
+    })();
   }
 }
 
@@ -141,8 +144,9 @@ async function findUserByEmail(email) {
 
   if (_sb) {
     try {
-      const queryPromise = _sb.from("users").select("*").eq("email", email).maybeSingle();
-      queryPromise.catch(() => {}); /* évite unhandled rejection si le race se termine avant */
+      /* Pas de .catch() sur le query builder — Supabase JS v2 récent ne l'a plus.
+         On enveloppe dans Promise.resolve() pour avoir un vrai Promise. */
+      const queryPromise = Promise.resolve(_sb.from("users").select("*").eq("email", email).maybeSingle());
       const timeout = new Promise((resolve) => setTimeout(() => resolve({ data: null, error: "timeout" }), 4000));
       const { data, error } = await Promise.race([queryPromise, timeout]);
       if (!error && data) {
@@ -235,28 +239,27 @@ async function createDecision({ creatorName = null, creatorEmail = null, surname
   setCurrentDecisionId(id);
   _setMyParticipant(id, pid);
 
-  /* Persistance Supabase — fire-and-forget pour ne pas bloquer l'UI.
-     Le cache local (ci-dessus) est la source de vérité immédiate.
-     Supabase se synchronise en arrière-plan sans bloquer l'overlay.
-     Enveloppé en try/catch pour éviter toute propagation d'erreur. */
+  /* Persistance Supabase — async IIFE fire-and-forget.
+     Pas de .catch() sur les query builders (Supabase JS v2 récent ne l'a plus).
+     On utilise await + try/catch à l'intérieur d'une IIFE async. */
   if (_sb) {
-    try {
-      const creatorId = getUser()?.id || null;
-      _sb.from("decisions").insert({
-        id, creator_id: creatorId, mode: decision.mode,
-        surname: decision.surname, items: decision.items, created_at: now,
-      }).then(({ error }) => {
-        if (error) { console.warn("[NameSpark] createDecision:", error); return; }
-        _sb.from("participants").insert({
+    (async () => {
+      try {
+        const creatorId = getUser()?.id || null;
+        const { error: e1 } = await _sb.from("decisions").insert({
+          id, creator_id: creatorId, mode: decision.mode,
+          surname: decision.surname, items: decision.items, created_at: now,
+        });
+        if (e1) { console.warn("[NameSpark] createDecision:", e1); return; }
+        const { error: e2 } = await _sb.from("participants").insert({
           id: pid, decision_id: id, role: "creator",
           name: creatorName || null, email: creatorEmail || null, joined_at: now,
-        }).then(({ error: e2 }) => {
-          if (e2) console.warn("[NameSpark] createParticipant:", e2);
-        }).catch(console.warn);
-      }).catch(console.warn);
-    } catch (e) {
-      console.warn("[NameSpark] createDecision (sync error):", e);
-    }
+        });
+        if (e2) console.warn("[NameSpark] createParticipant:", e2);
+      } catch (e) {
+        console.warn("[NameSpark] createDecision (async):", e);
+      }
+    })();
   }
 
   return { decision, participantId: pid };
@@ -446,15 +449,19 @@ function registerLead(email, firstName, favoritesCount = 0, bumpSession = false)
   if (bumpSession) u.sessions = (u.sessions || 0) + 1;
   _write(KEYS.leads, all);
 
-  /* Supabase fire-and-forget */
+  /* Supabase fire-and-forget — async IIFE car .catch() absent sur Supabase JS v2 récent */
   if (_sb) {
-    _sb.from("leads").upsert({
-      email:      u.email,
-      first_name: u.firstName,
-      favorites:  u.favorites,
-      sessions:   u.sessions,
-      last_seen:  now,
-    }, { onConflict: "email" }).catch(console.warn);
+    (async () => {
+      try {
+        await _sb.from("leads").upsert({
+          email:      u.email,
+          first_name: u.firstName,
+          favorites:  u.favorites,
+          sessions:   u.sessions,
+          last_seen:  now,
+        }, { onConflict: "email" });
+      } catch (e) { console.warn("[NameSpark] registerLead:", e); }
+    })();
   }
 }
 
