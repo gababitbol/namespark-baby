@@ -132,16 +132,19 @@ function setUser(user) {
   }
 }
 
-/* Recherche cross-appareil : cache local d'abord, puis Supabase avec timeout 4s */
+/* Recherche cross-appareil : cache local d'abord, puis Supabase avec timeout 4s.
+   Important : queryPromise.catch() évite un UnhandledPromiseRejection si le réseau
+   répond APRÈS la fin du race (ce qui peut corrompre l'état dans certains navigateurs). */
 async function findUserByEmail(email) {
   const local = getUser();
   if (local && local.email === email) return local;
 
   if (_sb) {
     try {
-      const query = _sb.from("users").select("*").eq("email", email).maybeSingle();
+      const queryPromise = _sb.from("users").select("*").eq("email", email).maybeSingle();
+      queryPromise.catch(() => {}); /* évite unhandled rejection si le race se termine avant */
       const timeout = new Promise((resolve) => setTimeout(() => resolve({ data: null, error: "timeout" }), 4000));
-      const { data, error } = await Promise.race([query, timeout]);
+      const { data, error } = await Promise.race([queryPromise, timeout]);
       if (!error && data) {
         const user = {
           id:        data.id,

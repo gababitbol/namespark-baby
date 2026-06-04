@@ -2105,6 +2105,7 @@ let _voteInProgress = false;  // garde contre le double-clic pendant Supabase
 
 /* Point d'entrée unique des votes : propose l'email (facultatif) si non connecté */
 async function startVote(mode) {
+  console.log("[NS:startVote] mode:", mode, "favs:", favorites.size, "user:", !!currentUser, "inProgress:", _voteInProgress);
   if (_voteInProgress) return;          // double-clic ou appel concurrent
   if (!favorites.size) {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
@@ -2114,7 +2115,12 @@ async function startVote(mode) {
   try {
     window.plausible?.("Vote lancé", { props: { mode } });
     pendingVoteMode = mode;
-    if (currentUser) { await launchVote(mode); return; }
+    if (currentUser) {
+      console.log("[NS:startVote] user déjà connecté → launchVote direct");
+      await launchVote(mode);
+      return;
+    }
+    console.log("[NS:startVote] ouverture modal email");
     openVoteStartModal();
   } finally {
     _voteInProgress = false;
@@ -2144,6 +2150,7 @@ async function handleVoteStartSubmit(e) {
   e.preventDefault();
   const email     = document.getElementById("voteStartEmail").value.trim();
   const firstName = document.getElementById("voteStartFirstName").value.trim();
+  console.log("[NS:voteSubmit] email:", !!email, "firstName:", !!firstName, "pendingMode:", pendingVoteMode);
 
   if (tryAdminLogin(email, firstName)) return;
 
@@ -2177,17 +2184,20 @@ async function handleVoteStartSubmit(e) {
     updateEspaceButton();
   }
 
+  console.log("[NS:voteSubmit] → closeModal + launchVote:", pendingVoteMode);
   closeVoteStartModal();
   await launchVote(pendingVoteMode);
 }
 
 /* ---- Créateur : ouvrir le module et créer la décision ---- */
 async function openDecide() {
+  console.log("[NS:openDecide] démarrage — favs:", favorites.size, "user:", !!currentUser);
   if (!favorites.size) {
     showToast(lang === "fr" ? "Ajoutez des favoris d'abord" : "Add favourites first");
     return;
   }
   try {
+    console.log("[NS:openDecide] createDecision...");
     const { decision, participantId } = await createDecision({
       creatorName:  currentUser?.firstName || null,
       creatorEmail: currentUser?.email || null,
@@ -2195,22 +2205,26 @@ async function openDecide() {
       mode:         "couple",
       items:        [...favorites],
     });
+    console.log("[NS:openDecide] décision créée:", decision.id);
     decideState = { decisionId: decision.id, role: "creator", participantId, mode: "couple" };
     if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
 
     setDecideHeader("couple_creator");
     showDecideStep("decideInvite");
     const overlay = document.getElementById("decideOverlay");
+    console.log("[NS:openDecide] overlay trouvé:", !!overlay);
     if (overlay) { overlay.classList.add("open"); document.body.style.overflow = "hidden"; }
     generateInviteLink();
+    console.log("[NS:openDecide] ✅ overlay ouvert");
   } catch (err) {
-    console.error("[NameSpark] openDecide:", err);
-    showToast(t("err_session_create"));
+    console.error("[NS:openDecide] ❌ ERREUR:", err?.message || err, err);
+    /* Affiche le détail de l'erreur pour le debug */
+    showToast(`${t("err_session_create")} [${err?.message || "unknown"}]`);
   }
 }
 
 function closeDecide() {
-  document.getElementById("decideOverlay").classList.remove("open");
+  document.getElementById("decideOverlay")?.classList.remove("open");
   document.body.style.overflow = "";
 }
 
