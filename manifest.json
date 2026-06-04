@@ -1,0 +1,25 @@
+{
+  "name": "NameSpark Baby",
+  "short_name": "NameSpark",
+  "description": "Choisissez le prénom de votre bébé, ensemble.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf9f6",
+  "theme_color": "#c9a27a",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["lifestyle", "social"],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png"
+    }
+  ]
+}

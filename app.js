@@ -100,6 +100,8 @@ const I18N = {
     fav_share: "🔗 Partager",
     fav_loaded: "Sélection partagée chargée !",
     share_btn:             "📤 Partager",
+    copy_link_btn:         "📋 Copier",
+    copy_link_done:        "✓ Lien copié !",
     share_invite_text:     "Mon partenaire m'invite à voter sur des prénoms de bébé ✨",
     share_family_text:     "Votez pour le prénom de notre bébé ! Dites-nous votre préféré 👶",
     share_selection_text:  "Voici mes prénoms préférés pour notre bébé ❤️",
@@ -332,6 +334,8 @@ const I18N = {
     fav_share: "🔗 Share",
     fav_loaded: "Shared selection loaded!",
     share_btn:             "📤 Share",
+    copy_link_btn:         "📋 Copy",
+    copy_link_done:        "✓ Link copied!",
     share_invite_text:     "My partner invited me to vote on baby names ✨",
     share_family_text:     "Vote for our baby's name! Tell us your favourite 👶",
     share_selection_text:  "Here are my favourite baby names ❤️",
@@ -2239,18 +2243,30 @@ function generateInviteLink() {
   try { input.select(); } catch (_) {} /* input.select() peut échouer sur iOS */
 }
 
-/* ---- Partager le lien d'invitation ---- */
+/* ---- Partager le lien d'invitation (feuille native) ---- */
 function copyInviteLink() {
+  const url = _getOrBuildInviteUrl();
+  if (!url) { showToast(t("err_generic")); return; }
+  shareLink(url, t("share_invite_text"));
+}
+
+/* ---- Copier le lien d'invitation directement ---- */
+async function copyInviteLinkOnly() {
+  const url = _getOrBuildInviteUrl();
+  if (!url) { showToast(t("err_generic")); return; }
+  await _copyToClipboard(url);
+}
+
+/* ---- Helper : récupère ou reconstruit l'URL d'invitation couple ---- */
+function _getOrBuildInviteUrl() {
   const input = document.getElementById("inviteLinkInput");
   let url = input?.value || "";
-  /* Si l'URL est vide (generateInviteLink a échoué), on la reconstruit */
   if (!url && decideState.decisionId) {
     const baseUrl = window.location.href.split("?")[0].split("#")[0];
     url = `${baseUrl}?invite=${decideState.decisionId}&lang=${lang}`;
     if (input) input.value = url;
   }
-  if (!url) { showToast(t("err_generic")); return; }
-  shareLink(url, t("share_invite_text"));
+  return url;
 }
 
 /* ---- Partenaire : ouvrir via ?invite=<decisionId> ---- */
@@ -2473,6 +2489,7 @@ function wireDecideButtons() {
 
   document.getElementById("closeDecide")?.addEventListener("click", closeDecide);
   document.getElementById("copyInviteLinkBtn")?.addEventListener("click", copyInviteLink);
+  document.getElementById("copyInviteLinkOnlyBtn")?.addEventListener("click", copyInviteLinkOnly);
 
   /* Créateur : passe à l'écran d'attente */
   document.getElementById("continueAfterInviteBtn")?.addEventListener("click", () => {
@@ -2542,6 +2559,7 @@ function wireDecideButtons() {
     showDecideStep("familyResults");
   });
   document.getElementById("copyFamilyLinkBtn")?.addEventListener("click", copyFamilyLink);
+  document.getElementById("copyFamilyLinkOnlyBtn")?.addEventListener("click", copyFamilyLinkOnly);
   document.getElementById("refreshFamilyBtn")?.addEventListener("click", async (e) => {
     await _withBtnLoading(e.currentTarget, async () => {
       await getDecision(decideState.decisionId);
@@ -2618,10 +2636,30 @@ function generateFamilyLink() {
   const input = document.getElementById("familyLinkInput");
   if (input) input.value = url;
 }
-/* ---- Partager le lien famille ---- */
+/* ---- Partager le lien famille (feuille native) ---- */
 function copyFamilyLink() {
-  const url = document.getElementById("familyLinkInput").value;
+  const url = _getOrBuildFamilyUrl();
+  if (!url) { showToast(t("err_generic")); return; }
   shareLink(url, t("share_family_text"));
+}
+
+/* ---- Copier le lien famille directement ---- */
+async function copyFamilyLinkOnly() {
+  const url = _getOrBuildFamilyUrl();
+  if (!url) { showToast(t("err_generic")); return; }
+  await _copyToClipboard(url);
+}
+
+/* ---- Helper : récupère ou reconstruit l'URL famille ---- */
+function _getOrBuildFamilyUrl() {
+  const input = document.getElementById("familyLinkInput");
+  let url = input?.value || "";
+  if (!url && decideState.decisionId) {
+    const baseUrl = window.location.href.split("?")[0].split("#")[0];
+    url = `${baseUrl}?familyVote=${decideState.decisionId}&lang=${lang}`;
+    if (input) input.value = url;
+  }
+  return url;
 }
 
 /* ---- Votant : ouvre via ?familyVote=<decisionId> ---- */
