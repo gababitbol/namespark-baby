@@ -701,7 +701,13 @@ function readFilters() {
    quand le backend Vercel sera actif (cf. api/generate.js).
    ============================================================= */
 function generateDemo(f, limit = 8) {
-  const scored = NAMES.map((n) => {
+  /* Deduplicate NAMES by name (data.js may contain duplicates) */
+  const _seen = new Set();
+  const scored = NAMES.filter(n => {
+    if (_seen.has(n.name)) return false;
+    _seen.add(n.name);
+    return true;
+  }).map((n) => {
     let score = 0;
     let hardFail = false;
 
@@ -749,7 +755,9 @@ function shuffleByScore(arr) {
 function getSimilarDemo(name, limit = 6) {
   const ref = NAMES.find((n) => n.name === name);
   if (!ref) return [];
+  const _seen2 = new Set([ref.name]);
   return NAMES
+    .filter((n) => { if (_seen2.has(n.name)) return false; _seen2.add(n.name); return true; })
     .filter((n) => n.name !== ref.name)
     .map((n) => {
       let score = 0;
@@ -1496,6 +1504,16 @@ async function handleSaveListeSubmit(e) {
       body: JSON.stringify({ email, firstName, names: [...favorites], lang }),
     });
   } catch (_) { /* silencieux — la liste est déjà sauvegardée localement */ }
+
+  /* Abonnement newsletter si checkbox cochée */
+  const newsletterChecked = document.getElementById("saveListeNewsletter")?.checked;
+  if (newsletterChecked) {
+    fetch("/api/subscribe-newsletter", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, firstName, lang }),
+    }).catch(() => {});
+  }
 
   document.getElementById("saveListeForm").style.display    = "none";
   document.getElementById("saveListeSuccess").style.display = "";
