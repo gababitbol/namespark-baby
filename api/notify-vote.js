@@ -16,6 +16,132 @@ const ALLOWED_ORIGINS = [
   "https://www.namespark.baby",
 ];
 
+function buildVoteEmailHtml({ voterName, greeting, resultsUrl, yes, maybe, no }) {
+  const yesHtml   = yes   === "—" ? `<span style="color:#9ca3af;font-style:italic">Aucun prénom aimé</span>` : yes;
+  const maybeHtml = maybe === "—" ? `<span style="color:#9ca3af;font-style:italic">Aucun</span>` : maybe;
+  const noHtml    = no    === "—" ? `<span style="color:#9ca3af;font-style:italic">Aucun prénom refusé</span>` : no;
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Nouveau vote — NameSpark Baby</title>
+</head>
+<body style="margin:0;padding:0;background:#fbf9f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1f1b16;-webkit-font-smoothing:antialiased;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#fbf9f6;padding:48px 16px;">
+    <tr><td align="center">
+
+      <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 48px -12px rgba(58,44,30,0.18);">
+
+        <!-- ══════ HEADER / LOGO ══════ -->
+        <tr>
+          <td style="background:#c9a27a;padding:44px 40px 36px;text-align:center;">
+            <!-- Logo mark -->
+            <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 18px;">
+              <tr>
+                <td width="60" height="60" style="width:60px;height:60px;background:rgba(255,255,255,0.2);border-radius:30px;text-align:center;vertical-align:middle;">
+                  <span style="font-size:30px;line-height:60px;color:#fff;display:block;">✦</span>
+                </td>
+              </tr>
+            </table>
+            <!-- Brand name -->
+            <div style="font-size:10px;font-weight:800;letter-spacing:.22em;color:rgba(255,255,255,0.72);text-transform:uppercase;margin-bottom:5px;">NameSpark</div>
+            <div style="font-size:30px;font-weight:700;color:#fff;font-family:Georgia,'Times New Roman',serif;letter-spacing:.02em;line-height:1.1;">Baby</div>
+          </td>
+        </tr>
+
+        <!-- ══════ INTRO ══════ -->
+        <tr>
+          <td style="padding:40px 40px 8px;">
+            <p style="margin:0 0 18px;font-size:16px;line-height:1.7;color:#1f1b16;">${greeting}</p>
+            <p style="margin:0 0 36px;font-size:16px;line-height:1.7;color:#1f1b16;">
+              <strong style="color:#a9805a;">${voterName}</strong> vient de terminer son vote sur votre sélection de prénoms. Voici ce qu'il·elle a choisi :
+            </p>
+          </td>
+        </tr>
+
+        <!-- ══════ RÉSULTATS DU VOTE ══════ -->
+        <tr>
+          <td style="padding:0 40px 36px;">
+
+            <!-- ❤️ Aimés -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:10px;border-radius:14px;overflow:hidden;border:1px solid #bbf7d0;">
+              <tr>
+                <td style="background:#f0fdf4;padding:18px 20px;">
+                  <table cellpadding="0" cellspacing="0" role="presentation">
+                    <tr>
+                      <td style="font-size:20px;vertical-align:middle;padding-right:10px;">❤️</td>
+                      <td style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#15803d;vertical-align:middle;">Prénoms aimés</td>
+                    </tr>
+                  </table>
+                  <p style="margin:10px 0 0;font-size:15px;color:#1f1b16;line-height:1.65;">${yesHtml}</p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- 🤔 Peut-être -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:10px;border-radius:14px;overflow:hidden;border:1px solid #fde68a;">
+              <tr>
+                <td style="background:#fffbeb;padding:18px 20px;">
+                  <table cellpadding="0" cellspacing="0" role="presentation">
+                    <tr>
+                      <td style="font-size:20px;vertical-align:middle;padding-right:10px;">🤔</td>
+                      <td style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#b45309;vertical-align:middle;">Peut-être</td>
+                    </tr>
+                  </table>
+                  <p style="margin:10px 0 0;font-size:15px;color:#1f1b16;line-height:1.65;">${maybeHtml}</p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- ✕ Refusés -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-radius:14px;overflow:hidden;border:1px solid #ece4da;">
+              <tr>
+                <td style="background:#faf9f6;padding:18px 20px;">
+                  <table cellpadding="0" cellspacing="0" role="presentation">
+                    <tr>
+                      <td style="font-size:20px;vertical-align:middle;padding-right:10px;">❌</td>
+                      <td style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#6b6259;vertical-align:middle;">Refusés</td>
+                    </tr>
+                  </table>
+                  <p style="margin:10px 0 0;font-size:15px;color:#6b6259;line-height:1.65;">${noHtml}</p>
+                </td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+
+        <!-- ══════ CTA ══════ -->
+        <tr>
+          <td style="padding:0 40px 44px;text-align:center;">
+            <a href="${resultsUrl}"
+               style="display:inline-block;background:#c9a27a;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:100px;letter-spacing:.02em;box-shadow:0 4px 16px -4px rgba(169,128,90,0.45);">
+              Voir les résultats complets →
+            </a>
+          </td>
+        </tr>
+
+        <!-- ══════ FOOTER ══════ -->
+        <tr>
+          <td style="padding:20px 40px 28px;text-align:center;border-top:1px solid #ece4da;">
+            <p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#c9a27a;">NameSpark Baby</p>
+            <p style="margin:0;font-size:11px;color:#b0a89e;line-height:1.6;">
+              Vous recevez cet email car vous avez créé une session de vote.<br>
+              <a href="https://namespark.baby" style="color:#c9a27a;text-decoration:none;">namespark.baby</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 export default async function handler(req, res) {
   /* CORS */
   const origin = req.headers.origin || "";
@@ -67,7 +193,6 @@ export default async function handler(req, res) {
   }
 
   if (!creatorEmail) {
-    /* Pas d'email enregistré — on log et on répond OK pour ne pas bloquer l'UX */
     console.warn("[notify-vote] No creator email for decision:", decisionId);
     return res.status(200).json({ sent: false, reason: "no_creator_email" });
   }
@@ -79,8 +204,6 @@ export default async function handler(req, res) {
   const maybe = (votes.maybe || []).join(", ") || "—";
   const no    = (votes.no    || []).join(", ") || "—";
 
-  /* MODE LOG : si RESEND_API_KEY absent, log les détails et renvoie OK.
-     Utile pour tester le flux complet avant de configurer Resend. */
   if (!resendKey) {
     console.log("[notify-vote] DRY RUN — RESEND_API_KEY non configurée.");
     console.log("[notify-vote] Email qui serait envoyé :", {
@@ -98,86 +221,7 @@ export default async function handler(req, res) {
   const resultsUrl = `https://namespark.baby/?decision=${encodeURIComponent(decisionId)}`;
   const greeting   = creatorName ? `Bonjour ${creatorName},` : "Bonjour,";
 
-  const html = `
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nouveau vote</title>
-</head>
-<body style="margin:0;padding:0;background:#faf9f7;font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#2c2c2c;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f7;padding:40px 0;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
-
-        <!-- Header -->
-        <tr>
-          <td style="background:#c8a882;padding:28px 40px;text-align:center;">
-            <p style="margin:0;font-size:13px;font-weight:700;letter-spacing:.12em;color:#fff;text-transform:uppercase;">NameSpark Baby</p>
-            <h1 style="margin:8px 0 0;font-size:22px;font-weight:700;color:#fff;">
-              ${voterName} a voté 🎉
-            </h1>
-          </td>
-        </tr>
-
-        <!-- Body -->
-        <tr>
-          <td style="padding:36px 40px;">
-            <p style="margin:0 0 24px;font-size:16px;line-height:1.6;">${greeting}</p>
-            <p style="margin:0 0 28px;font-size:16px;line-height:1.6;">
-              <strong>${voterName}</strong> vient de terminer son vote sur votre sélection de prénoms.
-            </p>
-
-            <!-- Votes -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-              <tr>
-                <td style="padding:14px 16px;background:#fdf2f2;border-radius:10px 10px 0 0;border-bottom:1px solid #f5e8e8;">
-                  <span style="font-size:18px;">❤️</span>
-                  <span style="font-size:14px;font-weight:600;color:#c0392b;margin-left:8px;">Aimés</span>
-                  <p style="margin:6px 0 0;font-size:15px;color:#2c2c2c;">${yes}</p>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:14px 16px;background:#fffbf0;border-bottom:1px solid #f5f0e0;">
-                  <span style="font-size:18px;">🤔</span>
-                  <span style="font-size:14px;font-weight:600;color:#d68910;margin-left:8px;">Peut-être</span>
-                  <p style="margin:6px 0 0;font-size:15px;color:#2c2c2c;">${maybe}</p>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:14px 16px;background:#f8f9fa;border-radius:0 0 10px 10px;">
-                  <span style="font-size:18px;">❌</span>
-                  <span style="font-size:14px;font-weight:600;color:#7f8c8d;margin-left:8px;">Refusés</span>
-                  <p style="margin:6px 0 0;font-size:15px;color:#2c2c2c;">${no}</p>
-                </td>
-              </tr>
-            </table>
-
-            <!-- CTA -->
-            <div style="text-align:center;">
-              <a href="${resultsUrl}"
-                 style="display:inline-block;background:#c8a882;color:#fff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:100px;">
-                Voir les résultats →
-              </a>
-            </div>
-          </td>
-        </tr>
-
-        <!-- Footer -->
-        <tr>
-          <td style="padding:20px 40px;text-align:center;border-top:1px solid #f0ece6;">
-            <p style="margin:0;font-size:12px;color:#aaa;">
-              NameSpark Baby · Vous recevez cet email car vous avez créé une session de vote.
-            </p>
-          </td>
-        </tr>
-
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+  const html = buildVoteEmailHtml({ voterName, greeting, resultsUrl, yes, maybe, no });
 
   /* ── 3. Envoyer via Resend ── */
   try {
@@ -190,7 +234,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: "NameSpark Baby <votes@namespark.baby>",
         to: [creatorEmail],
-        subject: `${voterName} a voté sur votre sélection de prénoms`,
+        subject: `${voterName} a voté sur votre sélection de prénoms ✦`,
         html,
       }),
     });
@@ -202,7 +246,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Email send failed", detail: result });
     }
 
-    /* ── 4. Log console (à remplacer par table Supabase quand créée) ── */
     console.log("[notify-vote] Email envoyé :", {
       to: creatorEmail, voter: voterName, resend_id: result.id,
     });

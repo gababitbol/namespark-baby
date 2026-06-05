@@ -464,17 +464,23 @@ function clearNotifications()      { _remove(KEYS.notifications); }
 
 /* ── 14. LEADS + ADMIN ────────────────────────────────────────────────────── */
 
-/* Upsert d'un lead — sync local + Supabase fire-and-forget */
+/* Upsert d'un lead — sync local + Supabase fire-and-forget.
+   Le nom de famille est lu depuis le cache local (getSurname) si non passé
+   explicitement, car il est déjà enregistré lors de la génération de prénoms.
+   Migration Supabase requise : ALTER TABLE leads ADD COLUMN IF NOT EXISTS surname TEXT; */
 function registerLead(email, firstName, favoritesCount = 0, bumpSession = false) {
   if (!email || email.trim().toLowerCase() === "admin") return;
   const all = _read(KEYS.leads, []);
   const now = new Date().toISOString();
+  /* Récupère le nom de famille depuis le cache local s'il existe */
+  const cachedSurname = getSurname() || null;
   let u = all.find((x) => x.email === email);
   if (!u) {
-    u = { email, firstName: firstName || null, createdAt: now, lastSeen: now, favorites: favoritesCount, sessions: 0 };
+    u = { email, firstName: firstName || null, surname: cachedSurname, createdAt: now, lastSeen: now, favorites: favoritesCount, sessions: 0 };
     all.push(u);
   } else {
     if (firstName) u.firstName = firstName;
+    if (cachedSurname && !u.surname) u.surname = cachedSurname;
     u.lastSeen = now;
     u.favorites = Math.max(u.favorites || 0, favoritesCount || 0);
   }
@@ -485,13 +491,15 @@ function registerLead(email, firstName, favoritesCount = 0, bumpSession = false)
   if (_sb) {
     (async () => {
       try {
-        await _sb.from("leads").upsert({
+        const payload = {
           email:      u.email,
           first_name: u.firstName,
           favorites:  u.favorites,
           sessions:   u.sessions,
           last_seen:  now,
-        }, { onConflict: "email" });
+        };
+        if (u.surname) payload.surname = u.surname;
+        await _sb.from("leads").upsert(payload, { onConflict: "email" });
       } catch (e) { console.warn("[NameSpark] registerLead:", e); }
     })();
   }
@@ -506,8 +514,9 @@ async function fetchAllLeadsAdmin() {
   const { data, error } = await _sb.from("leads").select("*").order("last_seen", { ascending: false });
   if (error || !data) { console.warn("[Admin] fetchAllLeadsAdmin:", error); return getLeads(); }
   return data.map((r) => ({
-    email: r.email, firstName: r.first_name, createdAt: r.created_at,
-    lastSeen: r.last_seen, favorites: r.favorites || 0, sessions: r.sessions || 0,
+    email: r.email, firstName: r.first_name, surname: r.surname || null,
+    createdAt: r.created_at, lastSeen: r.last_seen,
+    favorites: r.favorites || 0, sessions: r.sessions || 0,
   }));
 }
 

@@ -6,6 +6,103 @@
    Fait    : envoie un email récapitulatif via Resend
    ============================================================= */
 
+function buildSaveListHtml({ lang, greeting, title, subtitle, names, cta, footer }) {
+  const nameRows = names.map((n) => `
+    <tr>
+      <td style="padding:13px 20px;border-bottom:1px solid #f0ece8;">
+        <table cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td style="font-size:16px;padding-right:10px;vertical-align:middle;">❤️</td>
+            <td style="font-size:15px;font-weight:600;color:#1f1b16;vertical-align:middle;">${n}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>`).join("");
+
+  return `<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>${title} — NameSpark Baby</title>
+</head>
+<body style="margin:0;padding:0;background:#fbf9f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1f1b16;-webkit-font-smoothing:antialiased;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#fbf9f6;padding:48px 16px;">
+    <tr><td align="center">
+
+      <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 48px -12px rgba(58,44,30,0.18);">
+
+        <!-- ══════ HEADER / LOGO ══════ -->
+        <tr>
+          <td style="background:#c9a27a;padding:44px 40px 36px;text-align:center;">
+            <!-- Logo mark -->
+            <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 18px;">
+              <tr>
+                <td width="60" height="60" style="width:60px;height:60px;background:rgba(255,255,255,0.2);border-radius:30px;text-align:center;vertical-align:middle;">
+                  <span style="font-size:30px;line-height:60px;color:#fff;display:block;">✦</span>
+                </td>
+              </tr>
+            </table>
+            <!-- Brand name -->
+            <div style="font-size:10px;font-weight:800;letter-spacing:.22em;color:rgba(255,255,255,0.72);text-transform:uppercase;margin-bottom:5px;">NameSpark</div>
+            <div style="font-size:30px;font-weight:700;color:#fff;font-family:Georgia,'Times New Roman',serif;letter-spacing:.02em;line-height:1.1;">Baby</div>
+          </td>
+        </tr>
+
+        <!-- ══════ TITRE ══════ -->
+        <tr>
+          <td style="padding:40px 40px 8px;text-align:center;">
+            <h1 style="margin:0 0 10px;font-size:24px;font-weight:800;color:#1f1b16;letter-spacing:-.02em;">${title} ✦</h1>
+            <p style="margin:0;font-size:14px;color:#6b6259;line-height:1.6;">${greeting}</p>
+          </td>
+        </tr>
+
+        <!-- ══════ SOUS-TITRE ══════ -->
+        <tr>
+          <td style="padding:16px 40px 28px;text-align:center;">
+            <p style="margin:0;font-size:15px;color:#6b6259;line-height:1.6;">${subtitle}</p>
+          </td>
+        </tr>
+
+        <!-- ══════ LISTE DES PRÉNOMS ══════ -->
+        <tr>
+          <td style="padding:0 40px 36px;">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border:1px solid #ece4da;border-radius:14px;overflow:hidden;">
+              ${nameRows}
+              <!-- Dernière rangée sans bordure en bas : supprimée via CSS inline -->
+            </table>
+          </td>
+        </tr>
+
+        <!-- ══════ CTA ══════ -->
+        <tr>
+          <td style="padding:0 40px 44px;text-align:center;">
+            <a href="https://namespark.baby"
+               style="display:inline-block;background:#c9a27a;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:100px;letter-spacing:.02em;box-shadow:0 4px 16px -4px rgba(169,128,90,0.45);">
+              ${cta} →
+            </a>
+          </td>
+        </tr>
+
+        <!-- ══════ FOOTER ══════ -->
+        <tr>
+          <td style="padding:20px 40px 28px;text-align:center;border-top:1px solid #ece4da;">
+            <p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#c9a27a;">NameSpark Baby</p>
+            <p style="margin:0;font-size:11px;color:#b0a89e;line-height:1.6;">
+              ${footer}<br>
+              <a href="https://namespark.baby" style="color:#c9a27a;text-decoration:none;">namespark.baby</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -21,73 +118,26 @@ export default async function handler(req, res) {
 
   const resendKey = process.env.RESEND_API_KEY;
 
-  /* Mode dry run sans clé */
   if (!resendKey) {
     console.log("[save-list] DRY RUN — email qui serait envoyé à :", email, "noms :", names);
     return res.status(200).json({ sent: false, reason: "no_resend_key" });
   }
 
-  const greeting  = firstName ? (lang === "fr" ? `Bonjour ${firstName},` : `Hi ${firstName},`) : (lang === "fr" ? "Bonjour," : "Hi,");
-  const title     = lang === "fr" ? "Votre sélection de prénoms" : "Your baby name selection";
-  const subtitle  = lang === "fr"
+  const isFr = lang !== "en";
+
+  const greeting  = firstName
+    ? (isFr ? `Bonjour ${firstName},` : `Hi ${firstName},`)
+    : (isFr ? "Bonjour," : "Hi,");
+  const title     = isFr ? "Votre sélection de prénoms" : "Your baby name selection";
+  const subtitle  = isFr
     ? `Voici les ${names.length} prénoms que vous avez sauvegardés sur NameSpark Baby.`
     : `Here are the ${names.length} names you saved on NameSpark Baby.`;
-  const cta       = lang === "fr" ? "Voir ma sélection" : "View my selection";
-  const footer    = lang === "fr"
-    ? "NameSpark Baby · Vous recevez cet email car vous avez sauvegardé votre liste."
-    : "NameSpark Baby · You received this email because you saved your list.";
+  const cta       = isFr ? "Retourner sur NameSpark Baby" : "Back to NameSpark Baby";
+  const footer    = isFr
+    ? "Vous recevez cet email car vous avez sauvegardé votre liste."
+    : "You received this email because you saved your list.";
 
-  const namesList = names.map((n) => `
-    <tr>
-      <td style="padding:10px 16px;border-bottom:1px solid #f0ece6;font-size:15px;color:#2c2c2c;">
-        ❤️ &nbsp;${n}
-      </td>
-    </tr>`).join("");
-
-  const html = `
-<!DOCTYPE html>
-<html lang="${lang}">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#faf9f7;font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#2c2c2c;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f7;padding:40px 0;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
-        <tr>
-          <td style="background:#c8a882;padding:28px 40px;text-align:center;">
-            <p style="margin:0;font-size:13px;font-weight:700;letter-spacing:.12em;color:#fff;text-transform:uppercase;">NameSpark Baby</p>
-            <h1 style="margin:8px 0 0;font-size:22px;font-weight:700;color:#fff;">${title} ✨</h1>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:32px 40px 16px;">
-            <p style="margin:0 0 8px;font-size:16px;">${greeting}</p>
-            <p style="margin:0 0 24px;font-size:15px;color:#6b6259;">${subtitle}</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 40px;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #f0ece6;border-radius:12px;overflow:hidden;">
-              ${namesList}
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:28px 40px;text-align:center;">
-            <a href="https://namespark.baby" style="display:inline-block;background:#c8a882;color:#fff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:100px;">
-              ${cta} →
-            </a>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:20px 40px;text-align:center;border-top:1px solid #f0ece6;">
-            <p style="margin:0;font-size:12px;color:#aaa;">${footer}</p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+  const html = buildSaveListHtml({ lang, greeting, title, subtitle, names, cta, footer });
 
   try {
     const emailRes = await fetch("https://api.resend.com/emails", {
@@ -99,9 +149,9 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: "NameSpark Baby <bonjour@namespark.baby>",
         to: [email],
-        subject: lang === "fr"
-          ? `Vos ${names.length} prénoms favoris — NameSpark Baby`
-          : `Your ${names.length} favourite names — NameSpark Baby`,
+        subject: isFr
+          ? `Vos ${names.length} prénoms favoris — NameSpark Baby ✦`
+          : `Your ${names.length} favourite names — NameSpark Baby ✦`,
         html,
       }),
     });

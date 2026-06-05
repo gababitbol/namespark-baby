@@ -124,7 +124,8 @@ function renderLeads() {
   const search = (document.getElementById("leadSearch").value || "").toLowerCase();
   let leads = _adminLeads.filter((l) =>
     l.email.toLowerCase().includes(search) ||
-    (l.firstName || "").toLowerCase().includes(search)
+    (l.firstName || "").toLowerCase().includes(search) ||
+    (l.surname || "").toLowerCase().includes(search)
   );
 
   leads.sort((a, b) => {
@@ -141,13 +142,14 @@ function renderLeads() {
 
   const body = document.getElementById("leadsBody");
   if (!leads.length) {
-    body.innerHTML = `<tr class="empty-row"><td colspan="6">Aucun email capté pour l'instant.</td></tr>`;
+    body.innerHTML = `<tr class="empty-row"><td colspan="7">Aucun email capté pour l'instant.</td></tr>`;
     return;
   }
   body.innerHTML = leads.map((l) => `
     <tr>
       <td class="td-email">${esc(l.email)}</td>
       <td>${l.firstName ? esc(l.firstName) : "—"}</td>
+      <td>${l.surname ? esc(l.surname) : "<span style='color:var(--ink-soft)'>—</span>"}</td>
       <td>${fmtDate(l.createdAt)}</td>
       <td>${fmtDate(l.lastSeen)}</td>
       <td>${l.favorites || 0} ❤️</td>
@@ -245,11 +247,12 @@ function renderSessions() {
 /* ---- EXPORT CSV ---- */
 function exportCSV() {
   const leads = _adminLeads;
-  let csv = "Email,Prénom,Première visite,Dernière activité,Favoris,Sessions vote\n";
+  let csv = "Email,Prénom,Nom de famille,Première visite,Dernière activité,Favoris,Sessions vote\n";
   leads.forEach((l) => {
     csv += [
-      `"${(l.email || "").replace(/"/g, '""')}"`,
+      `"${(l.email     || "").replace(/"/g, '""')}"`,
       `"${(l.firstName || "").replace(/"/g, '""')}"`,
+      `"${(l.surname   || "").replace(/"/g, '""')}"`,
       (l.createdAt || "").slice(0, 10),
       (l.lastSeen  || "").slice(0, 10),
       l.favorites || 0,
