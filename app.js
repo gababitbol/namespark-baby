@@ -2664,6 +2664,10 @@ function wireDecideButtons() {
 
   /* Après vote : couple → matchs ; famille → écran de remerciement */
   document.getElementById("seeMatchsBtn")?.addEventListener("click", () => {
+    /* Notifier le créateur seulement si c'est un votant (pas le créateur lui-même) */
+    if (decideState.role !== "creator") {
+      _notifyCreatorOfVote();
+    }
     if (decideState.mode === "family") {
       finishFamilyVote();
     } else {
@@ -2894,6 +2898,28 @@ async function handleFamilyNameSubmit(e) {
 
 /* ---- Votant : termine → remerciement.
    Le bouton "Voir le classement" n'est visible que pour le créateur. ---- */
+/* Envoie un email au créateur quand un votant termine.
+   Fire-and-forget : on ne bloque pas l'UX en cas d'erreur. */
+async function _notifyCreatorOfVote() {
+  try {
+    const { decisionId, participantId, voterName } = decideState;
+    if (!decisionId || !voterName) return;
+
+    const myVotes = getVotes(decisionId)[participantId] || {};
+    const yes   = Object.entries(myVotes).filter(([, r]) => r === "yes").map(([n]) => n);
+    const maybe = Object.entries(myVotes).filter(([, r]) => r === "maybe").map(([n]) => n);
+    const no    = Object.entries(myVotes).filter(([, r]) => r === "no").map(([n]) => n);
+
+    await fetch("/api/notify-vote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ decisionId, voterName, votes: { yes, maybe, no } }),
+    });
+  } catch (_) {
+    /* Silencieux — ne jamais bloquer l'UX pour un email */
+  }
+}
+
 function finishFamilyVote() {
   const seeBtn = document.getElementById("familySeeResultsBtn");
   if (seeBtn) seeBtn.style.display = decideState.role === "creator" ? "" : "none";
