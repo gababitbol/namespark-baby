@@ -1469,7 +1469,7 @@ function closeSaveListeModal() {
   document.body.style.overflow = "";
 }
 
-function handleSaveListeSubmit(e) {
+async function handleSaveListeSubmit(e) {
   e.preventDefault();
   const email     = document.getElementById("saveListeEmail").value.trim();
   const firstName = document.getElementById("saveListeFirstName").value.trim();

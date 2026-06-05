@@ -244,7 +244,6 @@ function renderSessions() {
 
 /* ---- EXPORT CSV ---- */
 function exportCSV() {
-  _adminLeads already loaded;
   const leads = _adminLeads;
   let csv = "Email,Prénom,Première visite,Dernière activité,Favoris,Sessions vote\n";
   leads.forEach((l) => {
