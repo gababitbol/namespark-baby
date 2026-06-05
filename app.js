@@ -165,7 +165,7 @@ const I18N = {
     drawer_email_btn: "📩 M'envoyer par email",
     drawer_compare_btn: "⚖️ Comparer mes favoris",
     drawer_logout: "Se déconnecter",
-    email_sent_ok: "📩 Email simulé — activez le backend pour l'envoi réel.",
+    email_sent_ok: "📩 Email envoyé ! Vérifiez votre boîte mail.",
     logout_bye: "À bientôt !",
     /* ---- compatibilité ---- */
     compat_label: "Harmonie avec",
@@ -406,7 +406,7 @@ const I18N = {
     drawer_email_btn: "📩 Send by email",
     drawer_compare_btn: "⚖️ Compare favourites",
     drawer_logout: "Sign out",
-    email_sent_ok: "📩 Simulated email — activate backend for real sending.",
+    email_sent_ok: "📩 Email sent! Check your inbox.",
     logout_bye: "See you soon!",
     compat_label: "Harmony with",
     compat_na: "Enter a last name to see the score.",
