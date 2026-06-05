@@ -2252,6 +2252,7 @@ async function openDecide() {
     console.log("[NS:openDecide] overlay trouvé:", !!overlay);
     if (overlay) { overlay.classList.add("open"); document.body.style.overflow = "hidden"; }
     generateInviteLink();
+    _showEmailNudgeIfNeeded();
     console.log("[NS:openDecide] ✅ overlay ouvert");
   } catch (err) {
     console.error("[NS:openDecide] ❌ ERREUR:", err?.message || err, err);
@@ -2804,6 +2805,7 @@ async function openFamilyVote() {
     showDecideStep("familyResults");
     const fOverlay = document.getElementById("decideOverlay");
     if (fOverlay) { fOverlay.classList.add("open"); document.body.style.overflow = "hidden"; }
+    _showEmailNudgeIfNeeded();
   } catch (err) {
     console.error("[NameSpark] openFamilyVote:", err);
     showToast(t("err_session_create"));
@@ -2898,6 +2900,40 @@ async function handleFamilyNameSubmit(e) {
 
 /* ---- Votant : termine → remerciement.
    Le bouton "Voir le classement" n'est visible que pour le créateur. ---- */
+/* Affiche le nudge email si le créateur n'a pas d'email enregistré. */
+function _showEmailNudgeIfNeeded() {
+  const nudge = document.getElementById("inviteEmailNudge");
+  if (!nudge) return;
+  if (currentUser?.email) { nudge.style.display = "none"; return; }
+
+  nudge.style.display = "";
+  const input = document.getElementById("inviteNudgeEmail");
+  const saveBtn = document.getElementById("inviteNudgeSave");
+  if (!input || !saveBtn) return;
+
+  saveBtn.onclick = () => {
+    const email = input.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      input.style.borderColor = "var(--error, #e74c3c)";
+      return;
+    }
+    input.style.borderColor = "";
+    if (!currentUser) {
+      currentUser = { email, firstName: null, createdAt: new Date().toISOString() };
+    } else {
+      currentUser.email = email;
+    }
+    saveUser();
+    registerLead(email, currentUser.firstName, favorites.size);
+    /* Mettre à jour l'email du créateur dans la décision courante */
+    if (decideState?.decisionId) {
+      addParticipant(decideState.decisionId, { role: "creator", email });
+    }
+    nudge.innerHTML = `<p class="email-nudge-text" style="color:#27ae60;">✓ Email enregistré — vous recevrez les votes !</p>`;
+    setTimeout(() => { nudge.style.display = "none"; }, 3000);
+  };
+}
+
 /* Envoie un email au créateur quand un votant termine.
    Fire-and-forget : on ne bloque pas l'UX en cas d'erreur. */
 async function _notifyCreatorOfVote() {

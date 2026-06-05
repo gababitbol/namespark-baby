@@ -74,14 +74,26 @@ export default async function handler(req, res) {
 
   /* ── 2. Construire l'email ── */
   const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey) {
-    console.error("[notify-vote] Missing RESEND_API_KEY");
-    return res.status(500).json({ error: "Server misconfigured" });
-  }
 
   const yes   = (votes.yes   || []).join(", ") || "—";
   const maybe = (votes.maybe || []).join(", ") || "—";
   const no    = (votes.no    || []).join(", ") || "—";
+
+  /* MODE LOG : si RESEND_API_KEY absent, log les détails et renvoie OK.
+     Utile pour tester le flux complet avant de configurer Resend. */
+  if (!resendKey) {
+    console.log("[notify-vote] DRY RUN — RESEND_API_KEY non configurée.");
+    console.log("[notify-vote] Email qui serait envoyé :", {
+      to: creatorEmail,
+      subject: `${voterName} a voté sur votre sélection de prénoms`,
+      yes, maybe, no,
+    });
+    return res.status(200).json({
+      sent: false,
+      reason: "no_resend_key",
+      preview: { to: creatorEmail, subject: `${voterName} a voté`, yes, maybe, no },
+    });
+  }
 
   const resultsUrl = `https://namespark.baby/?decision=${encodeURIComponent(decisionId)}`;
   const greeting   = creatorName ? `Bonjour ${creatorName},` : "Bonjour,";

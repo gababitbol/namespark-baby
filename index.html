@@ -489,6 +489,16 @@
             <button class="btn btn-primary" id="copyInviteLinkBtn">📤 Partager</button>
             <button class="btn btn-ghost" id="copyInviteLinkOnlyBtn">📋 Copier</button>
           </div>
+
+          <!-- Avertissement email manquant (visible seulement si pas d'email) -->
+          <div class="email-nudge" id="inviteEmailNudge" style="display:none;">
+            <p class="email-nudge-text">📬 Ajoutez votre email pour recevoir les votes automatiquement.</p>
+            <div class="email-nudge-form">
+              <input type="email" id="inviteNudgeEmail" placeholder="votre@email.com" autocomplete="email" inputmode="email" />
+              <button class="btn btn-ghost btn-sm" id="inviteNudgeSave">Enregistrer</button>
+            </div>
+          </div>
+
           <button class="btn btn-ghost" id="continueAfterInviteBtn" data-i18n="decide_continue">Continuer</button>
         </div>
 

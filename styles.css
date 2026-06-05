@@ -2132,3 +2132,36 @@ body { animation: pageIn .5s ease; }
   .decide-title { font-size: 1.5rem; }
   .decide-body { padding: 16px; }
 }
+
+/* ---- Nudge email manquant (écran d'invitation) ---- */
+.email-nudge {
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  background: #fffbf0;
+  border: 1.5px solid #f0d080;
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+.email-nudge-text {
+  margin: 0 0 10px;
+  font-size: .88rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.email-nudge-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.email-nudge-form input[type="email"] {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: .88rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+}
+.email-nudge-form input[type="email"]:focus { border-color: var(--accent); }
