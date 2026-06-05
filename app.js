@@ -2944,8 +2944,13 @@ function _showEmailNudgeIfNeeded() {
    Fire-and-forget : on ne bloque pas l'UX en cas d'erreur. */
 async function _notifyCreatorOfVote() {
   try {
-    const { decisionId, participantId, voterName } = decideState;
-    if (!decisionId || !voterName) return;
+    const { decisionId, participantId } = decideState;
+    /* Récupère le nom du votant depuis currentUser ou les participants */
+    const decision = await getDecision(decisionId);
+    const voterName = currentUser?.firstName
+      || decision?.participants?.[participantId]?.name
+      || (lang === "fr" ? "Quelqu'un" : "Someone");
+    if (!decisionId) return;
 
     const myVotes = getVotes(decisionId)[participantId] || {};
     const yes   = Object.entries(myVotes).filter(([, r]) => r === "yes").map(([n]) => n);

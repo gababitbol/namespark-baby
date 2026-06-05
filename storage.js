@@ -500,6 +500,44 @@ function registerLead(email, firstName, favoritesCount = 0, bumpSession = false)
 function getLeads()       { return _read(KEYS.leads, []); }
 function getAllDecisions() { return Object.values(_allDecisions()); }
 
+/* Versions Supabase pour l'admin (données complètes, cross-appareils) */
+async function fetchAllLeadsAdmin() {
+  if (!_sb) return getLeads();
+  const { data, error } = await _sb.from("leads").select("*").order("last_seen", { ascending: false });
+  if (error || !data) { console.warn("[Admin] fetchAllLeadsAdmin:", error); return getLeads(); }
+  return data.map((r) => ({
+    email: r.email, firstName: r.first_name, createdAt: r.created_at,
+    lastSeen: r.last_seen, favorites: r.favorites || 0, sessions: r.sessions || 0,
+  }));
+}
+
+async function fetchAllDecisionsAdmin() {
+  if (!_sb) return getAllDecisions();
+  const { data: decisions, error: dErr } = await _sb.from("decisions").select("*").order("created_at", { ascending: false });
+  if (dErr || !decisions) { console.warn("[Admin] fetchAllDecisionsAdmin:", dErr); return getAllDecisions(); }
+
+  const { data: participants } = await _sb.from("participants").select("*");
+  const { data: votes } = await _sb.from("votes").select("*");
+
+  return decisions.map((d) => {
+    const parts = (participants || []).filter((p) => p.decision_id === d.id);
+    const partMap = {};
+    parts.forEach((p) => { partMap[p.id] = { role: p.role, name: p.name, email: p.email, joinedAt: p.joined_at }; });
+
+    const votesMap = {};
+    (votes || []).filter((v) => v.decision_id === d.id).forEach((v) => {
+      if (!votesMap[v.participant_id]) votesMap[v.participant_id] = {};
+      votesMap[v.participant_id][v.name] = v.reaction;
+    });
+
+    return {
+      id: d.id, mode: d.mode, surname: d.surname,
+      items: d.items || [], createdAt: d.created_at,
+      participants: partMap, votes: votesMap,
+    };
+  });
+}
+
 /* Auth admin (mot de passe fixe, V1) */
 function adminLogin(password)  {
   if (password === ADMIN_PASSWORD) { _write(KEYS.adminSession, "1"); return true; }
@@ -517,6 +555,7 @@ if (typeof module !== "undefined" && module.exports) {
     getSavedLists, addSavedList, getHistory, addHistory, getComparisons, addComparison,
     createDecision, getDecision, getCurrentDecisionId, setCurrentDecisionId,
     addParticipant, updateParticipantEmail, joinDecision, getMyParticipantId, saveVote, getVotes,
+    fetchAllLeadsAdmin, fetchAllDecisionsAdmin,
     computeMatches, computeRanking,
     addNotification, getNotifications, markNotificationRead, clearNotifications,
     registerLead, getLeads, getAllDecisions, adminLogin, hasAdminSession, clearAdminSession,

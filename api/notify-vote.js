@@ -202,24 +202,10 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Email send failed", detail: result });
     }
 
-    /* ── 4. Logger l'événement dans Supabase (table email_events) ── */
-    fetch(`${supabaseUrl}/rest/v1/email_events`, {
-      method: "POST",
-      headers: {
-        apikey: serviceKey,
-        Authorization: `Bearer ${serviceKey}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify({
-        decision_id: decisionId,
-        type: "vote_notification",
-        recipient: creatorEmail,
-        voter_name: voterName,
-        resend_id: result.id || null,
-        sent_at: new Date().toISOString(),
-      }),
-    }).catch((err) => console.warn("[notify-vote] Failed to log email event:", err));
+    /* ── 4. Log console (à remplacer par table Supabase quand créée) ── */
+    console.log("[notify-vote] Email envoyé :", {
+      to: creatorEmail, voter: voterName, resend_id: result.id,
+    });
 
     return res.status(200).json({ sent: true, id: result.id });
 

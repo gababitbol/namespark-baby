@@ -67,17 +67,35 @@ function showDashboard() {
   renderAll();
 }
 
+/* ---- DONNÉES (cache + sync Supabase) ---- */
+let _adminLeads = [];
+let _adminDecisions = [];
+
 /* ---- RENDER ALL ---- */
-function renderAll() {
+async function renderAll() {
+  document.getElementById("refreshBtn").textContent = "⏳";
+  document.getElementById("refreshBtn").disabled = true;
+  try {
+    [_adminLeads, _adminDecisions] = await Promise.all([
+      fetchAllLeadsAdmin(),
+      fetchAllDecisionsAdmin(),
+    ]);
+  } catch (e) {
+    console.warn("[Admin] Supabase fetch failed, using local cache", e);
+    _adminLeads = getLeads();
+    _adminDecisions = getAllDecisions();
+  }
   renderStats();
   renderLeads();
   renderSessions();
+  document.getElementById("refreshBtn").textContent = "🔄 Actualiser";
+  document.getElementById("refreshBtn").disabled = false;
 }
 
 /* ---- KPIs ---- */
 function renderStats() {
-  const leads = getLeads();
-  const decisions = getAllDecisions();
+  const leads = _adminLeads;
+  const decisions = _adminDecisions;
   const couple = decisions.filter((d) => d.mode !== "family");
   const family = decisions.filter((d) => d.mode === "family");
 
@@ -104,7 +122,7 @@ function renderStats() {
 /* ---- LEADS ---- */
 function renderLeads() {
   const search = (document.getElementById("leadSearch").value || "").toLowerCase();
-  let leads = getLeads().filter((l) =>
+  let leads = _adminLeads.filter((l) =>
     l.email.toLowerCase().includes(search) ||
     (l.firstName || "").toLowerCase().includes(search)
   );
@@ -142,7 +160,7 @@ function renderSessions() {
   const onlyFamily = document.getElementById("filterFamily").checked;
   const onlyCouple = document.getElementById("filterCouple").checked;
 
-  let decisions = getAllDecisions()
+  let decisions = _adminDecisions
     .filter((d) => {
       if (onlyFamily && d.mode !== "family") return false;
       if (onlyCouple && d.mode === "family") return false;
@@ -226,7 +244,8 @@ function renderSessions() {
 
 /* ---- EXPORT CSV ---- */
 function exportCSV() {
-  const leads = getLeads();
+  _adminLeads already loaded;
+  const leads = _adminLeads;
   let csv = "Email,Prénom,Première visite,Dernière activité,Favoris,Sessions vote\n";
   leads.forEach((l) => {
     csv += [
