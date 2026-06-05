@@ -508,6 +508,10 @@
           </p>
           <div class="voting-box">
             <div class="voting-stats" id="votingStats"></div>
+            <div class="poll-indicator" id="pollIndicator">
+              <span class="poll-dot"></span>
+              <span id="pollLabel">Actualisation automatique toutes les 15s</span>
+            </div>
             <button class="btn btn-primary" id="refreshVotesBtn" data-i18n="decide_refresh">🔄 Actualiser</button>
             <button class="btn btn-ghost btn-sm" id="simulatePartnerBtn" data-i18n="decide_simulate">Simuler le vote du partenaire (démo)</button>
           </div>
@@ -739,9 +743,9 @@
 
   <!-- Storage abstrait doit être chargé AVANT app.js -->
   <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
-  <script src="storage.js?v=7"></script>
+  <script src="storage.js?v=8"></script>
   <!-- data.js et app.js (data.js en premier) -->
-  <script src="data.js?v=7"></script>
-  <script src="app.js?v=7"></script>
+  <script src="data.js?v=8"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

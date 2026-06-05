@@ -2064,6 +2064,9 @@ let decideState = {
   role:          null, // "creator" | "partner"
   participantId: null,
 };
+/* Timer d'auto-polling (s'active quand le créateur est sur l'écran d'attente) */
+let _pollTimer = null;
+const POLL_INTERVAL = 15000; /* 15 secondes */
 
 /* Affiche une seule étape du module */
 function showDecideStep(stepId) {
@@ -2228,8 +2231,27 @@ async function openDecide() {
 }
 
 function closeDecide() {
+  stopPolling();
   document.getElementById("decideOverlay")?.classList.remove("open");
   document.body.style.overflow = "";
+}
+
+/* ---- Auto-polling : vérifie les votes toutes les POLL_INTERVAL ms ---- */
+function startPolling() {
+  stopPolling(); /* évite les doublons */
+  _pollTimer = setInterval(async () => {
+    /* N'actualise que si l'écran d'attente est visible */
+    const waitingStep = document.getElementById("decideWaiting");
+    if (!waitingStep?.classList.contains("active")) { stopPolling(); return; }
+    const count = await refreshWaiting();
+    if (count > 0) {
+      stopPolling();
+      showDecideResults();
+    }
+  }, POLL_INTERVAL);
+}
+function stopPolling() {
+  if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
 }
 
 /* ---- Lien d'invitation : ?invite=<decisionId> ---- */
@@ -2354,7 +2376,8 @@ async function handleVote(prenameName, reaction) {
 }
 
 /* ---- Afficher les résultats (matchs DÉRIVÉS via storage.computeMatches) ---- */
-function showDecideResults() {
+/* Async pour pouvoir re-fetcher la décision et passer les données à renderCoupleVoteDetail */
+async function showDecideResults() {
   showDecideStep("decideResults");
   const matchs = computeMatches(decideState.decisionId);
 
@@ -2383,13 +2406,16 @@ function showDecideResults() {
     return;
   }
 
-  renderCoupleVoteDetail();
+  /* Récupère la décision depuis le cache (déjà mis à jour par refreshWaiting/getDecision)
+     ou re-fetch si nécessaire. Pas d'appel async sans await. */
+  const d = await getDecision(decideState.decisionId);
+  renderCoupleVoteDetail(d);
   detailWrap.style.display = "";
 }
 
-/* Tableau de détail : pour chaque prénom, vote du créateur vs vote du conjoint */
-function renderCoupleVoteDetail() {
-  const d = getDecision(decideState.decisionId);
+/* Tableau de détail : pour chaque prénom, vote du créateur vs vote du conjoint.
+   Reçoit la décision en paramètre — plus d'appel async sans await. */
+function renderCoupleVoteDetail(d) {
   if (!d) return;
 
   const votes = d.votes;
@@ -2491,17 +2517,22 @@ function wireDecideButtons() {
   document.getElementById("copyInviteLinkBtn")?.addEventListener("click", copyInviteLink);
   document.getElementById("copyInviteLinkOnlyBtn")?.addEventListener("click", copyInviteLinkOnly);
 
-  /* Créateur : passe à l'écran d'attente */
+  /* Créateur : passe à l'écran d'attente + démarre l'auto-polling */
   document.getElementById("continueAfterInviteBtn")?.addEventListener("click", () => {
     showDecideStep("decideWaiting");
-    refreshWaiting();
+    refreshWaiting(); /* premier fetch immédiat */
+    startPolling();   /* puis auto-poll toutes les 15s */
   });
 
   /* Créateur : actualise les votes reçus → résultats si votes présents */
   document.getElementById("refreshVotesBtn")?.addEventListener("click", async (e) => {
     const count = await _withBtnLoading(e.currentTarget, refreshWaiting);
-    if (count > 0) showDecideResults();
-    else showToast(t("decide_no_votes_yet"));
+    if (count > 0) {
+      stopPolling();
+      showDecideResults();
+    } else {
+      showToast(t("decide_no_votes_yet"));
+    }
   });
 
   /* Démo : simuler le vote d'un partenaire (passe par storage) */

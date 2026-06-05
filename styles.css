@@ -1879,6 +1879,27 @@ body { animation: pageIn .5s ease; }
   margin-top: 4px;
 }
 
+/* Indicateur auto-polling */
+.poll-indicator {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+  font-size: .78rem;
+  color: var(--ink-soft);
+}
+.poll-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #4caf7d;
+  flex-shrink: 0;
+  animation: pollPulse 2s ease-in-out infinite;
+}
+@keyframes pollPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .45; transform: scale(.85); }
+}
+
 /* Notifications décider */
 .decide-notifications {
   display: flex;

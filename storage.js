@@ -265,31 +265,43 @@ async function createDecision({ creatorName = null, creatorEmail = null, surname
   return { decision, participantId: pid };
 }
 
-/* Lit une décision — depuis Supabase (cross-appareil) puis met à jour le cache */
+/* Lit une décision — depuis Supabase (cross-appareil) puis met à jour le cache.
+   Toujours enveloppé en try/catch. Si Supabase échoue ou retourne null,
+   on retombe sur le cache local pour ne jamais bloquer l'UI. */
 async function getDecision(id) {
   if (!id) return null;
 
   if (_sb) {
-    const [decRes, partRes, voteRes] = await Promise.all([
-      _sb.from("decisions").select("*").eq("id", id).maybeSingle(),
-      _sb.from("participants").select("*").eq("decision_id", id),
-      _sb.from("votes").select("*").eq("decision_id", id),
-    ]);
+    try {
+      const [decRes, partRes, voteRes] = await Promise.all([
+        Promise.resolve(_sb.from("decisions").select("*").eq("id", id).maybeSingle()),
+        Promise.resolve(_sb.from("participants").select("*").eq("decision_id", id)),
+        Promise.resolve(_sb.from("votes").select("*").eq("decision_id", id)),
+      ]);
 
-    if (!decRes.error && decRes.data) {
-      const decision = _reconstructDecision(
-        decRes.data, partRes.data || [], voteRes.data || []
-      );
-      const all = _allDecisions();
-      all[id] = decision;
-      _saveDecisions(all);
-      return decision;
+      if (decRes.error) console.warn("[NameSpark] getDecision (decisions):", decRes.error);
+      if (partRes.error) console.warn("[NameSpark] getDecision (participants):", partRes.error);
+      if (voteRes.error) console.warn("[NameSpark] getDecision (votes):", voteRes.error);
+
+      if (!decRes.error && decRes.data) {
+        const decision = _reconstructDecision(
+          decRes.data, partRes.data || [], voteRes.data || []
+        );
+        console.log("[NameSpark] getDecision OK — votes:", Object.keys(decision.votes).length, "participants");
+        const all = _allDecisions();
+        all[id] = decision;
+        _saveDecisions(all);
+        return decision;
+      }
+      /* Décision trouvée dans Supabase mais data null, ou erreur → fallback cache */
+      console.warn("[NameSpark] getDecision: pas de data Supabase, fallback cache");
+    } catch (e) {
+      console.warn("[NameSpark] getDecision exception:", e?.message || e);
+      /* Pas de return ici → fallback cache ci-dessous */
     }
-    /* Décision introuvable en Supabase */
-    return null;
   }
 
-  /* Fallback cache local (mode offline) */
+  /* Fallback cache local (mode offline ou Supabase indisponible) */
   return _allDecisions()[id] || null;
 }
 
