@@ -485,9 +485,19 @@
           <div class="invite-link-box">
             <input type="text" id="inviteLinkInput" readonly class="invite-link-input" />
           </div>
-          <div class="share-actions">
-            <button class="btn btn-primary share-main-btn" id="copyInviteLinkBtn" data-i18n="share_btn">📤 Partager</button>
-            <button class="btn btn-ghost share-copy-btn" id="copyInviteLinkOnlyBtn" data-i18n="copy_link_btn">📋 Copier</button>
+          <div class="share-grid">
+            <button class="share-tile share-tile-wa"   id="shareInviteWhatsApp">
+              <span class="share-tile-icon">💬</span><span class="share-tile-lbl">WhatsApp</span>
+            </button>
+            <button class="share-tile share-tile-mail" id="shareInviteEmail">
+              <span class="share-tile-icon">📧</span><span class="share-tile-lbl">Email</span>
+            </button>
+            <button class="share-tile share-tile-copy" id="copyInviteLinkOnlyBtn">
+              <span class="share-tile-icon">📋</span><span class="share-tile-lbl">Copier</span>
+            </button>
+            <button class="share-tile share-tile-more" id="copyInviteLinkBtn">
+              <span class="share-tile-icon">📤</span><span class="share-tile-lbl">Plus</span>
+            </button>
           </div>
           <button class="btn btn-ghost" id="continueAfterInviteBtn" data-i18n="decide_continue">Continuer</button>
         </div>
@@ -589,9 +599,19 @@
           <div class="family-share-box">
             <input type="text" id="familyLinkInput" readonly class="invite-link-input" />
           </div>
-          <div class="share-actions">
-            <button class="btn btn-primary share-main-btn" id="copyFamilyLinkBtn" data-i18n="share_btn">📤 Partager</button>
-            <button class="btn btn-ghost share-copy-btn" id="copyFamilyLinkOnlyBtn" data-i18n="copy_link_btn">📋 Copier</button>
+          <div class="share-grid">
+            <button class="share-tile share-tile-wa"   id="shareFamilyWhatsApp">
+              <span class="share-tile-icon">💬</span><span class="share-tile-lbl">WhatsApp</span>
+            </button>
+            <button class="share-tile share-tile-mail" id="shareFamilyEmail">
+              <span class="share-tile-icon">📧</span><span class="share-tile-lbl">Email</span>
+            </button>
+            <button class="share-tile share-tile-copy" id="copyFamilyLinkOnlyBtn">
+              <span class="share-tile-icon">📋</span><span class="share-tile-lbl">Copier</span>
+            </button>
+            <button class="share-tile share-tile-more" id="copyFamilyLinkBtn">
+              <span class="share-tile-icon">📤</span><span class="share-tile-lbl">Plus</span>
+            </button>
           </div>
           <div class="family-ranking" id="familyRanking"></div>
           <button class="btn btn-ghost" id="refreshFamilyBtn" data-i18n="family_refresh">🔄 Actualiser les votes</button>
@@ -768,9 +788,9 @@
 
   <!-- Storage abstrait doit être chargé AVANT app.js -->
   <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
-  <script src="storage.js?v=9"></script>
+  <script src="storage.js?v=10"></script>
   <!-- data.js et app.js (data.js en premier) -->
-  <script src="data.js?v=9"></script>
-  <script src="app.js?v=9"></script>
+  <script src="data.js?v=10"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>

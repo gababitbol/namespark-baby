@@ -1819,19 +1819,50 @@ body { animation: pageIn .5s ease; }
   user-select: all;
 }
 /* Boutons de partage côte à côte */
-.share-actions {
-  display: flex;
+/* ---- Grille de partage : WhatsApp / Email / Copier / Plus ---- */
+.share-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
-.share-main-btn {
-  flex: 1;
+.share-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 8px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, transform .15s ease;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-decoration: none;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
 }
-.share-copy-btn {
-  flex-shrink: 0;
-  padding: 10px 16px;
-  font-size: .88rem;
+.share-tile:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); transform: translateY(-2px); }
+.share-tile:active { transform: translateY(0) scale(.97); }
+.share-tile-icon { font-size: 1.4rem; line-height: 1; }
+.share-tile-lbl   { white-space: nowrap; }
+
+/* Couleur d'accentuation WhatsApp */
+.share-tile-wa:hover { border-color: #25D366; background: #f0fdf4; }
+
+/* Bouton "Plus" discret */
+.share-tile-more { border-style: dashed; color: var(--ink-soft); }
+.share-tile-more:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+/* Responsive : 2 colonnes sur très petit écran */
+@media (max-width: 360px) {
+  .share-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
 .decide-body .btn { margin-top: 8px; }
 
 /* Checkbox famille */

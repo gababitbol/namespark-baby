@@ -1276,6 +1276,18 @@ function _isMobile() {
   return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
+/* Ouvre WhatsApp avec le lien pré-rempli (mobile = app, desktop = web.whatsapp.com) */
+function _shareWhatsApp(url, text) {
+  const msg = encodeURIComponent(`${text}\n${url}`);
+  window.open(`https://wa.me/?text=${msg}`, "_blank", "noopener");
+}
+
+/* Ouvre le client email avec sujet + corps pré-rempli */
+function _shareEmail(url, subject, body) {
+  const link = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${body}\n\n${url}`)}`;
+  window.location.href = link;
+}
+
 /* Partage natif (navigator.share) avec fallback clipboard → fallback execCommand.
    Sur mobile   : ouvre la feuille de partage native (WhatsApp, Messages, Mail…).
    Sur desktop  : copie directement dans le presse-papiers + toast. */
@@ -2525,10 +2537,12 @@ function renderCoupleVoteDetail(d) {
   const reactionIcon = (r) => r === "yes" ? "❤️" : r === "maybe" ? "🤔" : r === "no" ? "❌" : "—";
 
   const html = d.items.map((name) => {
-    const myVote      = (votes[myPid]  || {})[name];
+    /* Le créateur ne vote pas explicitement : ses favoris = "yes" implicite.
+       ?? "yes" : si aucun vote explicite, on considère "yes" (il a choisi ces prénoms). */
+    const myVote      = ((votes[myPid]  || {})[name]) ?? "yes";
     const partnerVote = (votes[partners[0].pid] || {})[name]; // 1 conjoint en couple
 
-    const isMatch = myVote === "yes" && partnerVote === "yes";
+    const isMatch   = myVote === "yes" && partnerVote === "yes";
     const isPending = !partnerVote;
     const statusLabel = isPending ? t("couple_detail_pending")
                       : isMatch   ? t("couple_detail_match")
@@ -2613,8 +2627,19 @@ function wireDecideButtons() {
   });
 
   document.getElementById("closeDecide")?.addEventListener("click", closeDecide);
-  document.getElementById("copyInviteLinkBtn")?.addEventListener("click", copyInviteLink);
-  document.getElementById("copyInviteLinkOnlyBtn")?.addEventListener("click", copyInviteLinkOnly);
+  /* Grille de partage — invite couple */
+  document.getElementById("copyInviteLinkBtn")?.addEventListener("click", copyInviteLink);     /* "Plus" = natif/clipboard */
+  document.getElementById("copyInviteLinkOnlyBtn")?.addEventListener("click", copyInviteLinkOnly); /* Copier */
+  document.getElementById("shareInviteWhatsApp")?.addEventListener("click", () => {
+    const url = _getOrBuildInviteUrl();
+    if (url) _shareWhatsApp(url, t("share_invite_text"));
+  });
+  document.getElementById("shareInviteEmail")?.addEventListener("click", () => {
+    const url = _getOrBuildInviteUrl();
+    if (url) _shareEmail(url,
+      lang === "fr" ? "Vote pour notre bébé ✨" : "Vote for our baby ✨",
+      t("share_invite_text"));
+  });
 
   /* Créateur : passe à l'écran d'attente + démarre l'auto-polling */
   document.getElementById("continueAfterInviteBtn")?.addEventListener("click", () => {
@@ -2701,8 +2726,19 @@ function wireDecideButtons() {
     renderFamilyResults();
     showDecideStep("familyResults");
   });
-  document.getElementById("copyFamilyLinkBtn")?.addEventListener("click", copyFamilyLink);
-  document.getElementById("copyFamilyLinkOnlyBtn")?.addEventListener("click", copyFamilyLinkOnly);
+  /* Grille de partage — vote famille */
+  document.getElementById("copyFamilyLinkBtn")?.addEventListener("click", copyFamilyLink);       /* "Plus" = natif/clipboard */
+  document.getElementById("copyFamilyLinkOnlyBtn")?.addEventListener("click", copyFamilyLinkOnly); /* Copier */
+  document.getElementById("shareFamilyWhatsApp")?.addEventListener("click", () => {
+    const url = _getOrBuildFamilyUrl();
+    if (url) _shareWhatsApp(url, t("share_family_text"));
+  });
+  document.getElementById("shareFamilyEmail")?.addEventListener("click", () => {
+    const url = _getOrBuildFamilyUrl();
+    if (url) _shareEmail(url,
+      lang === "fr" ? "Votez pour le prénom de notre bébé 👶" : "Vote for our baby's name 👶",
+      t("share_family_text"));
+  });
   document.getElementById("refreshFamilyBtn")?.addEventListener("click", async (e) => {
     await _withBtnLoading(e.currentTarget, async () => {
       await getDecision(decideState.decisionId);
