@@ -1289,10 +1289,9 @@ function _shareEmail(url, subject, body) {
 }
 
 /* Partage natif (navigator.share) avec fallback clipboard → fallback execCommand.
-   Sur mobile   : ouvre la feuille de partage native (WhatsApp, Messages, Mail…).
-   Sur desktop  : copie directement dans le presse-papiers + toast. */
+   Sur mobile ET desktop : ouvre la feuille de partage native du système. */
 async function shareLink(url, text) {
-  if (_isMobile() && navigator.share) {
+  if (navigator.share) {
     try {
       await navigator.share({ title: "NameSpark Baby", text, url });
       window.plausible?.("Lien partagé", { props: { type: "natif" } });
@@ -1301,7 +1300,6 @@ async function shareLink(url, text) {
       if (e.name !== "AbortError") await _copyToClipboard(url);
     }
   } else {
-    /* Desktop → copie directe, toujours fiable */
     await _copyToClipboard(url);
   }
 }
