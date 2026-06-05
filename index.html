@@ -492,6 +492,24 @@
           <button class="btn btn-ghost" id="continueAfterInviteBtn" data-i18n="decide_continue">Continuer</button>
         </div>
 
+        <!-- ÉTAPE PARTENAIRE : identification avant vote (couple) -->
+        <div class="decide-step" id="couplePartnerReg">
+          <p class="decide-subtitle">Votre partenaire vous a invité·e à voter sur des prénoms. Pour commencer, dites-nous qui vous êtes.</p>
+          <form id="partnerRegForm" novalidate>
+            <div class="field">
+              <label for="partnerFirstName">Votre prénom <span class="req">*</span></label>
+              <input type="text" id="partnerFirstName" placeholder="Marie…" autocomplete="given-name" required />
+              <div class="field-error-msg" id="partnerFirstNameError" role="alert"></div>
+            </div>
+            <div class="field">
+              <label for="partnerEmail">Votre adresse email <span class="req">*</span></label>
+              <input type="email" id="partnerEmail" placeholder="marie@exemple.com" autocomplete="email" inputmode="email" required />
+              <div class="field-error-msg" id="partnerEmailError" role="alert"></div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="partnerRegSubmit">Commencer à voter →</button>
+          </form>
+        </div>
+
         <!-- ÉTAPE PARTENAIRE : vote (ouverte via ?invite=) -->
         <div class="decide-step" id="decideVote">
           <p class="decide-subtitle" id="decideVoteSub">
@@ -507,12 +525,19 @@
             Votre partenaire vote sur votre sélection...
           </p>
           <div class="voting-box">
-            <div class="voting-stats" id="votingStats"></div>
+            <!-- Stats visibles dès qu'il y a des votes -->
+            <div class="voting-stats" id="votingStats">
+              <div class="voting-stat-item"><div class="voting-stat-num">—</div><div class="voting-stat-label">💚 J'aime</div></div>
+              <div class="voting-stat-item"><div class="voting-stat-num">—</div><div class="voting-stat-label">🤔 Peut-être</div></div>
+              <div class="voting-stat-item"><div class="voting-stat-num">—</div><div class="voting-stat-label">❌ Non</div></div>
+            </div>
+            <!-- Bouton "Voir les résultats" — apparaît quand votes > 0 -->
+            <button class="btn btn-primary" id="seeResultsBtn" style="display:none">✨ Voir les résultats</button>
             <div class="poll-indicator" id="pollIndicator">
               <span class="poll-dot"></span>
               <span id="pollLabel">Actualisation automatique toutes les 15s</span>
             </div>
-            <button class="btn btn-primary" id="refreshVotesBtn" data-i18n="decide_refresh">🔄 Actualiser</button>
+            <button class="btn btn-ghost" id="refreshVotesBtn" data-i18n="decide_refresh">🔄 Actualiser maintenant</button>
             <button class="btn btn-ghost btn-sm" id="simulatePartnerBtn" data-i18n="decide_simulate">Simuler le vote du partenaire (démo)</button>
           </div>
           <div class="decide-notifications" id="decideNotifications"></div>
@@ -743,9 +768,9 @@
 
   <!-- Storage abstrait doit être chargé AVANT app.js -->
   <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
-  <script src="storage.js?v=8"></script>
+  <script src="storage.js?v=9"></script>
   <!-- data.js et app.js (data.js en premier) -->
-  <script src="data.js?v=8"></script>
-  <script src="app.js?v=8"></script>
+  <script src="data.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

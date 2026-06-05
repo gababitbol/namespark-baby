@@ -1035,6 +1035,8 @@ body { animation: pageIn .5s ease; }
   border-color: #e05050 !important;
   box-shadow: 0 0 0 3px rgba(224,80,80,.15) !important;
 }
+.req { color: #c05050; font-size: .85em; }
+
 .field-error-msg {
   color: #c05050;
   font-size: .8rem;

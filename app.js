@@ -207,6 +207,13 @@ const I18N = {
     partner_title: "À vous de voter",
     family_voter_eyebrow: "Vote famille",
     family_voter_title: "À vous de voter",
+    partner_reg_title: "Qui êtes-vous ?",
+    partner_reg_sub: "Votre partenaire vous a invité·e à voter. Identifiez-vous pour que vos votes soient bien associés.",
+    partner_reg_firstname: "Votre prénom",
+    partner_reg_email: "Votre adresse email",
+    partner_reg_submit: "Commencer à voter →",
+    partner_reg_firstname_required: "Veuillez renseigner votre prénom.",
+    partner_reg_email_required: "Veuillez renseigner une adresse email valide.",
     decide_invite_sub: "Partagez ce lien avec votre conjoint pour qu'il vote sur vos prénoms favoris.",
     decide_copy_link: "Copier le lien",
     decide_continue: "Continuer",
@@ -434,6 +441,13 @@ const I18N = {
     partner_title: "Your turn to vote",
     family_voter_eyebrow: "Family vote",
     family_voter_title: "Your turn to vote",
+    partner_reg_title: "Who are you?",
+    partner_reg_sub: "Your partner invited you to vote. Identify yourself so your votes are properly linked.",
+    partner_reg_firstname: "Your first name",
+    partner_reg_email: "Your email address",
+    partner_reg_submit: "Start voting →",
+    partner_reg_firstname_required: "Please enter your first name.",
+    partner_reg_email_required: "Please enter a valid email address.",
     decide_invite_sub: "Share this link with your spouse so they can vote on your favourite names.",
     decide_copy_link: "Copy link",
     decide_continue: "Continue",
@@ -1257,11 +1271,16 @@ function shareSelection() {
   shareLink(url.toString(), t("share_selection_text"));
 }
 
+/* Détecte si on est sur un vrai appareil mobile */
+function _isMobile() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 /* Partage natif (navigator.share) avec fallback clipboard → fallback execCommand.
-   Sur mobile : ouvre la feuille de partage native (WhatsApp, Messages, Mail…).
-   Sur desktop : copie dans le presse-papiers + toast. */
+   Sur mobile   : ouvre la feuille de partage native (WhatsApp, Messages, Mail…).
+   Sur desktop  : copie directement dans le presse-papiers + toast. */
 async function shareLink(url, text) {
-  if (navigator.share) {
+  if (_isMobile() && navigator.share) {
     try {
       await navigator.share({ title: "NameSpark Baby", text, url });
       window.plausible?.("Lien partagé", { props: { type: "natif" } });
@@ -1270,6 +1289,7 @@ async function shareLink(url, text) {
       if (e.name !== "AbortError") await _copyToClipboard(url);
     }
   } else {
+    /* Desktop → copie directe, toujours fiable */
     await _copyToClipboard(url);
   }
 }
@@ -2243,11 +2263,9 @@ function startPolling() {
     /* N'actualise que si l'écran d'attente est visible */
     const waitingStep = document.getElementById("decideWaiting");
     if (!waitingStep?.classList.contains("active")) { stopPolling(); return; }
-    const count = await refreshWaiting();
-    if (count > 0) {
-      stopPolling();
-      showDecideResults();
-    }
+    /* Mise à jour silencieuse des stats — le bouton "Voir les résultats"
+       apparaît automatiquement si des votes arrivent */
+    await refreshWaiting();
   }, POLL_INTERVAL);
 }
 function stopPolling() {
@@ -2265,11 +2283,11 @@ function generateInviteLink() {
   try { input.select(); } catch (_) {} /* input.select() peut échouer sur iOS */
 }
 
-/* ---- Partager le lien d'invitation (feuille native) ---- */
-function copyInviteLink() {
+/* ---- Partager le lien d'invitation (feuille native / clipboard) ---- */
+async function copyInviteLink() {
   const url = _getOrBuildInviteUrl();
   if (!url) { showToast(t("err_generic")); return; }
-  shareLink(url, t("share_invite_text"));
+  await shareLink(url, t("share_invite_text"));
 }
 
 /* ---- Copier le lien d'invitation directement ---- */
@@ -2291,6 +2309,9 @@ function _getOrBuildInviteUrl() {
   return url;
 }
 
+/* Stocke la décision en attente pendant l'identification du partenaire */
+let _pendingPartnerDecision = null;
+
 /* ---- Partenaire : ouvrir via ?invite=<decisionId> ---- */
 async function openDecideAsPartner(decisionId) {
   try {
@@ -2299,26 +2320,93 @@ async function openDecideAsPartner(decisionId) {
       showToast(t("decide_invite_invalid"));
       return false;
     }
-    const participantId = await joinDecision(decisionId, {
-      role:  "partner",
-      name:  currentUser?.firstName || null,
-      email: currentUser?.email || null,
-    });
-    decideState = { decisionId, role: "partner", participantId, mode: "couple" };
-
     if (decision.surname) lastSurname = decision.surname;
-
     setDecideHeader("couple_partner");
-    renderDecideVote(decision);
-    showDecideStep("decideVote");
-    document.getElementById("decideOverlay").classList.add("open");
-    document.body.style.overflow = "hidden";
+
+    /* Si le partenaire est déjà identifié, passer directement au vote */
+    if (currentUser) {
+      await _joinAndShowPartnerVote(decision, decisionId);
+    } else {
+      /* Sinon, montrer l'écran d'identification (prénom + email obligatoires) */
+      _pendingPartnerDecision = decision;
+      document.getElementById("decideOverlay").classList.add("open");
+      document.body.style.overflow = "hidden";
+      showDecideStep("couplePartnerReg");
+      setTimeout(() => document.getElementById("partnerFirstName")?.focus(), 200);
+    }
     return true;
   } catch (err) {
     console.error("[NameSpark] openDecideAsPartner:", err);
     showToast(t("err_session_load"));
     return false;
   }
+}
+
+/* ---- Rejoint la décision et affiche le vote (après identification) ---- */
+async function _joinAndShowPartnerVote(decision, decisionId) {
+  const participantId = await joinDecision(decisionId, {
+    role:  "partner",
+    name:  currentUser?.firstName || null,
+    email: currentUser?.email || null,
+  });
+  decideState = { decisionId, role: "partner", participantId, mode: "couple" };
+  renderDecideVote(decision);
+  showDecideStep("decideVote");
+  document.getElementById("decideOverlay")?.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+/* ---- Soumission du formulaire d'identification partenaire ---- */
+async function handlePartnerRegSubmit(e) {
+  e.preventDefault();
+  const firstName = document.getElementById("partnerFirstName").value.trim();
+  const email     = document.getElementById("partnerEmail").value.trim();
+
+  /* Validation prénom */
+  if (!firstName) {
+    document.getElementById("partnerFirstName").classList.add("field-error");
+    document.getElementById("partnerFirstNameError").textContent = t("partner_reg_firstname_required");
+    document.getElementById("partnerFirstNameError").classList.add("visible");
+    document.getElementById("partnerFirstName").focus();
+    return;
+  }
+
+  /* Validation email */
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById("partnerEmail").classList.add("field-error");
+    document.getElementById("partnerEmailError").textContent = t("partner_reg_email_required");
+    document.getElementById("partnerEmailError").classList.add("visible");
+    document.getElementById("partnerEmail").focus();
+    return;
+  }
+
+  const btn = document.getElementById("partnerRegSubmit");
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "…";
+
+  try {
+    const existing = await findUserByEmail(email);
+    currentUser = existing || {
+      email, firstName, createdAt: new Date().toISOString(), surname: lastSurname || null,
+    };
+  } catch (_) {
+    currentUser = { email, firstName, createdAt: new Date().toISOString(), surname: lastSurname || null };
+  } finally {
+    btn.disabled = false;
+    btn.textContent = origText;
+  }
+
+  saveUser();
+  registerLead(email, firstName, 0);
+  updateEspaceButton();
+
+  /* Reprendre le flow avec la décision en attente */
+  const decision = _pendingPartnerDecision;
+  _pendingPartnerDecision = null;
+  if (!decision) { showToast(t("err_generic")); return; }
+
+  await _joinAndShowPartnerVote(decision, decision.id);
 }
 
 /* ---- Rendu de la liste de vote (partenaire OU votant famille) ---- */
@@ -2468,27 +2556,38 @@ function renderCoupleVoteDetail(d) {
 /* ---- Créateur : rafraîchir l'état des votes reçus depuis Supabase ---- */
 async function refreshWaiting() {
   try {
+    console.log("[NS:refresh] decisionId:", decideState.decisionId, "myPid:", decideState.participantId);
+
     /* Re-fetch depuis Supabase → met à jour le cache local */
     const decision = await getDecision(decideState.decisionId);
     const votes = decision ? decision.votes : getVotes(decideState.decisionId);
 
+    console.log("[NS:refresh] participants avec votes:", Object.keys(votes).length);
+
     let yes = 0, no = 0, maybe = 0, voteCount = 0;
     Object.entries(votes).forEach(([pid, byName]) => {
-      if (pid === decideState.participantId) return;
+      if (pid === decideState.participantId) return; /* ignorer mes propres votes */
       Object.values(byName).forEach((r) => {
         voteCount++;
         if (r === "yes") yes++; else if (r === "no") no++; else maybe++;
       });
     });
 
+    console.log("[NS:refresh] votes partenaire:", voteCount, "(yes:", yes, "no:", no, "maybe:", maybe, ")");
+
+    /* Mise à jour des stats — toujours visible */
     document.getElementById("votingStats").innerHTML = `
-      <div class="voting-stat-item"><div class="voting-stat-num">${yes}</div><div class="voting-stat-label">${t("vote_yes")}</div></div>
-      <div class="voting-stat-item"><div class="voting-stat-num">${maybe}</div><div class="voting-stat-label">${t("vote_maybe")}</div></div>
-      <div class="voting-stat-item"><div class="voting-stat-num">${no}</div><div class="voting-stat-label">${t("vote_no")}</div></div>`;
+      <div class="voting-stat-item"><div class="voting-stat-num">${yes || 0}</div><div class="voting-stat-label">💚 J'aime</div></div>
+      <div class="voting-stat-item"><div class="voting-stat-num">${maybe || 0}</div><div class="voting-stat-label">🤔 Peut-être</div></div>
+      <div class="voting-stat-item"><div class="voting-stat-num">${no || 0}</div><div class="voting-stat-label">❌ Non</div></div>`;
+
+    /* Bouton "Voir les résultats" visible dès qu'il y a des votes */
+    const seeResultsBtn = document.getElementById("seeResultsBtn");
+    if (seeResultsBtn) seeResultsBtn.style.display = voteCount > 0 ? "" : "none";
 
     return voteCount;
   } catch (err) {
-    console.error("[NameSpark] refreshWaiting:", err);
+    console.error("[NS:refresh] erreur:", err?.message || err);
     showToast(t("err_network"));
     return 0;
   }
@@ -2524,15 +2623,17 @@ function wireDecideButtons() {
     startPolling();   /* puis auto-poll toutes les 15s */
   });
 
-  /* Créateur : actualise les votes reçus → résultats si votes présents */
+  /* Créateur : actualise manuellement */
   document.getElementById("refreshVotesBtn")?.addEventListener("click", async (e) => {
     const count = await _withBtnLoading(e.currentTarget, refreshWaiting);
-    if (count > 0) {
-      stopPolling();
-      showDecideResults();
-    } else {
-      showToast(t("decide_no_votes_yet"));
-    }
+    if (count === 0) showToast(t("decide_no_votes_yet"));
+    /* Pas d'auto-navigation — l'utilisateur choisit quand voir les résultats */
+  });
+
+  /* Créateur : voir les résultats explicitement */
+  document.getElementById("seeResultsBtn")?.addEventListener("click", () => {
+    stopPolling();
+    showDecideResults();
   });
 
   /* Démo : simuler le vote d'un partenaire (passe par storage) */
@@ -2558,6 +2659,17 @@ function wireDecideButtons() {
   document.getElementById("saveMatchsBtn")?.addEventListener("click", () => {
     window.plausible?.("Email capturé", { props: { contexte: "matchs-couple" } });
     openSaveListeModal();
+  });
+
+  /* ===== IDENTIFICATION PARTENAIRE COUPLE ===== */
+  document.getElementById("partnerRegForm")?.addEventListener("submit", handlePartnerRegSubmit);
+  document.getElementById("partnerFirstName")?.addEventListener("input", () => {
+    document.getElementById("partnerFirstName").classList.remove("field-error");
+    document.getElementById("partnerFirstNameError").classList.remove("visible");
+  });
+  document.getElementById("partnerEmail")?.addEventListener("input", () => {
+    document.getElementById("partnerEmail").classList.remove("field-error");
+    document.getElementById("partnerEmailError").classList.remove("visible");
   });
 
   /* ===== VOTE FAMILLE ===== */
@@ -2667,11 +2779,11 @@ function generateFamilyLink() {
   const input = document.getElementById("familyLinkInput");
   if (input) input.value = url;
 }
-/* ---- Partager le lien famille (feuille native) ---- */
-function copyFamilyLink() {
+/* ---- Partager le lien famille (feuille native / clipboard) ---- */
+async function copyFamilyLink() {
   const url = _getOrBuildFamilyUrl();
   if (!url) { showToast(t("err_generic")); return; }
-  shareLink(url, t("share_family_text"));
+  await shareLink(url, t("share_family_text"));
 }
 
 /* ---- Copier le lien famille directement ---- */
