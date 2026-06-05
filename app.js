@@ -258,11 +258,11 @@ const I18N = {
     couple_detail_pending: "⏳ En attente",
     couple_detail_no_votes: "Aucun vote du conjoint pour l'instant.",
     /* ---- Gate email au lancement d'un vote ---- */
-    vote_gate_title: "Recevez les résultats par email",
-    vote_gate_desc: "Laissez votre email pour suivre les votes et recevoir le résultat. C'est facultatif.",
-    vote_gate_email: "Votre adresse email (facultatif)",
+    vote_gate_title: "Être notifié quand votre partenaire vote",
+    vote_gate_desc: "Laissez votre email et recevez automatiquement un message dès que votre partenaire a terminé son vote.",
+    vote_gate_email: "Votre adresse email",
     vote_gate_continue: "Continuer",
-    vote_gate_skip: "Passer, je le ferai plus tard →",
+    vote_gate_skip: "Passer →",
     vote_gate_email_invalid: "Cette adresse email semble invalide.",
     save_results_email: "📩 Recevoir par email",
     err_network:       "Erreur de connexion. Vérifiez votre réseau et réessayez.",
@@ -492,11 +492,11 @@ const I18N = {
     couple_detail_pending: "⏳ Pending",
     couple_detail_no_votes: "No votes from your partner yet.",
     /* ---- Gate email au lancement d'un vote ---- */
-    vote_gate_title: "Get the results by email",
-    vote_gate_desc: "Leave your email to follow the votes and receive the result. It's optional.",
-    vote_gate_email: "Your email address (optional)",
+    vote_gate_title: "Get notified when your partner votes",
+    vote_gate_desc: "Leave your email and receive an automatic message as soon as your partner finishes voting.",
+    vote_gate_email: "Your email address",
     vote_gate_continue: "Continue",
-    vote_gate_skip: "Skip, I'll do it later →",
+    vote_gate_skip: "Skip →",
     vote_gate_email_invalid: "This email address looks invalid.",
     save_results_email: "📩 Receive by email",
     err_network:       "Connection error. Check your network and try again.",
@@ -1487,13 +1487,19 @@ function handleSaveListeSubmit(e) {
   btn.disabled    = true;
   btn.textContent = "…";
 
-  /* Simuler latence (futur : appel API) */
-  setTimeout(() => {
+  /* Appel backend réel */
+  try {
     saveListeToStorage(firstName, email);
-    document.getElementById("saveListeForm").style.display    = "none";
-    document.getElementById("saveListeSuccess").style.display = "";
-    btn.disabled = false;
-  }, 700);
+    await fetch("/api/save-list", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, firstName, names: [...favorites], lang }),
+    });
+  } catch (_) { /* silencieux — la liste est déjà sauvegardée localement */ }
+
+  document.getElementById("saveListeForm").style.display    = "none";
+  document.getElementById("saveListeSuccess").style.display = "";
+  btn.disabled = false;
 }
 
 function saveListeToStorage(firstName, email) {
@@ -2925,9 +2931,9 @@ function _showEmailNudgeIfNeeded() {
     }
     saveUser();
     registerLead(email, currentUser.firstName, favorites.size);
-    /* Mettre à jour l'email du créateur dans la décision courante */
-    if (decideState?.decisionId) {
-      addParticipant(decideState.decisionId, { role: "creator", email });
+    /* Mettre à jour l'email du créateur dans Supabase (UPDATE, pas INSERT) */
+    if (decideState?.participantId) {
+      updateParticipantEmail(decideState.participantId, email);
     }
     nudge.innerHTML = `<p class="email-nudge-text" style="color:#27ae60;">✓ Email enregistré — vous recevrez les votes !</p>`;
     setTimeout(() => { nudge.style.display = "none"; }, 3000);

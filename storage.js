@@ -345,6 +345,26 @@ async function addParticipant(decisionId, { role = "partner", name = null, email
   return pid;
 }
 
+/* Met à jour l'email d'un participant existant (ex: créateur sans email au départ) */
+async function updateParticipantEmail(participantId, email) {
+  /* Cache local */
+  const all = _allDecisions();
+  for (const did of Object.keys(all)) {
+    if (all[did].participants?.[participantId]) {
+      all[did].participants[participantId].email = email;
+      _saveDecisions(all);
+      break;
+    }
+  }
+  /* Supabase */
+  if (_sb) {
+    const { error } = await _sb.from("participants")
+      .update({ email })
+      .eq("id", participantId);
+    if (error) console.warn("[NameSpark] updateParticipantEmail:", error);
+  }
+}
+
 /* Rejoint une décision — get-or-create du participant pour CET appareil */
 async function joinDecision(decisionId, opts = {}) {
   const existing = getMyParticipantId(decisionId);
@@ -496,7 +516,7 @@ if (typeof module !== "undefined" && module.exports) {
     getSelection, saveSelection, addToSelection, removeFromSelection,
     getSavedLists, addSavedList, getHistory, addHistory, getComparisons, addComparison,
     createDecision, getDecision, getCurrentDecisionId, setCurrentDecisionId,
-    addParticipant, joinDecision, getMyParticipantId, saveVote, getVotes,
+    addParticipant, updateParticipantEmail, joinDecision, getMyParticipantId, saveVote, getVotes,
     computeMatches, computeRanking,
     addNotification, getNotifications, markNotificationRead, clearNotifications,
     registerLead, getLeads, getAllDecisions, adminLogin, hasAdminSession, clearAdminSession,
