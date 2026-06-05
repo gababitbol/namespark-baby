@@ -37,18 +37,11 @@ function buildVoteEmailHtml({ voterName, greeting, resultsUrl, yes, maybe, no })
 
         <!-- ══════ HEADER / LOGO ══════ -->
         <tr>
-          <td style="background:#c9a27a;padding:44px 40px 36px;text-align:center;">
-            <!-- Logo mark -->
-            <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 18px;">
-              <tr>
-                <td width="60" height="60" style="width:60px;height:60px;background:rgba(255,255,255,0.2);border-radius:30px;text-align:center;vertical-align:middle;">
-                  <span style="font-size:30px;line-height:60px;color:#fff;display:block;">✦</span>
-                </td>
-              </tr>
-            </table>
-            <!-- Brand name -->
-            <div style="font-size:10px;font-weight:800;letter-spacing:.22em;color:rgba(255,255,255,0.72);text-transform:uppercase;margin-bottom:5px;">NameSpark</div>
-            <div style="font-size:30px;font-weight:700;color:#fff;font-family:Georgia,'Times New Roman',serif;letter-spacing:.02em;line-height:1.1;">Baby</div>
+          <td style="background:#c9a27a;padding:32px 40px 28px;text-align:center;">
+            <img src="https://namespark.baby/email-logo.png"
+                 alt="NameSpark Baby"
+                 width="220" height="51"
+                 style="display:block;margin:0 auto;border:0;outline:none;text-decoration:none;max-width:220px;" />
           </td>
         </tr>
 
