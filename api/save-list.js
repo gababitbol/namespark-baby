@@ -6,6 +6,8 @@
    Fait    : envoie un email récapitulatif via Resend
    ============================================================= */
 
+import { unsubscribeUrl } from "./_helpers.js";
+
 const LOGO_IMG = `<img src="https://namespark.baby/email-logo.png" alt="NameSpark Baby" width="220" height="51" style="display:block;margin:0 auto;border:0;max-width:220px;" />`;
 
 function emailWrapper(body, lang = "fr") {
@@ -36,11 +38,12 @@ function emailHeader() {
 </tr>`;
 }
 
-function emailFooter(isFr) {
-  const unsub  = isFr ? "Se désabonner" : "Unsubscribe";
-  const notice = isFr
+function emailFooter(isFr, recipientEmail) {
+  const unsub    = isFr ? "Se désabonner" : "Unsubscribe";
+  const notice   = isFr
     ? "Vous recevez cet email car vous avez sauvegardé votre liste."
     : "You received this email because you saved your list.";
+  const unsubUrl = recipientEmail ? unsubscribeUrl(recipientEmail) : "https://namespark.baby/unsubscribe";
   return `<tr>
   <td style="padding:0 40px 28px;text-align:center;border-top:1px solid #ece4da;">
     <table cellpadding="0" cellspacing="0" role="presentation" style="margin:20px auto 0;">
@@ -51,7 +54,7 @@ function emailFooter(isFr) {
             ${notice}<br>
             <a href="https://namespark.baby" style="color:#c9a27a;text-decoration:none;">namespark.baby</a>
             &nbsp;·&nbsp;
-            <a href="https://namespark.baby/unsubscribe" style="color:#d0c8be;text-decoration:none;">${unsub}</a>
+            <a href="${unsubUrl}" style="color:#d0c8be;text-decoration:none;">${unsub}</a>
           </p>
         </td>
       </tr>
@@ -129,7 +132,7 @@ ${emailHeader()}
     </a>
   </td>
 </tr>
-${emailFooter(isFr)}`;
+${emailFooter(isFr, email)}`;
 
   return emailWrapper(body, lang);
 }

@@ -2072,9 +2072,21 @@ function executePremiumAction(action) {
       setTimeout(() => exportPDF(), 260);
       break;
     case "email":
-      if (currentUser) saveListeToStorage(currentUser.firstName, currentUser.email);
+      if (currentUser) {
+        saveListeToStorage(currentUser.firstName, currentUser.email);
+        fetch("/api/save-list", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email:     currentUser.email,
+            firstName: currentUser.firstName || null,
+            names:     [...favorites],
+            lang,
+          }),
+        }).catch(() => {});
+      }
       showToast(t("email_sent_ok"));
-      renderSelectionPage(); /* mise à jour état débloqué */
+      renderSelectionPage();
       break;
     case "save":
       showToast(t("save_space_confirm"));

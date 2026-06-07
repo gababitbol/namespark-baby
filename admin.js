@@ -70,23 +70,27 @@ function showDashboard() {
 /* ---- DONNÉES (cache + sync Supabase) ---- */
 let _adminLeads = [];
 let _adminDecisions = [];
+let _adminNewsletter = [];
 
 /* ---- RENDER ALL ---- */
 async function renderAll() {
   document.getElementById("refreshBtn").textContent = "⏳";
   document.getElementById("refreshBtn").disabled = true;
   try {
-    [_adminLeads, _adminDecisions] = await Promise.all([
+    [_adminLeads, _adminDecisions, _adminNewsletter] = await Promise.all([
       fetchAllLeadsAdmin(),
       fetchAllDecisionsAdmin(),
+      fetchNewsletterSubscribers(),
     ]);
   } catch (e) {
     console.warn("[Admin] Supabase fetch failed, using local cache", e);
     _adminLeads = getLeads();
     _adminDecisions = getAllDecisions();
+    _adminNewsletter = [];
   }
   renderStats();
   renderLeads();
+  renderNewsletter();
   renderSessions();
   document.getElementById("refreshBtn").textContent = "🔄 Actualiser";
   document.getElementById("refreshBtn").disabled = false;
@@ -265,6 +269,52 @@ function exportCSV() {
   a.download = `namespark-leads-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+/* ---- NEWSLETTER ---- */
+async function fetchNewsletterSubscribers() {
+  if (!_sb) return [];
+  const { data, error } = await _sb
+    .from("newsletter_subscribers")
+    .select("email, first_name, lang, subscribed_at, unsubscribed_at, is_active")
+    .order("subscribed_at", { ascending: false });
+  if (error || !data) { console.warn("[Admin] newsletter fetch:", error); return []; }
+  return data;
+}
+
+function renderNewsletter() {
+  const subs   = _adminNewsletter;
+  const active = subs.filter((s) => s.is_active);
+  const unsub  = subs.filter((s) => !s.is_active);
+
+  const statsEl = document.getElementById("newsletterStats");
+  if (statsEl) {
+    statsEl.innerHTML = `<strong style="color:var(--accent-deep)">${active.length}</strong> actif${active.length > 1 ? "s" : ""}
+      &nbsp;·&nbsp; <span style="color:#c05050">${unsub.length}</span> désabonné${unsub.length > 1 ? "s" : ""}`;
+  }
+
+  const body = document.getElementById("newsletterBody");
+  if (!body) return;
+
+  if (!subs.length) {
+    body.innerHTML = `<tr class="empty-row"><td colspan="5">Aucun abonné pour l'instant.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = subs.map((s) => {
+    const isActive = s.is_active;
+    const badge = isActive
+      ? `<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:700;background:#ecfdf5;color:#065f46">Actif</span>`
+      : `<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:700;background:#fef2f2;color:#991b1b">Désabonné</span>`;
+    const dateCol = isActive ? fmtDate(s.subscribed_at) : `<span style="color:#c05050">${fmtDate(s.unsubscribed_at)}</span>`;
+    return `<tr style="${isActive ? "" : "opacity:.65"}">
+      <td class="td-email">${esc(s.email)}</td>
+      <td>${s.first_name ? esc(s.first_name) : "—"}</td>
+      <td>${s.lang || "fr"}</td>
+      <td>${fmtDate(s.subscribed_at)}</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join("");
 }
 
 /* ---- HELPERS ---- */

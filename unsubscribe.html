@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Désabonnement — NameSpark Baby</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .unsub-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      background: var(--bg);
+    }
+    .unsub-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 52px 44px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 40px -12px rgba(58,44,30,.14);
+    }
+    .unsub-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .unsub-logo .spark {
+      width: 28px; height: 28px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+      color: #fff; font-size: .9rem;
+    }
+    .unsub-logo span { font-size: 1rem; font-weight: 700; }
+    .unsub-logo b { color: var(--accent-deep); }
+    .unsub-icon {
+      font-size: 2.4rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .unsub-title {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .unsub-desc {
+      font-size: .95rem;
+      color: var(--ink-soft);
+      line-height: 1.65;
+      margin-bottom: 0;
+    }
+    .unsub-email-badge {
+      display: inline-block;
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--accent-deep);
+      margin: 14px 0 20px;
+    }
+    .unsub-back {
+      margin-top: 28px;
+      font-size: .88rem;
+      color: var(--ink-soft);
+    }
+    .unsub-back a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .unsub-back a:hover { text-decoration: underline; }
+    /* Error state */
+    .state-error .unsub-icon::after { content: ""; }
+    #stateLoading, #stateOk, #stateError { display: none; }
+    #stateLoading.active, #stateOk.active, #stateError.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="unsub-wrap">
+    <div class="unsub-card">
+
+      <div class="unsub-logo">
+        <span class="spark">✦</span>
+        <span>NameSpark <b>Baby</b></span>
+      </div>
+
+      <!-- Chargement -->
+      <div id="stateLoading">
+        <span class="unsub-icon">⏳</span>
+        <h1 class="unsub-title">Traitement en cours…</h1>
+        <p class="unsub-desc">Un instant, nous enregistrons votre demande.</p>
+      </div>
+
+      <!-- Succès -->
+      <div id="stateOk">
+        <span class="unsub-icon">✓</span>
+        <h1 class="unsub-title">Désabonnement confirmé</h1>
+        <div id="emailBadge" class="unsub-email-badge"></div>
+        <p class="unsub-desc">
+          Vous ne recevrez plus les emails de la newsletter NameSpark Baby.<br>
+          Vous pouvez toujours revenir sur notre site à tout moment.
+        </p>
+        <p class="unsub-back">← <a href="/">Retourner sur NameSpark Baby</a></p>
+      </div>
+
+      <!-- Erreur -->
+      <div id="stateError">
+        <span class="unsub-icon">✕</span>
+        <h1 class="unsub-title">Lien invalide</h1>
+        <p class="unsub-desc">
+          Ce lien de désabonnement est invalide ou a déjà été utilisé.<br>
+          Contactez-nous à <a href="mailto:bonjour@namespark.baby" style="color:var(--accent)">bonjour@namespark.baby</a>.
+        </p>
+        <p class="unsub-back">← <a href="/">Retourner sur NameSpark Baby</a></p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const email  = params.get("email");
+      const token  = params.get("token");
+
+      function show(id) {
+        ["stateLoading","stateOk","stateError"].forEach(s => {
+          document.getElementById(s).classList.toggle("active", s === id);
+        });
+      }
+
+      if (!email || !token) { show("stateError"); return; }
+
+      show("stateLoading");
+
+      try {
+        const res = await fetch("/api/unsubscribe", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ email, token }),
+        });
+
+        if (res.ok) {
+          document.getElementById("emailBadge").textContent = email;
+          show("stateOk");
+        } else {
+          show("stateError");
+        }
+      } catch {
+        show("stateError");
+      }
+    })();
+  </script>
+</body>
+</html>

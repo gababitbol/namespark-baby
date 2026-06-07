@@ -19,6 +19,8 @@
    );
    ============================================================= */
 
+import { unsubscribeUrl } from "./_helpers.js";
+
 const ALLOWED_ORIGINS = [
   "https://namespark.baby",
   "https://www.namespark.baby",
@@ -80,7 +82,7 @@ function confirmationEmail({ firstName, lang }) {
                 <p style="margin:0;font-size:11px;color:#b0a89e;line-height:1.6;">${footerNote}<br>
                   <a href="https://namespark.baby" style="color:#c9a27a;text-decoration:none;">namespark.baby</a>
                   &nbsp;·&nbsp;
-                  <a href="https://namespark.baby/unsubscribe" style="color:#d0c8be;text-decoration:none;">${isFr ? "Se désabonner" : "Unsubscribe"}</a>
+                  <a href="${unsubscribeUrl(email)}" style="color:#d0c8be;text-decoration:none;">${isFr ? "Se désabonner" : "Unsubscribe"}</a>
                 </p>
               </td></tr>
             </table>

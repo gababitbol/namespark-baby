@@ -7,12 +7,13 @@
              envoie un email via Resend.
    ============================================================= */
 
+import { unsubscribeUrl } from "./_helpers.js";
+
 const ALLOWED_ORIGINS = [
   "https://namespark.baby",
   "https://www.namespark.baby",
 ];
 
-/* ── Shared email chrome ─────────────────────────────────────────────────── */
 const LOGO_IMG = `<img src="https://namespark.baby/email-logo.png" alt="NameSpark Baby" width="220" height="51" style="display:block;margin:0 auto;border:0;max-width:220px;" />`;
 
 function emailWrapper(body) {
@@ -43,7 +44,8 @@ function emailHeader() {
 </tr>`;
 }
 
-function emailFooter() {
+function emailFooter(recipientEmail) {
+  const unsubUrl = recipientEmail ? unsubscribeUrl(recipientEmail) : "https://namespark.baby/unsubscribe";
   return `<tr>
   <td style="padding:0 40px 28px;text-align:center;border-top:1px solid #ece4da;">
     <table cellpadding="0" cellspacing="0" role="presentation" style="margin:20px auto 0;">
@@ -54,7 +56,7 @@ function emailFooter() {
             Vous recevez cet email car vous avez créé une session de vote.<br>
             <a href="https://namespark.baby" style="color:#c9a27a;text-decoration:none;">namespark.baby</a>
             &nbsp;·&nbsp;
-            <a href="https://namespark.baby/unsubscribe" style="color:#d0c8be;text-decoration:none;">Se désabonner</a>
+            <a href="${unsubUrl}" style="color:#d0c8be;text-decoration:none;">Se désabonner</a>
           </p>
         </td>
       </tr>
@@ -128,7 +130,7 @@ ${emailHeader()}
     </a>
   </td>
 </tr>
-${emailFooter()}`;
+${emailFooter(creatorEmail)}`;
 
   return emailWrapper(body);
 }
