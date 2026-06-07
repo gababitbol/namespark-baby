@@ -1,0 +1,32 @@
+module.exports = {
+  origin: "portugais",
+  names: [
+    // Garçons
+    { name: "Duarte", gender: "boy", fr: "Gardien de la prospérité", en: "Guardian of wealth", tags: ["prosperite", "noblesse"], style: ["rare", "classique"] },
+    { name: "Vasco", gender: "boy", fr: "Du Pays basque, corbeau", en: "From the Basque country", tags: ["liberte", "courage"], style: ["rare", "classique"] },
+    { name: "Tiago", gender: "boy", fr: "Celui qui supplante (Jacques)", en: "Supplanter (James)", tags: ["force", "foi"], style: ["moderne"] },
+    { name: "Afonso", gender: "boy", fr: "Noble et prêt au combat", en: "Noble and ready", tags: ["noblesse", "courage"], style: ["classique", "rare"] },
+    { name: "Bernardo", gender: "boy", fr: "Ours fort et courageux", en: "Strong, brave bear", tags: ["force", "courage"], style: ["classique"] },
+    { name: "Martim", gender: "boy", fr: "Voué à Mars, guerrier", en: "Of Mars, warrior", tags: ["force", "courage"], style: ["moderne", "classique"] },
+    { name: "Salvador", gender: "boy", fr: "Sauveur", en: "Saviour", tags: ["foi", "espoir"], style: ["classique", "rare"] },
+    { name: "Bento", gender: "boy", fr: "Béni", en: "Blessed", tags: ["foi", "grace"], style: ["court", "rare"] },
+    { name: "Nuno", gender: "boy", fr: "Neuvième, solennel", en: "Ninth, solemn", tags: ["foi"], style: ["court", "rare"] },
+    { name: "Joaquim", gender: "boy", fr: "Dieu établira", en: "God will establish", tags: ["foi"], style: ["classique", "rare"] },
+    { name: "Lourenco", gender: "boy", fr: "Couronné de laurier", en: "Laurel-crowned", tags: ["victoire", "noblesse"], style: ["rare", "classique"] },
+    { name: "Dinis", gender: "boy", fr: "Consacré à Dionysos", en: "Devoted to Dionysus", tags: ["joie", "nature"], style: ["rare"] },
+    { name: "Gaspar", gender: "boy", fr: "Gardien du trésor", en: "Treasure keeper", tags: ["prosperite", "noblesse"], style: ["rare", "classique"] },
+    // Filles
+    { name: "Beatriz", gender: "girl", fr: "Celle qui rend heureux", en: "She who brings joy", tags: ["joie", "grace"], style: ["classique", "elegant"] },
+    { name: "Matilde", gender: "girl", fr: "Force au combat", en: "Strength in battle", tags: ["force", "noblesse"], style: ["classique", "elegant"] },
+    { name: "Leonor", gender: "girl", fr: "Lumière, compassion", en: "Light, compassion", tags: ["lumiere", "grace"], style: ["elegant", "classique"] },
+    { name: "Constanca", gender: "girl", fr: "Constante, fidèle", en: "Constant, steadfast", tags: ["foi", "noblesse"], style: ["rare", "classique"] },
+    { name: "Margarida", gender: "girl", fr: "Perle, marguerite", en: "Pearl, daisy", tags: ["beaute", "nature"], style: ["classique", "poetique"] },
+    { name: "Benedita", gender: "girl", fr: "Bénie", en: "Blessed", tags: ["foi", "grace"], style: ["rare", "classique"] },
+    { name: "Filipa", gender: "girl", fr: "Amie des chevaux", en: "Friend of horses", tags: ["nature", "liberte"], style: ["rare", "classique"] },
+    { name: "Vitoria", gender: "girl", fr: "Victoire", en: "Victory", tags: ["victoire"], style: ["classique", "elegant"] },
+    { name: "Mafalda", gender: "girl", fr: "Force au combat", en: "Mighty in battle", tags: ["force", "noblesse"], style: ["rare", "classique"] },
+    { name: "Iara", gender: "girl", fr: "Dame des eaux", en: "Lady of the waters", tags: ["nature", "beaute"], style: ["rare", "poetique"] },
+    { name: "Branca", gender: "girl", fr: "Blanche, pure", en: "White, pure", tags: ["grace", "lumiere"], style: ["rare", "poetique"] },
+    { name: "Guiomar", gender: "girl", fr: "Illustre au combat", en: "Famous in battle", tags: ["noblesse", "force"], style: ["rare"] },
+  ],
+};
