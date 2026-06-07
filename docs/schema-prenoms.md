@@ -38,12 +38,14 @@ Toute entrée doit passer `node validate-data.js` sans erreur avant commit.
 ### STYLES (6)
 `classique` · `moderne` · `rare` · `elegant` · `court` · `poetique`
 
-### TAGS de signification (10 — proposition étendue)
-`force` · `courage` · `sagesse` · `lumiere` · `nature` · `liberte` · `foi` · `amour` · `paix` · `victoire`
+### TAGS de signification (16)
+`force` · `courage` · `sagesse` · `lumiere` · `nature` · `liberte` · `foi` · `amour` ·
+`paix` · `victoire` · `joie` · `beaute` · `espoir` · `noblesse` · `grace` · `prosperite`
 
-> `paix` (18 usages) et `victoire` (9 usages) sont **ajoutés** car déjà présents et utiles.
-> `combat`, `gloire`, `royaute`, `ordre` sont **supprimés** (≤3 usages) → remappés
-> vers `force` / `victoire`.
+> `paix` et `victoire` ajoutés (déjà présents et utiles). `combat`, `gloire`, `royaute`,
+> `ordre` supprimés (≤3 usages) → remappés vers `force` / `victoire` / `sagesse`.
+> `joie`, `beaute`, `espoir`, `noblesse`, `grace`, `prosperite` ajoutés (2026-06-07)
+> pour des filtres de signification plus fins sur la base élargie à 10 000.
 
 ### ORIGINS (22 — toutes exposées dans le filtre UI)
 `hebreu` · `francais` · `anglais` · `arabe` · `italien` · `espagnol` · `grec` ·

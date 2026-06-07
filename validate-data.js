@@ -17,7 +17,7 @@ const NAMES = g.NAMES;
 const GENDERS = ["boy", "girl", "mixte"];
 const LENGTHS = ["court", "moyen", "long"];
 const STYLES = ["classique", "moderne", "rare", "elegant", "court", "poetique"];
-const TAGS = ["force", "courage", "sagesse", "lumiere", "nature", "liberte", "foi", "amour", "paix", "victoire"];
+const TAGS = ["force", "courage", "sagesse", "lumiere", "nature", "liberte", "foi", "amour", "paix", "victoire", "joie", "beaute", "espoir", "noblesse", "grace", "prosperite"];
 const ORIGINS = ["hebreu", "francais", "anglais", "arabe", "italien", "espagnol", "grec", "latin", "nordique", "irlandais", "japonais", "slave", "sanskrit", "persan", "africain", "portugais", "coreen", "chinois", "gallois", "basque", "armenien", "georgien"];
 
 const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");

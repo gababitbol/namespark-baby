@@ -1,0 +1,33 @@
+module.exports = {
+  origin: "georgien",
+  names: [
+    // Garçons
+    { name: "Davit", gender: "boy", fr: "Bien-aimé", en: "Beloved", tags: ["amour", "foi"], style: ["classique"] },
+    { name: "Nika", gender: "boy", fr: "Victoire du peuple", en: "Victory of the people", tags: ["victoire"], style: ["court", "moderne"] },
+    { name: "Saba", gender: "boy", fr: "Sage ancien", en: "Wise elder", tags: ["sagesse"], style: ["court", "rare"] },
+    { name: "Tornike", gender: "boy", fr: "Vainqueur", en: "Conqueror", tags: ["victoire", "force"], style: ["rare"] },
+    { name: "Irakli", gender: "boy", fr: "Gloire d'Héra, Héraclès", en: "Glory of Hera, Heracles", tags: ["force", "victoire"], style: ["classique", "rare"] },
+    { name: "Vakhtang", gender: "boy", fr: "Au corps de loup", en: "Wolf-bodied", tags: ["force", "courage"], style: ["rare", "classique"] },
+    { name: "Levan", gender: "boy", fr: "Lion", en: "Lion", tags: ["force", "courage"], style: ["classique"] },
+    { name: "Sandro", gender: "boy", fr: "Défenseur de l'humanité", en: "Defender of mankind", tags: ["courage", "force"], style: ["moderne"] },
+    { name: "Lasha", gender: "boy", fr: "Lumière", en: "Light", tags: ["lumiere"], style: ["court", "moderne"] },
+    { name: "Avtandil", gender: "boy", fr: "Cœur de la patrie", en: "Heart of the homeland", tags: ["courage", "noblesse"], style: ["rare", "poetique"] },
+    { name: "Beka", gender: "boy", fr: "Ferme, solide", en: "Firm, steadfast", tags: ["force"], style: ["court"] },
+    { name: "Temur", gender: "boy", fr: "Fer", en: "Iron", tags: ["force"], style: ["classique"] },
+    { name: "Vano", gender: "boy", fr: "Dieu fait grâce", en: "God is gracious", tags: ["foi", "grace"], style: ["court"] },
+    { name: "Zaza", gender: "boy", fr: "Fleur, éclat", en: "Bloom, radiance", tags: ["beaute", "joie"], style: ["court", "rare"] },
+    // Filles
+    { name: "Tamar", gender: "girl", fr: "Palmier dattier", en: "Date palm", tags: ["nature", "noblesse"], style: ["classique", "elegant"] },
+    { name: "Tinatin", gender: "girl", fr: "Rayon de soleil", en: "Sunbeam", tags: ["lumiere", "beaute"], style: ["poetique", "rare"] },
+    { name: "Natela", gender: "girl", fr: "Lumineuse", en: "Luminous", tags: ["lumiere"], style: ["rare", "poetique"] },
+    { name: "Mzia", gender: "girl", fr: "Soleil", en: "Sun", tags: ["lumiere", "joie"], style: ["rare", "court"] },
+    { name: "Lali", gender: "girl", fr: "Rubis", en: "Ruby", tags: ["beaute"], style: ["court", "rare"] },
+    { name: "Sopio", gender: "girl", fr: "Sagesse", en: "Wisdom", tags: ["sagesse"], style: ["elegant"] },
+    { name: "Nana", gender: "girl", fr: "Tendre, douce", en: "Tender, gentle", tags: ["amour", "grace"], style: ["court"] },
+    { name: "Ketevan", gender: "girl", fr: "Pure", en: "Pure", tags: ["grace", "foi"], style: ["classique", "rare"] },
+    { name: "Rusudan", gender: "girl", fr: "Croyante, lumineuse", en: "Faithful, radiant", tags: ["foi", "lumiere"], style: ["rare"] },
+    { name: "Eter", gender: "girl", fr: "Éther, ciel pur", en: "Ether, clear sky", tags: ["nature", "beaute"], style: ["poetique", "rare"] },
+    { name: "Mzekala", gender: "girl", fr: "Fille du soleil", en: "Daughter of the sun", tags: ["lumiere", "joie"], style: ["rare", "poetique"] },
+    { name: "Tamuna", gender: "girl", fr: "Petite Tamar", en: "Little Tamar", tags: ["nature", "grace"], style: ["court", "moderne"] },
+  ],
+};
