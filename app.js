@@ -58,6 +58,10 @@ const I18N = {
     f_origin: "Origine", o_all: "Toutes", o_hebreu: "Hébreu", o_francais: "Français",
     o_anglais: "Anglais", o_arabe: "Arabe", o_italien: "Italien", o_espagnol: "Espagnol",
     o_grec: "Grec", o_latin: "Latin",
+    o_nordique: "Nordique", o_irlandais: "Irlandais", o_japonais: "Japonais", o_slave: "Slave",
+    o_sanskrit: "Sanskrit", o_persan: "Persan", o_africain: "Africain", o_portugais: "Portugais",
+    o_coreen: "Coréen", o_chinois: "Chinois", o_gallois: "Gallois", o_basque: "Basque",
+    o_armenien: "Arménien", o_georgien: "Géorgien",
     f_style: "Style", any: "Peu importe",
     s_classique: "Classique", s_moderne: "Moderne", s_rare: "Rare",
     s_elegant: "Élégant", s_court: "Court", s_poetique: "Poétique",
@@ -277,7 +281,7 @@ const I18N = {
     notif_match_found: (n) => `🎉 ${n} nouveau${n > 1 ? "x" : ""} match${n > 1 ? "s" : ""} !`,
     notif_weeks_left: (n) => `⏳ Plus que ${n} semaine${n > 1 ? "s" : ""} avant la date prévue`,
     /* ---- listes ---- */
-    origins: { hebreu: "Hébreu", francais: "Français", anglais: "Anglais", arabe: "Arabe", italien: "Italien", espagnol: "Espagnol", grec: "Grec", latin: "Latin" },
+    origins: { hebreu: "Hébreu", francais: "Français", anglais: "Anglais", arabe: "Arabe", italien: "Italien", espagnol: "Espagnol", grec: "Grec", latin: "Latin", nordique: "Nordique", irlandais: "Irlandais", japonais: "Japonais", slave: "Slave", sanskrit: "Sanskrit", persan: "Persan", africain: "Africain", portugais: "Portugais", coreen: "Coréen", chinois: "Chinois", gallois: "Gallois", basque: "Basque", armenien: "Arménien", georgien: "Géorgien" },
     styles: { classique: "Classique", moderne: "Moderne", rare: "Rare", elegant: "Élégant", court: "Court", poetique: "Poétique" }
   },
 
@@ -302,6 +306,10 @@ const I18N = {
     f_origin: "Origin", o_all: "All", o_hebreu: "Hebrew", o_francais: "French",
     o_anglais: "English", o_arabe: "Arabic", o_italien: "Italian", o_espagnol: "Spanish",
     o_grec: "Greek", o_latin: "Latin",
+    o_nordique: "Nordic", o_irlandais: "Irish", o_japonais: "Japanese", o_slave: "Slavic",
+    o_sanskrit: "Sanskrit", o_persan: "Persian", o_africain: "African", o_portugais: "Portuguese",
+    o_coreen: "Korean", o_chinois: "Chinese", o_gallois: "Welsh", o_basque: "Basque",
+    o_armenien: "Armenian", o_georgien: "Georgian",
     f_style: "Style", any: "Any",
     s_classique: "Classic", s_moderne: "Modern", s_rare: "Rare",
     s_elegant: "Elegant", s_court: "Short", s_poetique: "Poetic",
@@ -510,7 +518,7 @@ const I18N = {
     notif_partner_voted: (n) => `Your partner voted on ${n} name${n > 1 ? "s" : ""}!`,
     notif_match_found: (n) => `🎉 ${n} new match${n > 1 ? "es" : ""}!`,
     notif_weeks_left: (n) => `⏳ ${n} week${n > 1 ? "s" : ""} left until your due date`,
-    origins: { hebreu: "Hebrew", francais: "French", anglais: "English", arabe: "Arabic", italien: "Italian", espagnol: "Spanish", grec: "Greek", latin: "Latin" },
+    origins: { hebreu: "Hebrew", francais: "French", anglais: "English", arabe: "Arabic", italien: "Italian", espagnol: "Spanish", grec: "Greek", latin: "Latin", nordique: "Nordic", irlandais: "Irish", japonais: "Japanese", slave: "Slavic", sanskrit: "Sanskrit", persan: "Persian", africain: "African", portugais: "Portuguese", coreen: "Korean", chinois: "Chinese", gallois: "Welsh", basque: "Basque", armenien: "Armenian", georgien: "Georgian" },
     styles: { classique: "Classic", moderne: "Modern", rare: "Rare", elegant: "Elegant", court: "Short", poetique: "Poetic" }
   }
 };
