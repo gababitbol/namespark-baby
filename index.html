@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
   <!-- Analytics — Plausible (RGPD, sans cookie, sans bannière)
        Remplace YOUR_DOMAIN par votre domaine réel (ex: namespark.baby)
        dans les Project Settings de plausible.io -->
@@ -68,6 +68,7 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="#accueil" data-nav data-i18n="nav_home">Accueil</a></li>
         <li><a href="#generateur" data-nav data-i18n="nav_generator">Générateur</a></li>
+        <li><a href="#signification" data-nav data-i18n="nav_meaning">Signification</a></li>
         <li><a href="#comment" data-nav data-i18n="nav_how">Comment ça marche</a></li>
         <li><a href="#faq" data-nav data-i18n="nav_faq">FAQ</a></li>
         <li id="navListeWrap">
@@ -276,6 +277,22 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ============================ SIGNIFICATION D'UN PRÉNOM ============================ -->
+    <section id="signification" class="alt-bg">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 data-i18n="sig_title">Signification d'un prénom</h2>
+          <p data-i18n="sig_sub">Tapez un prénom pour découvrir son origine, sa signification et des prénoms proches.</p>
+        </div>
+        <div class="sig-search reveal">
+          <input type="text" id="sigInput" autocomplete="off" data-i18n-ph="sig_placeholder"
+                 placeholder="Ex : Nathan, Léa, Yasmine…" aria-label="Rechercher un prénom" />
+          <ul id="sigSuggest" class="sig-suggest" role="listbox" hidden></ul>
+        </div>
+        <div id="sigDetail" class="sig-detail" aria-live="polite"></div>
       </div>
     </section>
 
@@ -806,7 +823,7 @@
   <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
   <script src="storage.js?v=10"></script>
   <!-- data.js et app.js (data.js en premier) -->
-  <script src="data.js?v=29"></script>
-  <script src="app.js?v=10"></script>
+  <script src="data.js?v=30"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

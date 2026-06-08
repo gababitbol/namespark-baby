@@ -35,8 +35,17 @@
 const I18N = {
   fr: {
     /* ---- navigation ---- */
-    nav_home: "Accueil", nav_generator: "Générateur",
+    nav_home: "Accueil", nav_generator: "Générateur", nav_meaning: "Signification",
     nav_how: "Comment ça marche", nav_faq: "FAQ",
+    sig_title: "Signification d'un prénom",
+    sig_sub: "Tapez un prénom pour découvrir son origine, sa signification et des prénoms proches.",
+    sig_placeholder: "Ex : Nathan, Léa, Yasmine…",
+    sig_meaning: "Signification", sig_origin: "Origine", sig_gender: "Genre",
+    sig_style: "Style", sig_length: "Longueur", sig_variants: "Variantes",
+    sig_pron: "Prononciation", sig_similar: "Prénoms similaires",
+    sig_open_generator: "Voir des prénoms similaires",
+    sig_not_found: "Aucun prénom trouvé pour",
+    sig_intro: "Plus de 4 000 prénoms avec leur signification, leur origine et leur style.",
     nav_favs: "Mes favoris",
     /* ---- hero ---- */
     hero_eyebrow: "Pour les futurs parents",
@@ -288,8 +297,17 @@ const I18N = {
   },
 
   en: {
-    nav_home: "Home", nav_generator: "Generator",
+    nav_home: "Home", nav_generator: "Generator", nav_meaning: "Meaning",
     nav_how: "How it works", nav_faq: "FAQ",
+    sig_title: "Name meaning",
+    sig_sub: "Type a name to discover its origin, meaning and similar names.",
+    sig_placeholder: "E.g. Nathan, Léa, Yasmine…",
+    sig_meaning: "Meaning", sig_origin: "Origin", sig_gender: "Gender",
+    sig_style: "Style", sig_length: "Length", sig_variants: "Variants",
+    sig_pron: "Pronunciation", sig_similar: "Similar names",
+    sig_open_generator: "See similar names",
+    sig_not_found: "No name found for",
+    sig_intro: "Over 4,000 names with their meaning, origin and style.",
     nav_favs: "Favourites",
     hero_eyebrow: "For parents-to-be",
     hero_title: "Your baby's name, chosen together",
@@ -597,9 +615,16 @@ function applyLang(next) {
     if (typeof val === "string") el.textContent = val;
   });
 
+  document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
+    const val = I18N[lang][el.getAttribute("data-i18n-ph")];
+    if (typeof val === "string") el.setAttribute("placeholder", val);
+  });
+
   document.querySelectorAll("#langSwitch button").forEach((b) =>
     b.classList.toggle("active", b.dataset.lang === lang)
   );
+
+  if (typeof renderSigCurrent === "function") renderSigCurrent();
 
   renderFaq();
   if (lastResults) renderResults(lastResults, lastTitle);
@@ -3107,6 +3132,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initSegments();
   initForm();
   initPopular();
+  initSignification();
   renderFaq();
   animateTitle();
   initReveal();
@@ -3135,3 +3161,170 @@ document.addEventListener("DOMContentLoaded", () => {
     applyQueryPrefill();
   }
 });
+
+/* =============================================================
+   25) PAGE « SIGNIFICATION D'UN PRÉNOM »
+   - Recherche instantanée dans toute la base
+   - Fiche détaillée (réutilise les données NAMES)
+   - Deep-link SEO : #/prenom/<slug>  (slug = nom normalisé)
+   ============================================================= */
+function sigSlug(name) {
+  return name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+             .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+let _sigIndex = null;      // [{ name, norm, slug, ref }]
+let _sigBySlug = null;     // Map slug -> name
+let currentSigName = null; // prénom actuellement affiché (pour re-render i18n)
+
+function buildSigIndex() {
+  if (_sigIndex) return;
+  _sigIndex = [];
+  _sigBySlug = new Map();
+  const seen = new Set();
+  for (const n of NAMES) {
+    const key = n.name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const norm = n.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const slug = sigSlug(n.name);
+    _sigIndex.push({ name: n.name, norm, slug, ref: n });
+    if (!_sigBySlug.has(slug)) _sigBySlug.set(slug, n.name);
+  }
+}
+
+function sigSearch(q, limit = 8) {
+  buildSigIndex();
+  const nq = q.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+  if (!nq) return [];
+  const starts = [], contains = [];
+  for (const e of _sigIndex) {
+    if (e.norm.startsWith(nq)) starts.push(e);
+    else if (e.norm.includes(nq)) contains.push(e);
+    if (starts.length >= limit) break;
+  }
+  return starts.concat(contains).slice(0, limit);
+}
+
+function renderSigDetail(name) {
+  const detail = document.getElementById("sigDetail");
+  if (!detail) return;
+  const n = NAMES.find((x) => x.name === name);
+  if (!n) {
+    detail.innerHTML = `<div class="sig-empty">${t("sig_not_found")} « ${name} ».</div>`;
+    currentSigName = null;
+    return;
+  }
+  currentSigName = name;
+  const meaning = (n.meaning && (n.meaning[lang] || n.meaning.fr)) || "";
+  const originLabel = (t("origins") || {})[n.origin] || n.origin;
+  const styleLabels = (n.style || []).map((s) => (t("styles") || {})[s] || s).join(" · ");
+  const genderLabel = n.gender === "boy" ? t("g_boy") : n.gender === "girl" ? t("g_girl") : t("g_mixte");
+  const lengthLabel = t("l_" + n.length) || n.length;
+  const tags = (n.meaningTags || []).map((tg) => `<span class="sig-tag">${t("m_" + tg) || tg}</span>`).join("");
+  const variants = (n.variants && n.variants.length)
+    ? `<div class="sig-row"><span class="k">${t("sig_variants")}</span><span class="v">${n.variants.join(", ")}</span></div>` : "";
+  const pron = n.pronunciation
+    ? `<div class="sig-row"><span class="k">${t("sig_pron")}</span><span class="v sig-pron">${n.pronunciation}</span></div>` : "";
+
+  const similar = getSimilarDemo(name, 6);
+  const similarHTML = similar.length ? `
+    <div class="sig-similar">
+      <h4>${t("sig_similar")}</h4>
+      <div class="chips">
+        ${similar.map((s) => `<button class="chip" data-sig-name="${s.name}">${s.name}</button>`).join("")}
+      </div>
+    </div>` : "";
+
+  detail.innerHTML = `
+    <article class="sig-card">
+      <div class="sig-head">
+        <h3>${n.name}</h3>
+        <span class="sig-gender-badge ${n.gender}">${genderLabel}</span>
+      </div>
+      <p class="sig-meaning">« ${meaning} »</p>
+      <div class="sig-rows">
+        <div class="sig-row"><span class="k">${t("sig_origin")}</span><span class="v">${originLabel}</span></div>
+        <div class="sig-row"><span class="k">${t("sig_style")}</span><span class="v">${styleLabels}</span></div>
+        <div class="sig-row"><span class="k">${t("sig_length")}</span><span class="v">${lengthLabel}</span></div>
+        <div class="sig-row"><span class="k">${t("sig_meaning")}</span><span class="v"><div class="sig-tags">${tags}</div></span></div>
+        ${variants}
+        ${pron}
+      </div>
+      <div class="sig-actions">
+        <a class="btn btn-ghost" href="?origin=${n.origin}&gender=${n.gender}#generateur">${t("sig_open_generator")}</a>
+        <button class="btn btn-ghost" data-sig-fav="${n.name}">${favorites.has(n.name) ? t("fav_remove") : t("fav_add_tip")}</button>
+      </div>
+      ${similarHTML}
+    </article>`;
+
+  detail.querySelectorAll("[data-sig-name]").forEach((b) =>
+    b.addEventListener("click", () => selectSigName(b.getAttribute("data-sig-name"))));
+  const favBtn = detail.querySelector("[data-sig-fav]");
+  if (favBtn) favBtn.addEventListener("click", () => {
+    const nm = favBtn.getAttribute("data-sig-fav");
+    if (favorites.has(nm)) favorites.delete(nm); else favorites.add(nm);
+    saveFavorites(); renderFavorites(); updateSelPanel();
+    renderSigDetail(nm);
+  });
+}
+
+function renderSigCurrent() { if (currentSigName) renderSigDetail(currentSigName); }
+
+function selectSigName(name, opts = {}) {
+  const input = document.getElementById("sigInput");
+  const sug = document.getElementById("sigSuggest");
+  if (input) input.value = name;
+  if (sug) { sug.hidden = true; sug.innerHTML = ""; }
+  renderSigDetail(name);
+  const slug = sigSlug(name);
+  if (location.hash !== "#/prenom/" + slug) {
+    history.replaceState(null, "", "#/prenom/" + slug);
+  }
+  if (!opts.noScroll) {
+    document.getElementById("signification")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function initSignification() {
+  const input = document.getElementById("sigInput");
+  const sug = document.getElementById("sigSuggest");
+  if (!input || !sug) return;
+  buildSigIndex();
+
+  const showSuggest = () => {
+    const q = input.value.trim();
+    const res = sigSearch(q, 8);
+    if (!res.length) { sug.hidden = true; sug.innerHTML = ""; return; }
+    sug.innerHTML = res.map((e) => {
+      const o = (t("origins") || {})[e.ref.origin] || e.ref.origin;
+      const m = (e.ref.meaning && (e.ref.meaning[lang] || e.ref.meaning.fr)) || "";
+      return `<li role="option" data-name="${e.name}"><span class="s-name">${e.name}</span><span class="s-meta">${o} — ${m}</span></li>`;
+    }).join("");
+    sug.hidden = false;
+    sug.querySelectorAll("li").forEach((li) =>
+      li.addEventListener("mousedown", (ev) => { ev.preventDefault(); selectSigName(li.getAttribute("data-name")); }));
+  };
+
+  input.addEventListener("input", showSuggest);
+  input.addEventListener("focus", () => { if (input.value.trim()) showSuggest(); });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const res = sigSearch(input.value.trim(), 1);
+      if (res.length) selectSigName(res[0].name);
+    } else if (e.key === "Escape") { sug.hidden = true; }
+  });
+  document.addEventListener("click", (e) => {
+    if (!sug.contains(e.target) && e.target !== input) sug.hidden = true;
+  });
+
+  // Deep-link : #/prenom/<slug>
+  const routeFromHash = () => {
+    const m = location.hash.match(/^#\/prenom\/(.+)$/);
+    if (!m) return false;
+    const name = _sigBySlug.get(decodeURIComponent(m[1]));
+    if (name) { selectSigName(name, { noScroll: false }); return true; }
+    return false;
+  };
+  window.addEventListener("hashchange", routeFromHash);
+  routeFromHash();
+}

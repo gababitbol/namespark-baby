@@ -30,7 +30,7 @@ Disa;g;Déesse active;Active goddess
 Edda;g;Aïeule, poésie;Great-grandmother, poetry
 Elin;g;Lumière;Light
 Ebba;g;Forte, sanglier;Strong
-Frceja;g;Dame, déesse;Lady, goddess
+Freyja;g;Dame, déesse;Lady, goddess
 Gunhild;g;Bataille;Battle
 Hedda;g;Combattante;Warrior maid
 Idun;g;Toujours jeune;Ever young
