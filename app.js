@@ -181,6 +181,7 @@ const I18N = {
     drawer_compare_btn: "⚖️ Comparer mes favoris",
     drawer_logout: "Se déconnecter",
     email_sent_ok: "📩 Email envoyé ! Vérifiez votre boîte mail.",
+    email_already_sent: "📩 Cet email a déjà été envoyé pour cette sélection.",
     logout_bye: "À bientôt !",
     /* ---- compatibilité ---- */
     compat_label: "Harmonie avec",
@@ -437,6 +438,7 @@ const I18N = {
     drawer_compare_btn: "⚖️ Compare favourites",
     drawer_logout: "Sign out",
     email_sent_ok: "📩 Email sent! Check your inbox.",
+    email_already_sent: "📩 This email has already been sent for this selection.",
     logout_bye: "See you soon!",
     compat_label: "Harmony with",
     compat_na: "Enter a last name to see the score.",
@@ -1779,10 +1781,51 @@ function saveDrawerSurname() {
   showToast(t("drawer_surname_saved"));
 }
 
-function sendEmailFromEspace() {
+/* ---- Clé anti-doublon email : signature de la sélection + email ---- */
+let _lastEmailSig = null;
+function _selectionSig() {
+  return [...favorites].sort().join(",") + "|" + (currentUser?.email || "");
+}
+
+async function sendEmailFromEspace() {
   if (!currentUser) { openSaveListeModal(); return; }
+  if (favorites.size === 0) { showToast(t("share_no_fav")); return; }
+
+  /* Anti-doublon : même sélection + même email → bloqué */
+  const sig = _selectionSig();
+  if (sig === _lastEmailSig) {
+    showToast(t("email_already_sent") || "Cet email a déjà été envoyé pour cette sélection.");
+    return;
+  }
+
+  /* Sauvegarde locale (historique) */
   saveListeToStorage(currentUser.firstName, currentUser.email);
-  showToast(t("email_sent_ok"));
+
+  /* Envoi réel via l'API Vercel (Resend) */
+  try {
+    const res = await fetch("/api/save-list", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: currentUser.email,
+        firstName: currentUser.firstName || null,
+        names: [...favorites],
+        surname: lastSurname || null,
+        lang
+      })
+    });
+    if (res.ok) {
+      _lastEmailSig = sig;
+      showToast(t("email_sent_ok"));
+    } else {
+      const data = await res.json().catch(() => ({}));
+      console.error("[NameSpark] save-list error:", data);
+      showToast(t("err_network") || "Erreur lors de l'envoi de l'email.");
+    }
+  } catch (err) {
+    console.error("[NameSpark] sendEmail fetch error:", err);
+    showToast(t("err_network") || "Erreur réseau.");
+  }
 }
 
 function loadHistoryEntry(entry) {
@@ -2109,20 +2152,7 @@ function executePremiumAction(action) {
       setTimeout(() => exportPDF(), 260);
       break;
     case "email":
-      if (currentUser) {
-        saveListeToStorage(currentUser.firstName, currentUser.email);
-        fetch("/api/save-list", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email:     currentUser.email,
-            firstName: currentUser.firstName || null,
-            names:     [...favorites],
-            lang,
-          }),
-        }).catch(() => {});
-      }
-      showToast(t("email_sent_ok"));
+      sendEmailFromEspace(); /* centralisé, avec anti-doublon + appel API */
       renderSelectionPage();
       break;
     case "save":

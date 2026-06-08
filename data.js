@@ -4039,4 +4039,5 @@ const NAMES = [
   { name: "Haven", gender: "mixte", origin: "anglais", style: ["elegant","poetique"], meaningTags: ["force"], length: "moyen", meaning: {"fr":"Refuge, havre","en":"Haven"}, why: {"fr":"Haven plein de caractère et de douceur.","en":"Haven full of character and softness."} },
   { name: "Bliss", gender: "girl", origin: "anglais", style: ["poetique"], meaningTags: ["joie"], length: "moyen", meaning: {"fr":"Félicité","en":"Bliss"}, why: {"fr":"Bliss chaleureux et facile à prononcer.","en":"Bliss warm and easy to pronounce."} },
   { name: "Loyal", gender: "boy", origin: "anglais", style: ["elegant","poetique"], meaningTags: ["force"], length: "moyen", meaning: {"fr":"Loyal, fidèle","en":"Loyal"}, why: {"fr":"Loyal élégant et facile à porter.","en":"Loyal elegant and easy to carry."} },
+  { name: "Shalev", gender: "boy", origin: "hebreu", style: ["moderne","rare"], meaningTags: ["paix","grace"], length: "moyen", meaning: {"fr":"Paisible, serein","en":"Peaceful, tranquil"}, why: {"fr":"Shalev séduit par sa douceur et son calme naturel.","en":"Shalev charms with its gentleness and natural calm."} },
 ];
