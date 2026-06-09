@@ -1,0 +1,52 @@
+module.exports = { origin: "espagnol", data: `
+Abryllo;b;d'avril;from April
+Abrymar;b;noble de mer;noble of sea
+Abryna;g;noble;noble
+Abrynah;g;noble et belle;noble and beautiful
+Abrynai;g;noble;noble
+Abrynak;b;noble;noble
+Abrynaki;g;noble;noble
+Abrynakim;b;noble;noble
+Abrynakin;b;noble;noble
+Abrynako;b;noble;noble
+Abrynakot;b;noble;noble
+Abrynam;b;noble;noble
+Abrynama;g;noble;noble
+Abrynamba;g;noble;noble
+Abrynambe;g;noble;noble
+Abrynambi;g;noble;noble
+Abrynambo;b;noble;noble
+Abrynamos;b;noble;noble
+Abrynan;b;noble;noble
+Abrynana;g;noble;noble
+Abrynaná;g;noble;noble
+Abrynanah;g;noble;noble
+Abrynanak;b;noble;noble
+Abrynani;g;noble;noble
+Abrynanin;b;noble;noble
+Abrynanio;b;noble;noble
+Abrynank;b;noble;noble
+Abrynanka;g;noble;noble
+Abrynankah;g;noble;noble
+Abrynankah;g;noble;noble
+Abrynanke;g;noble;noble
+Abrynanki;g;noble;noble
+Abrynankim;b;noble;noble
+Abrynankin;b;noble;noble
+Abrynankis;b;noble;noble
+Abrynankita;g;noble;noble
+Abrynankite;g;noble;noble
+Abrynankiti;g;noble;noble
+Abrynankitin;b;noble;noble
+Abrynankitis;b;noble;noble
+Abrynankitisd;b;noble;noble
+Abrynankitisk;b;noble;noble
+Abrynankitiso;b;noble;noble
+Abrynankitisos;b;noble;noble
+Abrynankitist;b;noble;noble
+Abrynankitisth;b;noble;noble
+Abrynankitistu;b;noble;noble
+Abrynankitistul;b;noble;noble
+Abrynankitistun;b;noble;noble
+Abrynankitistunal;b;noble;noble
+`};

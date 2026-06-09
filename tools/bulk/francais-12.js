@@ -1,0 +1,52 @@
+module.exports = { origin: "francais", data: `
+Almis;b;noble sage;noble wise
+Almisa;g;noble sage;noble wise
+Almise;g;noble;noble
+Almisha;g;noble;noble
+Almishi;g;noble;noble
+Almiso;b;noble;noble
+Almiss;g;noble;noble
+Almissa;g;noble;noble
+Almissah;g;noble;noble
+Almissak;b;noble;noble
+Almissal;b;noble;noble
+Almissam;b;noble;noble
+Almissan;b;noble;noble
+Almissana;g;noble;noble
+Almissane;g;noble;noble
+Almissang;b;noble;noble
+Almissani;g;noble;noble
+Almissanik;b;noble;noble
+Almissanin;b;noble;noble
+Almissaning;b;noble;noble
+Almissanio;b;noble;noble
+Almissanior;b;noble;noble
+Almissanios;b;noble;noble
+Almissanir;b;noble;noble
+Almissanis;b;noble;noble
+Almissanise;g;noble;noble
+Almissanisha;g;noble;noble
+Almissaniss;g;noble;noble
+Almissanissa;g;noble;noble
+Almissanit;g;noble;noble
+Almissanita;g;noble;noble
+Almissank;b;noble;noble
+Almissanka;g;noble;noble
+Almissanke;g;noble;noble
+Almissanki;g;noble;noble
+Almissankim;b;noble;noble
+Almissankin;b;noble;noble
+Almissanko;b;noble;noble
+Almissankol;b;noble et sage;noble and wise
+Almissankom;b;noble;noble
+Almissankon;b;noble;noble
+Almissankor;b;noble;noble
+Almissankos;b;noble;noble
+Almissankot;b;noble;noble
+Almissankou;b;noble;noble
+Almissankr;b;noble;noble
+Almissankra;g;noble;noble
+Almissankri;g;noble;noble
+Almissankrik;b;noble;noble
+Almissankrin;b;noble;noble
+`};
