@@ -1,45 +1,63 @@
 module.exports = { origin: "coreen", data: `
-Kang;b;Fort, robuste;Strong
-Seokwoo;b;Roc de l'univers;Stone universe
-Hanbin;b;Brillant, raffiné;Bright, refined
-Jiwon;b;Origine de la sagesse;Source of wisdom
-Minseok;b;Roc vif;Quick stone
-Taehyung;b;Grand et brillant;Great and bright
-Yoonseo;b;Présage favorable;Auspicious sign
-Junho;b;Talent généreux;Generous talent
-Sangwoo;b;Univers suprême;Supreme universe
-Doyun;b;Voie abondante;Abundant path
-Hyunsoo;b;Excellence vertueuse;Virtuous excellence
-Jaeyoon;b;Talent permis;Granted talent
-Minki;b;Énergie vive;Bright energy
-Seungho;b;Héros victorieux;Victorious hero
-Wonbin;b;Origine raffinée;Refined origin
-Geon;b;Ferme, bâtir;Firm, build
-Hojin;b;Trésor précieux;Precious treasure
-Jihwan;b;Sagesse brillante;Bright wisdom
-Namjoon;b;Talent du sud;Southern talent
-Siwoo;b;Pluie nouvelle;New rain
-Suho;b;Gardien protecteur;Guardian
-Yujin;m;Précieux trésor;Precious treasure
-Eunseo;g;Grâce auspicieuse;Auspicious grace
-Jiyu;g;Sagesse douce;Gentle wisdom
-Subin;g;Brillante et pure;Bright, pure
-Yejin;g;Beauté et trésor;Beauty, treasure
-Hyewon;g;Source de grâce;Source of grace
-Dahyun;g;Grande clarté;Great brightness
-Gaeun;g;Grâce magnifique;Splendid grace
-Hyunji;g;Sagesse vertueuse;Virtuous wisdom
-Jisun;g;Bonté sage;Wise goodness
-Minseo;g;Beauté vive;Bright beauty
-Nayeon;g;Élégance gracieuse;Graceful elegance
-Seohyun;g;Vertu auspicieuse;Auspicious virtue
-Sumin;g;Beauté excellente;Excellent beauty
-Yeji;g;Sagesse artistique;Artistic wisdom
-Yoonha;g;Lumière permise;Granted light
-Chaeyoung;g;Floraison éclatante;Bright blossom
-Dabin;g;Grande grâce;Great grace
-Garam;g;Rivière;River
-Hana;g;Une, unique;One, unique
-Sarang;g;Amour;Love
-Seul;g;Rosée, perle;Dew, pearl
+Ahn;b;quietude, paix;quietude, peace
+Baek;b;blanc, pur;white, pure
+Bo;g;précieuse, perle;precious, pearl
+Bomi;g;beauté du printemps;spring beauty
+Bongsun;g;phénix immortel;immortal phoenix
+Byeol;g;étoile, brillante;star, brilliant
+Byung;b;brave, courageux;brave, courageous
+Chae;g;couleur, éclat;color, brilliance
+Chaeun;g;grâce colorée;colorful grace
+Chaeyoung;g;beauté colorée;colorful beauty
+Chan;b;brillant, noble;brilliant, noble
+Chanhee;b;joie brillante;brilliant joy
+Chanho;b;lac brillant;brilliant lake
+Chanyeol;b;brillant et chaud;brilliant and warm
+Daehan;b;grand Coréen;great Korean
+Daehee;b;grande joie;great joy
+Dahyun;g;grande sagesse;great wisdom
+Dayeon;g;grande connexion;great connection
+Dongwoo;b;amitié orientale;eastern friendship
+Dowoon;b;vaste mouvement;vast movement
+Eun;g;grâce, argent;grace, silver
+Eunha;g;rivière de grâce;river of grace
+Eunhee;g;joie de grâce;joy of grace
+Eunjung;g;loyauté de grâce;loyal grace
+Gaon;b;fier, glorieux;proud, glorious
+Geun;b;racine, fondement;root, foundation
+Gyuri;g;beauté qui tourne;turning beauty
+Ha;g;rivière, été;river, summer
+Haeun;g;été de grâce;summer grace
+Hana;g;une seule, unique;one, unique
+Hanul;g;ciel, vaste;sky, vast
+Harin;g;beauté du tigre;tiger beauty
+Haru;g;jour, soleil;day, sun
+Hyeok;b;révolution, renouveau;revolution, renewal
+Hyeonseok;b;présent brillant;brilliant present
+Hyojin;g;filiale et pure;filial and pure
+Hyunji;g;sage et pure;wise and pure
+Inyoung;b;vin éternel;eternal prosperity
+Jaebeom;b;grand tigre;great tiger
+Jaehwan;b;grand retour;great return
+Jaewon;b;grande source;great source
+Jihae;g;sagesse de la mer;wisdom of the sea
+Jinsol;b;vraie forêt de pins;true pine forest
+Jiyeong;b;sage feu;wise fire
+Jongin;b;vrai et humain;true and human
+Joohee;g;perle de joie;pearl of joy
+Juhyeon;g;beau rubis;beautiful ruby
+Junho;b;héros du printemps;spring hero
+Junseo;b;noble et calliographe;noble and calligraphic
+Junwoo;b;noble pluie;noble rain
+Kyung;g;honneur, respect;honor, respect
+Kyungha;g;été honorable;honorable summer
+Kyunghee;g;joie honorable;honorable joy
+Mikyung;g;belle et honorable;beautiful and honorable
+Minhee;b;brillante joie;brilliant joy
+Minjae;b;talent brillant;brilliant talent
+Minseok;b;diamant de talent;diamond talent
+Mirae;g;avenir lumineux;bright future
+Miyeon;g;belle connexion;beautiful connection
+Naeun;g;ma grâce;my grace
+Namjoon;b;talent du sud;southern talent
 `};

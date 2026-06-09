@@ -1,50 +1,52 @@
 module.exports = { origin: "italien", data: `
-Adriano;b;De l'Adriatique;From the Adriatic
-Alvise;b;Guerrier illustre;Famous warrior
-Ascanio;b;Sans tente, nomade;Tentless
-Battista;b;Celui qui baptise;Baptiser
-Camillo;b;Servant du temple;Temple servant
-Dante;b;Qui endure, durable;Enduring
-Egidio;b;Bouclier, protecteur;Shield
-Ferruccio;b;De fer, ferme;Iron, firm
-Gioacchino;b;Dieu établira;God will establish
-Goffredo;b;Paix divine;Divine peace
-Ilario;b;Joyeux, gai;Cheerful
-Lamberto;b;Brillant pays;Bright land
-Lazzaro;b;Dieu a secouru;God has helped
-Lelio;b;Loquace, gai;Talkative
-Maurilio;b;Brun, sombre;Dark
-Nazario;b;De Nazareth;Of Nazareth
-Oreste;b;De la montagne;Of the mountain
-Pellegrino;b;Pèlerin, voyageur;Pilgrim
-Quirino;b;Lancier;Spear-bearer
-Raimondo;b;Sage protecteur;Wise protector
-Saverio;b;Maison neuve;New house
-Tullio;b;Paisible;Peaceful
-Vittore;b;Vainqueur;Conqueror
-Zeno;b;Don de Zeus;Gift of Zeus
-Albina;g;Blanche, pure;White, pure
-Annalisa;g;Grâce consacrée;Grace consecrated
-Aurelia;g;Dorée;Golden
-Brigida;g;Force, exaltée;Strength, exalted
-Carmen;g;Chant;Song
-Cleofe;g;Gloire du père;Glory of the father
-Damiana;g;Qui dompte;Tamer
-Donata;g;Donnée par Dieu;Given by God
-Eleonora;g;Lumière, compassion;Light, compassion
-Fiammetta;g;Petite flamme;Little flame
-Geltrude;g;Lance vigoureuse;Strong spear
-Ilenia;g;Lumineuse, torche;Bright, torch
-Liana;g;Liane, grâce;Vine, grace
-Mirella;g;Admirable;Admirable
-Nicoletta;g;Victoire du peuple;Victory of the people
-Ottavia;g;Huitième;Eighth
-Prisca;g;Ancienne, vénérable;Ancient, venerable
-Rosalia;g;Belle rose;Beautiful rose
-Sabrina;g;De la rivière;Of the river
-Serafina;g;Ardente, séraphin;Fiery, seraph
-Tecla;g;Gloire de Dieu;Glory of God
-Ursula;g;Petite ourse;Little bear
-Vanna;g;Dieu fait grâce;God is gracious
-Zita;g;Jeune fille, chercheuse;Maiden, seeker
+Abbone;b;abbé, pieux;abbot, pious
+Abramo;b;père d'une multitude;father of a multitude
+Accursio;b;qui court vers, zélé;who runs towards, zealous
+Achille;b;douleur, guerrier;pain, warrior
+Adalberto;b;noble et brillant;noble and brilliant
+Adalgiso;b;otage noble;noble hostage
+Adalrico;b;noble richesse;noble wealth
+Adamo;b;fait de terre, humain;made of earth, human
+Adauco;b;qui augmente, croît;who increases, grows
+Addo;b;noble, bon;noble, good
+Adeodato;b;don de Dieu;gift of God
+Adelchi;b;noble et intrépide;noble and fearless
+Adelindo;b;serpent noble;noble snake
+Adelmo;b;noble casque;noble helmet
+Adelone;b;grand noble;great noble
+Adelvino;b;noble ami;noble friend
+Ademaro;b;noble gloire;noble glory
+Adenzio;b;noble;noble
+Adeodato;b;don de Dieu;gift of God
+Adilio;b;noble fils;noble son
+Adriana;g;de l'Adriatique;from the Adriatic
+Agapito;b;aimé de Dieu;beloved by God
+Agata;g;bonne, vertueuse;good, virtuous
+Agatino;b;bon garçon;good boy
+Agazio;b;bon;good
+Ageo;b;fête, célébration;festival, celebration
+Agemio;b;pur, saint;pure, holy
+Ageo;b;festif;festive
+Agilberto;b;brillant combattant;brilliant fighter
+Agipito;b;aimé;beloved
+Aglaia;g;beauté, splendeur;beauty, splendor
+Agnello;b;petit agneau;little lamb
+Agnesina;g;petite et pure;small and pure
+Agnezia;g;pure, chaste;pure, chaste
+Agobardo;b;ours fort;strong bear
+Agostina;g;majesté féminine;feminine majesty
+Agrippino;b;né premier;born first
+Aimone;b;foyer, maison;home, house
+Alagia;g;noble, précieuse;noble, precious
+Alano;b;harmonie, beau;harmony, beautiful
+Alarico;b;roi noble;noble king
+Alberigo;b;noble, brillant;noble, brilliant
+Alberico;b;roi des elfes;king of elves
+Alberta;g;noble et brillante;noble and brilliant
+Alceste;b;noble échange;noble exchange
+Alcibiade;b;force noble;noble strength
+Aldemaro;b;noble gloire;noble glory
+Aldina;g;vieille noblesse;old nobility
+Aldobrando;b;ancienne épée;ancient sword
+Aldone;b;vieux protecteur;old protector
 `};

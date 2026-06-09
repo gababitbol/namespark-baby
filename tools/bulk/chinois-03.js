@@ -1,46 +1,62 @@
 module.exports = { origin: "chinois", data: `
-Bohai;b;Mer du nord, vaste;Northern sea
-Changpu;b;Toujours simple;Ever plain
-Delun;b;Vertu et ordre;Virtue and order
-Fengge;b;Pavillon du phénix;Phoenix pavilion
-Guoliang;b;Pays excellent;Excellent nation
-Haoran;b;Vaste et droit;Vast and upright
-Heng;b;Constant, persévérant;Constant
-Hong;b;Vaste, grand;Vast, great
-Jiahao;b;Famille remarquable;Outstanding family
-Kun;b;Terre, immense;Earth, immense
-Lei;b;Tonnerre;Thunder
-Mingzhu;b;Perle brillante;Bright pearl
-Renshu;b;Bienveillant et juste;Benevolent
-Shen;b;Profond, prudent;Deep, cautious
-Tengfei;b;S'élever, prospérer;Soar, thrive
-Weiyuan;b;Au loin puissant;Mighty afar
-Xiaobo;b;Petite vague, modeste;Small wave
-Yingjie;b;Héros brillant;Bright hero
-Zhihao;b;Aspiration grandiose;Grand aspiration
-Ziyang;b;Soleil pourpre;Purple sun
-Aiguo;b;Qui aime le pays;Loves the country
-Bojing;b;Vue admirable;Admirable view
-Chunhua;g;Fleur de printemps;Spring flower
-Cuifen;g;Parfum d'émeraude;Jade fragrance
-Daiyu;g;Jade noir précieux;Black jade
-Fenfang;g;Parfum agréable;Sweet fragrance
-Huifang;g;Sage et parfumée;Wise, fragrant
-Jinghua;g;Fleur pure;Pure flower
-Lihua;g;Belle fleur;Beautiful flower
-Liling;g;Belle clochette de jade;Jade bell
-Meixiang;g;Beau parfum;Beautiful fragrance
-Nuwa;g;Déesse créatrice;Creator goddess
-Qiaohui;g;Habile et sage;Skilful, wise
-Ruolan;g;Comme l'orchidée;Like an orchid
-Shuang;g;Claire, franche;Clear, bright
-Shufen;g;Vertueuse et parfumée;Virtuous, fragrant
-Tingfeng;g;Pavillon au vent;Pavilion wind
-Wenling;g;Douce clochette;Gentle bell
-Xiaodan;g;Petite aube;Little dawn
-Xiulan;g;Belle orchidée;Elegant orchid
-Yanlin;g;Belle forêt;Beautiful forest
-Yumei;g;Belle de jade;Jade beauty
-Yuying;g;Fleur de jade;Jade flower
-Zhilan;g;Iris et orchidée;Iris and orchid
+Aihua;g;fleur d'amour;love flower
+Ailan;g;orchidée aimée;beloved orchid
+Aili;g;pluie aimée;beloved rain
+Ailing;g;carillon aimé;beloved chime
+Aiqin;g;fougère aimée;beloved fern
+Airu;g;douceur aimée;beloved gentleness
+Aiting;g;gracieux jardin;graceful garden
+Aiwei;g;magnifique aimé;beloved magnificence
+Aixin;g;cœur aimant;loving heart
+Aiyu;g;jade aimé;beloved jade
+Baifeng;g;phénix blanc;white phoenix
+Bairong;g;lotus blanc;white lotus
+Baiwei;g;magnifique blanc;white magnificence
+Beihua;g;fleur du nord;northern flower
+Beilei;g;bouton du nord;northern bud
+Beilin;g;forêt du nord;northern forest
+Beinan;g;sud du nord;northern south
+Beiqing;g;herbe du nord;northern grass
+Binghui;g;glace sage;wise ice
+Binglan;g;orchidée de glace;ice orchid
+Bingling;g;carillon de glace;ice chime
+Bingmei;g;beauté de glace;ice beauty
+Bingning;g;paix de glace;ice peace
+Bingqing;g;glace herbe;ice grass
+Cailian;g;lotus coloré;colorful lotus
+Caimei;g;beauté colorée;colorful beauty
+Caiqin;g;fougère colorée;colorful fern
+Caixia;g;nuages colorés;colorful clouds
+Caiyan;g;hirondelle colorée;colorful swallow
+Caiying;g;perle colorée;colorful pearl
+Caiyun;g;nuage coloré;colorful cloud
+Changchun;b;printemps éternel;eternal spring
+Changhao;b;vaste éternité;vast eternity
+Changming;b;destin lumineux;luminous fate
+Changrong;b;lotus éternel;eternal lotus
+Changsheng;b;vie éternelle;eternal life
+Changwei;b;magnificence éternelle;eternal magnificence
+Changxin;b;nouveau changement;new change
+Changying;b;réussite éternelle;eternal success
+Changzhi;b;aspiration éternelle;eternal aspiration
+Chengfeng;b;phénix accompli;accomplished phoenix
+Chenghao;b;héros accompli;accomplished hero
+Chenghui;b;sagesse accomplie;accomplished wisdom
+Chengjie;b;excellence accomplie;accomplished excellence
+Chenglong;b;dragon accompli;accomplished dragon
+Chengming;b;destin accompli;accomplished fate
+Dechun;b;printemps vertueux;virtuous spring
+Dehao;b;héros vertueux;virtuous hero
+Dehua;b;fleur vertueuse;virtuous flower
+Defeng;b;phénix vertueux;virtuous phoenix
+Dehai;b;mer vertueuse;virtuous sea
+Dehui;b;sagesse vertueuse;virtuous wisdom
+Dejun;b;roi vertueux;virtuous king
+Delan;b;orchidée vertueuse;virtuous orchid
+Deli;b;belle vertu;beautiful virtue
+Delin;b;forêt vertueuse;virtuous forest
+Deming;b;destin vertueux;virtuous fate
+Dongfang;b;orient, est;orient, east
+Donghe;b;rivière de l'est;eastern river
+Donghong;g;rouge de l'est;eastern red
 `};

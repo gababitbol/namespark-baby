@@ -1,48 +1,53 @@
 module.exports = { origin: "francais", data: `
-Abel;b;Souffle, vanité;Breath
-Achille;b;Héros invincible;Invincible hero
-Amédée;b;Qui aime Dieu;Lover of God
-Aymar;b;Noble et renommé;Noble and famous
-Bastian;b;Vénérable;Venerable
-Côme;b;Ordre, beauté;Order, beauty
-Edern;b;Géant vigoureux;Strong giant
-Eliott;b;Le Seigneur est Dieu;The Lord is God
-Faustin;b;Heureux, favorable;Fortunate
-Gaubert;b;Brillant pouvoir;Bright power
-Hilarion;b;Joyeux;Cheerful
-Joseph;b;Dieu accroîtra;God shall increase
-Lubin;b;Cher ami;Dear friend
-Maxence;b;Le plus grand;The greatest
-Médard;b;Puissant, courageux;Mighty, brave
-Nolan;b;Champion, noble;Champion
-Octave;b;Huitième;Eighth
-Pierrick;b;Petite pierre;Little stone
-Romuald;b;Souverain glorieux;Glorious ruler
-Sauveur;b;Sauveur;Saviour
-Théophane;b;Manifestation de Dieu;God appears
-Urbain;b;De la ville, courtois;Of the city
-Vivien;b;Plein de vie;Full of life
-Yvon;b;If, archer;Yew, archer
-Apolline;g;Consacrée à Apollon;Of Apollo
-Ariane;g;Très pure;Most pure
-Bérthe;g;Brillante;Bright
-Cyrielle;g;Seigneuriale;Lordly
-Daphné;g;Laurier;Laurel
-Edmée;g;Riche protectrice;Wealthy protector
-Eloïse;g;Saine, large;Healthy, wide
-Firmine;g;Ferme, solide;Firm
-Gwenn;g;Blanche, bénie;White, blessed
-Iris;g;Arc-en-ciel;Rainbow
-Léa;g;Lasse, gazelle;Weary, gazelle
-Lucie;g;Lumière;Light
-Maïwenn;g;Fine et blanche;Fine and fair
-Mélusine;g;Fée des eaux;Water fairy
-Naïs;g;Source, nymphe;Spring, nymph
-Oriane;g;Aube dorée;Golden dawn
-Pauline;g;Petite, humble;Small, humble
-Régine;g;Reine;Queen
-Soline;g;Solennelle, soleil;Solemn, sun
-Tiphaine;g;Apparition divine;Divine appearance
-Viviane;g;Pleine de vie;Full of life
-Zéline;g;Du ciel, sereine;Of heaven
+Abbon;b;abbé, père;abbot, father
+Abélard;b;noble et hardi;noble and bold
+Achille;b;guerrier, sans lèvres;warrior, without lips
+Adalard;b;noble et dur;noble and hard
+Adalbéron;b;ours noble;noble bear
+Adalberte;g;noble et brillante;noble and brilliant
+Adalinde;g;noble et douce;noble and gentle
+Adaltrude;g;noble et forte;noble and strong
+Adélaïde;g;noble et noble;noble and noble
+Adhémar;b;gloire illustre;illustrious glory
+Adjoint;b;associé;associated
+Agnan;b;de l'agneau;of the lamb
+Agnès;g;pure, chaste;pure, chaste
+Aimard;b;maison forte;strong home
+Aimeri;b;maison puissante;powerful home
+Aimar;b;foyer illustre;illustrious home
+Aimé;b;aimé, chéri;loved, cherished
+Alain;b;harmonie, beau;harmony, beautiful
+Alaric;b;roi noble;noble king
+Alberada;g;noble et douce;noble and gentle
+Albéric;b;roi des elfes;king of elves
+Alberte;g;noble et brillante;noble and brilliant
+Albin;b;blanc, brillant;white, brilliant
+Albine;g;blanche, pure;white, pure
+Alcuin;b;noble et intelligent;noble and intelligent
+Aleth;g;noble, vraie;noble, true
+Alix;g;noble, sorte;noble, sort
+Alphonse;b;noble et prêt;noble and ready
+Alphonsine;g;noble et prête;noble and ready
+Altmann;b;vieux homme;old man
+Alvère;g;vérité étrangère;foreign truth
+Amable;b;aimable, agréable;likeable, pleasant
+Amédée;b;amour de Dieu;love of God
+Ameline;g;douce et travailleuse;gentle and hardworking
+Amenuil;g;amour;love
+Amidée;b;amour divin;divine love
+Aminthe;g;fleur, protection;flower, protection
+Amnon;b;fidèle, nourricier;faithful, nurturing
+Amphibalus;b;vêtement, couverture;garment, covering
+Anaclès;b;faible, incapable;weak, incapable
+Ananie;b;Dieu est miséricordieux;God is gracious
+Anastase;b;résurrection;resurrection
+Anastasie;g;résurrection;resurrection
+Ancelle;g;servante, dévouée;servant, devoted
+Andrée;g;femme virile;manly woman
+Andriette;g;petite virile;little manly
+Andromaque;g;qui combat les hommes;who fights men
+Anés;g;divine;divine
+Anfroy;b;noble paix;noble peace
+Angelbert;b;ange brillant;brilliant angel
+Angelique;g;divine, angélique;divine, angelic
 `};

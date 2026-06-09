@@ -1,51 +1,53 @@
 module.exports = { origin: "espagnol", data: `
-Albaro;b;Gardien vigilant;Watchful guardian
-Aurelio;b;Doré;Golden
-Baltasar;b;Protège le roi;Protect the king
-Cipriano;b;De Chypre;From Cyprus
-Cosme;b;Ordre, beauté;Order, beauty
-Dionisio;b;Consacré à Dionysos;Of Dionysus
-Eladio;b;Grec, hellène;Greek
-Florencio;b;Florissant;Flourishing
-Gervasio;b;Serviteur de la lance;Spear servant
-Hipolito;b;Qui délie les chevaux;Frees the horses
-Isaias;b;Salut de Dieu;Salvation of God
-Jonas;b;Colombe;Dove
-Lazaro;b;Dieu a secouru;God has helped
-Lucio;b;Lumière;Light
-Maximo;b;Le plus grand;The greatest
-Nicasio;b;Victorieux;Victorious
-Onofre;b;Toujours en paix;Ever at peace
-Plácido;b;Paisible, calme;Placid, calm
-Rogelio;b;Lance glorieuse;Famous spear
-Saturnino;b;De Saturne;Of Saturn
-Telmo;b;Protecteur des marins;Sailors' protector
-Tobias;b;Dieu est bon;God is good
-Urbano;b;De la ville, courtois;Of the city
-Vidal;b;Plein de vie;Full of life
-Amaya;g;La fin, sommet;The end, height
-Brisa;g;Brise;Breeze
-Carmela;g;Jardin, verger;Garden, orchard
-Cayetana;g;De Gaète;From Gaeta
-Cielo;g;Ciel;Sky
-Damaris;g;Douce génisse;Gentle heifer
-Delia;g;De Délos, lumineuse;Of Delos, bright
-Emilia;g;Travailleuse;Industrious
-Fátima;g;Pure, qui sèvre;Pure
-Greta;g;Perle;Pearl
-Ivanna;g;Dieu fait grâce;God is gracious
-Jacinta;g;Jacinthe;Hyacinth
-Leire;g;Lieu saint;Holy place
-Lucia;g;Lumière;Light
-Marisa;g;Mer et soleil;Sea and sun
-Maya;g;Mère, source;Mother
-Noa;g;Mouvement, grâce;Movement, grace
-Olivia;g;Olivier, paix;Olive, peace
-Pia;g;Pieuse, dévote;Pious
-Rebeca;g;Qui attache, charmante;Captivating
-Rosario;g;Rosaire, roseraie;Rose garden
-Salud;g;Santé, salut;Health, salvation
-Tania;g;Reine des fées;Fairy queen
-Verónica;g;Vraie image;True image
-Zaira;g;Fleur, brillante;Flower, bright
+Abelardo;b;noble, courageux;noble, courageous
+Abundio;b;abondant, généreux;abundant, generous
+Acacio;b;acacia, innocent;acacia, innocent
+Acisclo;b;petite hache;little axe
+Adolfo;b;noble loup;noble wolf
+Adrián;b;de l'Adriatique;from the Adriatic
+Afrodisio;b;de l'amour, sensuel;of love, sensual
+Agatón;b;bon, vertueux;good, virtuous
+Agripino;b;né premier;born first
+Agustín;b;majestueux, vénérable;majestic, venerable
+Albano;b;d'Alban, blanc;from Alban, white
+Alberto;b;noble et brillant;noble and brilliant
+Alcaide;b;gouverneur, chef;governor, chief
+Alcides;b;force d'Héraclès;strength of Heracles
+Alejo;b;défenseur;defender
+Alfonso;b;noble et prêt;noble and ready
+Alfredo;b;conseiller des elfes;elven counselor
+Alipio;b;sans douleur;without pain
+Alonso;b;noble et prêt;noble and ready
+Álvaro;b;armée vigilante;watchful army
+Ambrosio;b;immortel, divin;immortal, divine
+Amílcar;b;grâce du peuple;grace of the people
+Amparo;g;protection, refuge;protection, refuge
+Ampelia;g;vigne, fertile;vine, fertile
+Anastasio;b;résurrection;resurrection
+Anatolio;b;du levant, est;from the east
+Ángeles;g;messagères célestes;heavenly messengers
+Aniceto;b;invincible;invincible
+Anselmo;b;protection divine;divine protection
+Antolín;b;de la famille Antonius;of the Antonius family
+Aparicio;b;apparition, épiphanie;appearance, epiphany
+Apolinar;b;d'Apollon;of Apollo
+Aquilino;b;aigle, vif;eagle, lively
+Arcadio;b;d'Arcadie, pastoral;from Arcadia, pastoral
+Arcelino;b;noble, fort;noble, strong
+Aresio;b;de Mars, guerrier;of Mars, warrior
+Argimiro;b;roi illustre;illustrious king
+Aristeo;b;le meilleur;the best
+Arístides;b;le meilleur;the best
+Armengol;b;aigle puissant;powerful eagle
+Arnaldo;b;aigle fort;strong eagle
+Aroa;g;bonne saison;good season
+Artemia;g;déesse de la chasse;goddess of the hunt
+Asensio;b;ascension;ascension
+Asunción;g;assomption, montée;assumption, ascent
+Atanasio;b;immortel;immortal
+Atenodoro;b;don d'Athéna;gift of Athena
+Aurelia;g;d'or, brillante;golden, brilliant
+Aureliano;b;d'or, fils d'Aurélius;golden, son of Aurelius
+Ausencio;b;absent, voyageur;absent, traveler
+Azucena;g;lys blanc, pure;white lily, pure
 `};
