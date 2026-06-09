@@ -1,55 +1,52 @@
 module.exports = { origin: "irlandais", data: `
-Ciarán;b;petit sombre, mystérieux;little dark one, mysterious
-Eoghan;b;né de l'if, jeune;born of the yew, young
-Fionn;b;blanc, pur, brillant;white, pure, brilliant
-Cormac;b;charretier, sage;charioteer, wise
-Ruairí;b;roi roux;red king
-Diarmuid;b;sans jalousie, libre;without envy, free
-Fergus;b;homme fort, vigoureux;strong man, vigorous
-Lugh;b;lumière, brillant;light, brilliant
-Niall;b;champion, puissant;champion, mighty
-Cael;b;svelte, agile;slender, agile
-Daithi;b;agilité, rapidité;agility, speed
-Lorcan;b;petit guerrier farouche;little fierce warrior
-Malachy;b;serviteur de Dieu;servant of God
-Nechtan;b;pur, purifié;pure, purified
-Oisín;b;petit cerf, léger;little deer, light
-Rónán;b;petit phoque;little seal
-Tadhg;b;poète, philosophe;poet, philosopher
-Tigernach;b;seigneur, maître;lord, master
-Ultan;b;de l'Ulster, du nord;from Ulster, northern
-Bran;b;corbeau, sage;raven, wise
-Cathal;b;règle de bataille;battle rule
-Donal;b;grand chef;great chief
-Muiris;b;seigneur de la mer;lord of the sea
-Pádraig;b;noble, patricien;noble, patrician
-Senan;b;vieux sage;old wise one
-Ailill;b;esprit des lutins;fairy spirit
-Fachtna;b;malicieux, vif;mischievous, lively
-Garbhan;b;rugueux, fort;rough, strong
-Aoibhinn;g;belle, joyeuse, radieuse;beautiful, joyful, radiant
-Bláithín;g;petite fleur;little flower
-Caoimhe;g;belle, gracieuse;beautiful, gracious
-Deirdre;g;bruyante, troublée;noisy, troubled
-Eimear;g;rapide, agile;swift, agile
-Fionnuala;g;épaule blanche, pure;white shoulder, pure
-Gráinne;g;soleil, rayonnante;sun, radiant
-Muirenn;g;née de la mer;born of the sea
-Nuala;g;épaule blanche, noble;white shoulder, noble
-Orlaith;g;princesse dorée;golden princess
-Ríonach;g;reine, majestueuse;queen, majestic
-Sadhbh;g;douce, agréable;sweet, pleasant
-Sorcha;g;lumineuse, brillante;bright, brilliant
-Áine;g;éclat, feu, beauté;brilliance, fire, beauty
-Bláthnaid;g;petite fleur, délicate;little flower, delicate
-Clíodhna;g;belle forme, élégante;beautiful shape, elegant
-Étaín;g;passionnée;passionate
-Gobnait;g;art et force;skill and strength
-Íde;g;soif de Dieu;thirst for God
-Liadán;g;poétesse grise;gray poet
-Máire;g;bien-aimée, mer amère;beloved, bitter sea
-Meadhbh;g;enivrante, douce;intoxicating, sweet
-Muireann;g;née de la mer, libre;born of the sea, free
-Nessa;g;douce ambition;gentle ambition
-Scáthach;g;ombre, mystérieuse;shadow, mysterious
+Abaigeal;g;joie du père;father's joy
+Abhartach;b;nain du folklore;dwarf of folklore
+Abedar;b;source de vigueur;source of vigor
+Abhean;b;petit être;little being
+Abhlach;b;des vergers, fertile;from orchards, fertile
+Abhnait;g;rivière douce;gentle river
+Abnoba;g;déesse rivière;river goddess
+Abracham;b;père de multitudes;father of multitudes
+Abthaine;b;abbé puissant;powerful abbot
+Abucc;b;petit fleuve;little river
+Acaill;b;aigle courageux;courageous eagle
+Acallam;b;dialogue des anciens;dialogue of the ancients
+Accaill;g;petite aiguille;little needle
+Acclon;b;fort combattant;strong fighter
+Achadh;b;champ fertile;fertile field
+Achall;g;amie loyale;loyal friend
+Achasah;g;ornement;ornament
+Achill;b;eagle, courageux;eagle, courageous
+Achilleas;b;douleur, fort;pain, strong
+Achtan;g;petite rivière;little river
+Adaeze;g;princesse noble;noble princess
+Adamnan;b;petit Adam;little Adam
+Adaoin;g;petite noblesse;little nobility
+Adare;b;gué du chêne;ford of the oak
+Adha;b;noble;noble
+Adhbhamair;g;merveilleuse, rare;wonderful, rare
+Adiaman;b;diamant, dur;diamond, hard
+Adne;b;ardeur, passion;ardor, passion
+Adnomair;b;seigneur puissant;powerful lord
+Adomnán;b;petit Adam, doux;little Adam, gentle
+Adornis;b;courageux et noble;courageous and noble
+Adra;g;noble, chaste;noble, chaste
+Adrano;b;feu sacré;sacred fire
+Aduar;b;fort et noble;strong and noble
+Aed;b;feu, ardeur;fire, ardor
+Aedammair;g;petite flamme;little flame
+Aednat;g;petite flamme;little flame
+Aedoc;b;petit feu;little fire
+Aedreann;g;flamme royale;royal flame
+Aedu;b;feu noble;noble fire
+Aef;g;belle, douce;beautiful, gentle
+Aengus;b;force unique;unique strength
+Aeneas;b;loué, chéri;praised, cherished
+Aenthi;g;seule, unique;alone, unique
+Aes;b;feu sacré, ardeur;sacred fire, ardor
+Aeval;g;déesse de la joie;goddess of joy
+Affraic;g;agréable, douce;pleasant, gentle
+Afric;g;agréable, douce;pleasant, gentle
+Afrika;g;agréable, belle;pleasant, beautiful
+Agga;g;bonne, pure;good, pure
 `};

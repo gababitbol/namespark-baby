@@ -1,59 +1,52 @@
 module.exports = { origin: "gallois", data: `
-Rhys;b;ardeur, enthousiasme;ardor, enthusiasm
-Emrys;b;immortel, éternel;immortal, eternal
-Caradoc;b;fort, aimé;strong, beloved
-Gethin;b;sombre, mystérieux;dark, mysterious
-Idris;b;seigneur ardent;ardent lord
-Mabon;b;fils divin, jeune dieu;divine son, young god
-Padrig;b;noble, patricien;noble, patrician
-Rhodri;b;roi du cercle;king of the wheel
-Tegid;b;beau, élégant;beautiful, elegant
-Cynon;b;grand chien, puissant;great hound, powerful
-Gruffudd;b;prince fort;strong prince
-Hywel;b;distingué, éminent;distinguished, eminent
-Llewelyn;b;ressemblant au lion;lion-like
-Macsen;b;grand, majestueux;great, majestic
-Meurig;b;seigneur de la mer;lord of the sea
-Pryderi;b;inquiétude, soin;worry, care
-Taliesin;b;front brillant;shining brow
-Urien;b;né de la ville;born from the city
-Arwel;b;or brillant;shining gold
-Brân;b;corbeau, sage;raven, wise
-Cadfael;b;bataille de métal;battle of metal
-Cai;b;se réjouir;to rejoice
-Gwydion;b;science divine;divine science
-Nefydd;b;céleste;celestial
-Peredur;b;dure lance;hard spear
-Rhydderch;b;chef généreux;generous chief
-Selyf;b;salut, paix;salvation, peace
-Anarawd;b;discours libre;free speech
-Arthfael;b;prince ours;bear prince
-Gwenllian;g;lin blanc, pure;white linen, pure
-Branwen;g;corbeau blanc, belle;white raven, beautiful
-Angharad;g;très aimée;much loved
-Cerys;g;amour, cœur;love, heart
-Ffion;g;digitale rose, belle;foxglove, beautiful
-Seren;g;étoile, brillante;star, brilliant
-Carys;g;amour pur;pure love
-Bethan;g;promise à Dieu;promised to God
-Eirlys;g;perce-neige, pureté;snowdrop, purity
-Enfys;g;arc-en-ciel, espoir;rainbow, hope
-Lowri;g;laurier, victoire;laurel, victory
-Megan;g;perle, précieuse;pearl, precious
-Nerys;g;noble dame;noble lady
-Sioned;g;Dieu est miséricordieux;God is gracious
-Tanwen;g;feu blanc, brillante;white fire, brilliant
-Tesni;g;chaleur du soleil;warmth of the sun
-Morfudd;g;grande richesse;great wealth
-Nest;g;pure, chaste;pure, chaste
-Olwen;g;trace blanche, lumière;white footprint, light
-Blodeuyn;g;fleur, fraîcheur;flower, freshness
-Dwynwen;g;vague blanche, paix;white wave, peace
-Elan;g;cerf, biche;deer, doe
-Gweneth;g;bienheureuse, chanceuse;blessed, lucky
-Haf;g;été, chaleur;summer, warmth
-Lleucu;g;lumière, éclat;light, brilliance
-Meinir;g;belle et fine;beautiful and slender
-Non;g;sainte, pure;holy, pure
-Rhedyn;g;fougère, nature;fern, nature
+Abertha;g;sacrifice, dévouée;sacrifice, devoted
+Aelwen;g;blanche et belle;white and beautiful
+Aeron;g;baie, force;berry, strength
+Aeronwy;g;rivière de baies;river of berries
+Aethwy;b;noble, puissant;noble, powerful
+Afan;b;rivière, courant;river, current
+Afanc;b;créature de l'eau;water creature
+Afon;g;rivière, fluide;river, fluid
+Ailes;g;ange, protectrice;angel, protectress
+Alis;g;noble, aimable;noble, amiable
+Almed;g;belle, lumineuse;beautiful, luminous
+Alun;b;noble, fort;noble, strong
+Alwena;g;belle, lumineuse;beautiful, luminous
+Alwen;g;belle rivière;beautiful river
+Alwyn;b;grand ami;great friend
+Amaethon;b;dieu de l'agriculture;god of agriculture
+Amhar;b;fils d'Arthur;son of Arthur
+Amig;g;amie, chère;friend, dear
+Amlodd;b;ancêtre noble;noble ancestor
+Amren;b;géant ancien;ancient giant
+Amynedd;g;patience, douce;patience, gentle
+Anarawd;b;riche et noble;rich and noble
+Ancoret;g;aimée, chérie;loved, cherished
+Andras;b;courageux, viril;courageous, virile
+Anest;g;pure, honnête;pure, honest
+Angharad;g;très aimée;very loved
+Anghrist;b;fort, courageux;strong, courageous
+Anir;b;fils de Lancelot;son of Lancelot
+Anlawdd;b;fondateur noble;noble founder
+Annest;g;pure, chaste;pure, chaste
+Anwas;b;sans fléchissement;without faltering
+Anwyl;b;chéri, aimé;cherished, loved
+Anwylid;g;chérie, bien-aimée;cherished, beloved
+Aranrhod;g;roue d'argent;silver wheel
+Arawdwr;b;gouverneur noble;noble governor
+Arawn;b;roi des enfers;king of the underworld
+Arbedwr;b;sauveur, protecteur;savior, protector
+Ardderchog;b;splendide, magnifique;splendid, magnificent
+Arddun;g;belle, merveilleuse;beautiful, wonderful
+Ardudwy;b;de la région noble;from noble land
+Arfon;b;face à la mer;facing the sea
+Arglwydd;b;seigneur, maître;lord, master
+Argraig;g;rocher fort;strong rock
+Argwaed;g;sang de force;blood of strength
+Argyros;b;argent, pur;silver, pure
+Ariannell;g;petit argent;little silver
+Arianrhod;g;roue d'argent;silver wheel
+Arianwen;g;blanche comme l'argent;white as silver
+Aril;b;aigle, courageux;eagle, courageous
+Arles;g;noble, libre;noble, free
 `};
