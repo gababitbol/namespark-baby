@@ -156,9 +156,9 @@ export default async function handler(req, res) {
   }
 
   const isFr = lang !== "en";
-  const html = buildSelectionEmail({ lang, firstName, names, email });
 
   try {
+    const html = buildSelectionEmail({ lang, firstName, names, email });
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
@@ -178,7 +178,7 @@ export default async function handler(req, res) {
     }
     return res.status(200).json({ sent: true, id: result.id });
   } catch (err) {
-    console.error("[save-list] Fetch error:", err);
-    return res.status(500).json({ error: "Network error" });
+    console.error("[save-list] error:", err);
+    return res.status(500).json({ error: "Send error", detail: String(err && err.message || err) });
   }
 }

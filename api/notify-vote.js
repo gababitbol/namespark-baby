@@ -191,9 +191,9 @@ export default async function handler(req, res) {
 
   const resultsUrl = `https://namespark.baby/?decision=${encodeURIComponent(decisionId)}`;
   const greeting   = creatorName ? `Bonjour ${creatorName},` : "Bonjour,";
-  const html = buildVoteEmail({ voterName, greeting, resultsUrl, yes, maybe, no, creatorEmail });
 
   try {
+    const html = buildVoteEmail({ voterName, greeting, resultsUrl, yes, maybe, no, creatorEmail });
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
@@ -212,7 +212,7 @@ export default async function handler(req, res) {
     console.log("[notify-vote] Sent:", { to: creatorEmail, voter: voterName, id: result.id });
     return res.status(200).json({ sent: true, id: result.id });
   } catch (err) {
-    console.error("[notify-vote] Fetch error:", err);
-    return res.status(500).json({ error: "Network error" });
+    console.error("[notify-vote] error:", err);
+    return res.status(500).json({ error: "Send error", detail: String(err && err.message || err) });
   }
 }

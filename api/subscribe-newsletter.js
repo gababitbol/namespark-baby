@@ -146,10 +146,10 @@ export default async function handler(req, res) {
     return res.status(200).json({ subscribed: true, emailSent: false });
   }
 
-  const html = confirmationEmail({ firstName, lang, email });
   const isFr = lang !== "en";
 
   try {
+    const html = confirmationEmail({ firstName, lang, email });
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
