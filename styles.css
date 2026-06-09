@@ -2209,3 +2209,18 @@ body { animation: pageIn .5s ease; }
 .sig-similar h4 { font-size: 1rem; color: var(--ink-soft); margin: 0 0 12px; }
 .sig-empty { text-align: center; color: var(--ink-soft); padding: 30px; }
 @media (max-width: 560px) { .sig-row { grid-template-columns: 100px 1fr; } .sig-card { padding: 22px; } }
+
+/* ============================ MENU DE PARTAGE DESKTOP ============================ */
+.share-menu {
+  position: fixed; z-index: 9999; display: flex; flex-direction: column; gap: 4px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: var(--shadow); padding: 8px; min-width: 190px; animation: fadeUp .18s ease;
+}
+.share-menu button {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 11px 14px; border: none; background: transparent; border-radius: 10px;
+  font-family: var(--font); font-size: .95rem; font-weight: 500; color: var(--ink);
+  cursor: pointer; text-align: left; transition: background .15s;
+}
+.share-menu button:hover { background: var(--accent-soft); }
+.share-menu button span { font-size: 1.15rem; }

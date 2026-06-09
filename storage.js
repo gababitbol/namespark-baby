@@ -386,16 +386,31 @@ async function saveVote(decisionId, participantId, name, reaction) {
     _saveDecisions(all);
   }
 
-  /* Supabase upsert (insert ou update si déjà voté) */
+  /* Supabase upsert (insert ou update si déjà voté).
+     Résilience : la 1re tentative peut échouer si la ligne `participants`
+     n'est pas encore visible (latence de réplication → violation de clé
+     étrangère). On réessaie avec un court backoff pour ne perdre aucun vote. */
   if (_sb) {
-    const { error } = await _sb.from("votes").upsert({
+    const payload = {
       decision_id:    decisionId,
       participant_id: participantId,
       name,
       reaction,
       voted_at: new Date().toISOString(),
-    }, { onConflict: "decision_id,participant_id,name" });
-    if (error) console.warn("[NameSpark] saveVote:", error);
+    };
+    const MAX_TRIES = 4;
+    for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
+      const { error } = await _sb.from("votes")
+        .upsert(payload, { onConflict: "decision_id,participant_id,name" });
+      if (!error) break;
+      const isFkRace = error.code === "23503" || /foreign key/i.test(error.message || "");
+      if (isFkRace && attempt < MAX_TRIES) {
+        await new Promise((r) => setTimeout(r, 300 * attempt)); /* 300, 600, 900ms */
+        continue;
+      }
+      console.warn("[NameSpark] saveVote (tentative " + attempt + "):", error);
+      break;
+    }
   }
 }
 

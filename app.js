@@ -1303,7 +1303,7 @@ function exportPDF() {
 /* =============================================================
    20) ★ PARTAGE (URL params)
    ============================================================= */
-function shareSelection() {
+function shareSelection(anchor) {
   if (favorites.size === 0) { showToast(t("share_no_fav")); return; }
 
   const url = new URL(window.location.href);
@@ -1315,7 +1315,7 @@ function shareSelection() {
   url.searchParams.set("lang", lang);
   url.hash = "";
 
-  shareLink(url.toString(), t("share_selection_text"));
+  shareLink(url.toString(), t("share_selection_text"), anchor instanceof HTMLElement ? anchor : undefined);
 }
 
 /* Détecte si on est sur un vrai appareil mobile */
@@ -1335,9 +1335,36 @@ function _shareEmail(url, subject, body) {
   window.location.href = link;
 }
 
-/* Partage natif (navigator.share) avec fallback clipboard → fallback execCommand.
-   Sur mobile ET desktop : ouvre la feuille de partage native du système. */
-async function shareLink(url, text) {
+/* Menu de partage desktop (WhatsApp / Email / Copier) — affiché quand
+   navigator.share n'existe pas (= ordinateur). Positionné sous le bouton. */
+function showShareMenu(url, text, anchor) {
+  document.querySelector(".share-menu")?.remove();
+  const menu = document.createElement("div");
+  menu.className = "share-menu";
+  menu.innerHTML = `
+    <button type="button" data-sm="whatsapp"><span>💬</span> WhatsApp</button>
+    <button type="button" data-sm="email"><span>✉️</span> Email</button>
+    <button type="button" data-sm="copy"><span>📋</span> ${t("copy_link_btn").replace(/^[^\w]+\s*/, "")}</button>`;
+  document.body.appendChild(menu);
+
+  const r = anchor.getBoundingClientRect();
+  menu.style.top  = `${Math.min(r.bottom + 8, window.innerHeight - menu.offsetHeight - 8)}px`;
+  menu.style.left = `${Math.max(8, Math.min(r.left, window.innerWidth - menu.offsetWidth - 8))}px`;
+
+  const close = () => menu.remove();
+  menu.querySelector('[data-sm="whatsapp"]').onclick = () => { _shareWhatsApp(url, text); close(); window.plausible?.("Lien partagé", { props: { type: "whatsapp" } }); };
+  menu.querySelector('[data-sm="email"]').onclick    = () => { _shareEmail(url, t("share_invite_text"), text); close(); window.plausible?.("Lien partagé", { props: { type: "email" } }); };
+  menu.querySelector('[data-sm="copy"]').onclick     = () => { _copyToClipboard(url); close(); };
+
+  setTimeout(() => {
+    const onDoc = (e) => { if (!menu.contains(e.target) && e.target !== anchor) { close(); document.removeEventListener("click", onDoc); } };
+    document.addEventListener("click", onDoc);
+  }, 50);
+}
+
+/* Partage : feuille native sur mobile, menu (WhatsApp/Email/Copier) sur desktop,
+   fallback clipboard si aucun ancrage fourni. */
+async function shareLink(url, text, anchor) {
   if (navigator.share) {
     try {
       await navigator.share({ title: "NameSpark Baby", text, url });
@@ -1346,6 +1373,8 @@ async function shareLink(url, text) {
       /* AbortError = l'utilisateur a annulé le sélecteur — pas une erreur */
       if (e.name !== "AbortError") await _copyToClipboard(url);
     }
+  } else if (anchor) {
+    showShareMenu(url, text, anchor);
   } else {
     await _copyToClipboard(url);
   }
@@ -2199,7 +2228,7 @@ let decideState = {
 };
 /* Timer d'auto-polling (s'active quand le créateur est sur l'écran d'attente) */
 let _pollTimer = null;
-const POLL_INTERVAL = 15000; /* 15 secondes */
+const POLL_INTERVAL = 5000; /* 5 secondes — sync conjoint plus réactive */
 
 /* Affiche une seule étape du module */
 function showDecideStep(stepId) {
@@ -2401,7 +2430,7 @@ function generateInviteLink() {
 async function copyInviteLink() {
   const url = _getOrBuildInviteUrl();
   if (!url) { showToast(t("err_generic")); return; }
-  await shareLink(url, t("share_invite_text"));
+  await shareLink(url, t("share_invite_text"), document.getElementById("copyInviteLinkBtn"));
 }
 
 /* ---- Copier le lien d'invitation directement ---- */
@@ -2926,7 +2955,7 @@ function generateFamilyLink() {
 async function copyFamilyLink() {
   const url = _getOrBuildFamilyUrl();
   if (!url) { showToast(t("err_generic")); return; }
-  await shareLink(url, t("share_family_text"));
+  await shareLink(url, t("share_family_text"), document.getElementById("copyFamilyLinkBtn"));
 }
 
 /* ---- Copier le lien famille directement ---- */
