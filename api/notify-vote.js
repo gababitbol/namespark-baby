@@ -92,7 +92,7 @@ function voteSection({ emoji, label, color, bg, border, names }) {
 }
 
 /* ── Build vote notification email ──────────────────────────────────────── */
-function buildVoteEmail({ voterName, greeting, resultsUrl, yes, maybe, no }) {
+function buildVoteEmail({ voterName, greeting, resultsUrl, yes, maybe, no, creatorEmail }) {
   const yesSection = voteSection({
     label: 'Prénoms aimés', color: '#166534', bg: '#f0fdf4', border: '#bbf7d0',
     names: yes,
@@ -191,7 +191,7 @@ export default async function handler(req, res) {
 
   const resultsUrl = `https://namespark.baby/?decision=${encodeURIComponent(decisionId)}`;
   const greeting   = creatorName ? `Bonjour ${creatorName},` : "Bonjour,";
-  const html = buildVoteEmail({ voterName, greeting, resultsUrl, yes, maybe, no });
+  const html = buildVoteEmail({ voterName, greeting, resultsUrl, yes, maybe, no, creatorEmail });
 
   try {
     const emailRes = await fetch("https://api.resend.com/emails", {

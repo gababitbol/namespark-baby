@@ -63,7 +63,7 @@ function emailFooter(isFr, recipientEmail) {
 </tr>`;
 }
 
-function buildSelectionEmail({ lang, firstName, names }) {
+function buildSelectionEmail({ lang, firstName, names, email }) {
   const isFr = lang !== "en";
   const greeting = firstName
     ? (isFr ? `Bonjour ${firstName},` : `Hi ${firstName},`)
@@ -156,7 +156,7 @@ export default async function handler(req, res) {
   }
 
   const isFr = lang !== "en";
-  const html = buildSelectionEmail({ lang, firstName, names });
+  const html = buildSelectionEmail({ lang, firstName, names, email });
 
   try {
     const emailRes = await fetch("https://api.resend.com/emails", {

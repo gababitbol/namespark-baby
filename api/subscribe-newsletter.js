@@ -28,7 +28,7 @@ const ALLOWED_ORIGINS = [
 
 const LOGO_IMG = `<img src="https://namespark.baby/email-logo.png" alt="NameSpark Baby" width="220" height="51" style="display:block;margin:0 auto;border:0;max-width:220px;" />`;
 
-function confirmationEmail({ firstName, lang }) {
+function confirmationEmail({ firstName, lang, email }) {
   const isFr = lang !== "en";
   const greeting = firstName
     ? (isFr ? `Bonjour ${firstName},` : `Hi ${firstName},`)
@@ -146,7 +146,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ subscribed: true, emailSent: false });
   }
 
-  const html = confirmationEmail({ firstName, lang });
+  const html = confirmationEmail({ firstName, lang, email });
   const isFr = lang !== "en";
 
   try {
