@@ -1,44 +1,46 @@
 module.exports = { origin: "grec", data: `
-Achilleas;b;Héros invincible;Invincible hero
-Adrastos;b;Indomptable;Unyielding
-Aineias;b;Loué, digne;Praised
-Alkibiades;b;Force violente;Mighty force
-Ariston;b;Le meilleur;The best
-Damianos;b;Qui dompte;Tamer
-Diomedes;b;Pensée divine;Divine cunning
-Endymion;b;Le plongeur, sommeil;Diver, sleep
-Galenos;b;Calme, serein;Calm
-Heraklios;b;Gloire d'Héra;Glory of Hera
-Ikaros;b;Qui suit l'élan;Follower
-Kadmos;b;De l'orient;From the east
-Leonteus;b;Semblable au lion;Lion-like
-Lykourgos;b;Loup, conducteur;Wolf-worker
-Nestoras;b;Voyageur sage;Wise traveller
-Odysseas;b;Voyageur intrépide;Bold traveller
-Patroklos;b;Gloire du père;Glory of the father
-Polydoros;b;Aux nombreux dons;Many gifts
-Ptolemaios;b;Belliqueux;Warlike
-Theseus;b;Qui institue, fondateur;Founder
-Andromache;g;Qui combat les hommes;Warrior woman
-Antigone;g;Digne de ses parents;Worthy of kin
-Arete;g;Vertu, excellence;Virtue, excellence
-Atalante;g;Égale en poids;Balanced
-Briseis;g;Fille de Brisès;Prevailing
-Chryseis;g;Dorée;Golden
-Clymene;g;Renommée, gloire;Famous
-Danae;g;Aride, lumineuse;Bright
-Elektra;g;Ambre, rayonnante;Amber, shining
-Eudora;g;Bon présent;Good gift
-Eurydice;g;Large justice;Wide justice
-Helene;g;Lumière, torche;Light, torch
-Hermione;g;Messagère, pilier;Messenger
-Hippolyta;g;Reine des Amazones;Queen of Amazons
-Iphigenia;g;Née forte;Born strong
-Klytia;g;Renommée, gloire;Glorious
-Leto;g;Discrète, mère divine;Gentle mother
-Medea;g;Rusée, avisée;Cunning
-Ourania;g;Céleste;Heavenly
-Penthesilea;g;Reine guerrière;Warrior queen
-Polyxene;g;Très hospitalière;Most welcoming
-Semele;g;Déesse de la terre;Earth goddess
+Alexandros;b;défenseur des hommes;defender of men
+Chrysostomos;b;bouche d'or;golden mouth
+Demetrios;b;de Déméter, fertile;of Demeter, fertile
+Evagoras;b;bien gouvernant;well-governing
+Fthartos;b;mortel, courageux;mortal, courageous
+Georgis;b;cultivateur de la terre;earth farmer
+Herakleitos;b;gloire d'Héraclès;glory of Heracles
+Ikaros;b;de l'île Icarie;from the island of Icaria
+Kallinikos;b;belle victoire;beautiful victory
+Leontios;b;lion, courageux;lion, courageous
+Methodios;b;méthode, organisé;method, organized
+Nikomedes;b;pensée victorieuse;victorious thought
+Prokopios;b;progrès, avant-garde;progress, avant-garde
+Sostrates;b;sauveur de l'armée;savior of the army
+Timoleon;b;honorer le lion;to honor the lion
+Xenophanes;b;apparence étrangère;foreign appearance
+Agathokles;b;bonne gloire;good glory
+Aristarhos;b;meilleur gouvernant;best ruler
+Basileios;b;royal, kingly;royal, kingly
+Chrysippos;b;cheval d'or;golden horse
+Diadochos;b;successeur;successor
+Epaminondas;b;fidèle aux nobles;faithful to the noble
+Filoktitis;b;amoureux de l'arc;lover of the bow
+Gregoris;b;vigilant, alerte;watchful, alert
+Hermokrates;b;pouvoir d'Hermès;power of Hermes
+Agathe;g;bonne, vertueuse;good, virtuous
+Berenike;g;qui apporte la victoire;she who brings victory
+Chryseis;g;fille d'or;golden girl
+Diotima;g;honorée de Zeus;honored by Zeus
+Evdokia;g;bienveillance, bonté;benevolence, goodness
+Glaukie;g;bleue-verte, lumineuse;blue-green, luminous
+Halikarnassos;g;forteresse marin;marine fortress
+Iokaste;g;brillante, éclatante;brilliant, dazzling
+Kallirhoe;g;belle eau, rivière;beautiful water, river
+Lamprini;g;brillante, lumineuse;brilliant, luminous
+Mnisiklis;g;mémoire glorieuse;glorious memory
+Neanthi;g;fraîche, jeune;fresh, young
+Persefoni;g;déesse du printemps;goddess of spring
+Rodoula;g;petite rose;little rose
+Stavroula;g;petite croix;little cross
+Theodora;g;don de Dieu;gift of God
+Xanthippe;g;cheval jaune, sage;yellow horse, wise
+Yiota;g;violette, fleur;violet, flower
+Zafira;g;saphir, précieuse;sapphire, precious
 `};

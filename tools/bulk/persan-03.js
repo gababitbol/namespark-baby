@@ -1,46 +1,31 @@
 module.exports = { origin: "persan", data: `
-Afshin;b;Vaillant guerrier;Brave warrior
-Ali;b;Élevé, sublime;Elevated
-Anoosh;b;Immortel;Immortal
-Ardalan;b;Sûr, certain;Sure
-Azad;b;Libre;Free
-Bahman;b;Bonne pensée;Good thought
-Behzad;b;Bien né, noble;Nobly born
-Dariush;b;Détenteur du bien;Holder of good
-Esfandyar;b;Don sacré;Sacred gift
-Faramarz;b;Pardonneur royal;Royal forgiver
-Farzan;b;Sage, savant;Wise, learned
-Hooshmand;b;Intelligent;Intelligent
-Iman;b;Foi, croyance;Faith
-Kambiz;b;Roi puissant;Mighty king
-Kourosh;b;Soleil, clairvoyant;Sun, farsighted
-Mani;b;Penseur, lumière;Thinker, light
-Nariman;b;Esprit héroïque;Heroic spirit
-Ramin;b;Joyeux, paisible;Joyful, peaceful
-Sasan;b;Bon roi;Good king
-Shervin;b;Doux comme le lion;Lion-sweet
-Tirdad;b;Don de Tir;Gift of Tir
-Yashar;b;Qui vit longtemps;Long-living
-Zal;b;Aux cheveux blancs, sage;White-haired, wise
-Afsaneh;g;Conte, légende;Legend, tale
-Arezou;g;Désir, souhait;Wish, desire
-Aria;g;Noble, pure;Noble, pure
-Atusa;g;Affectueuse;Affectionate
-Azadeh;g;Libre, noble;Free, noble
-Banou;g;Dame, noble;Lady, noble
-Delara;g;Qui orne le cœur;Heart-adorning
-Donya;g;Le monde;The world
-Farnaz;g;Gloire et grâce;Glory and grace
-Golara;g;Ornée de fleurs;Flower-adorned
-Hasti;g;Existence, être;Existence
-Katayoun;g;Reine du foyer;Queen of the home
-Mahin;g;Comme la lune;Moon-like
-Mehrsa;g;Comme le soleil;Sun-like
-Nasim;g;Brise douce;Gentle breeze
-Parmida;g;Princesse;Princess
-Roshana;g;Lumineuse, claire;Bright, clear
-Shahla;g;Aux yeux sombres;Dark-eyed
-Shiva;g;Charmante, éloquente;Charming
-Termeh;g;Soie précieuse;Fine silk
-Yekta;g;Unique;Unique
+Ardeshir;b;lion saint, roi juste;holy lion, just king
+Babak;b;père aimant, gardien;loving father, guardian
+Cyrus;b;soleil, roi solaire;sun, solar king
+Dara;b;possesseur de bonté;possessor of goodness
+Eshaq;b;Isaac, qui rit;Isaac, who laughs
+Farzaneh;g;sage, intelligente;wise, intelligent
+Golnaz;g;rose délicate;delicate rose
+Hossein;b;beau, bon;beautiful, good
+Ismail;b;Dieu écoute;God listens
+Jalal;b;grandeur, gloire;greatness, glory
+Khosrow;b;roi célèbre;famous king
+Laleh;g;tulipe, belle fleur;tulip, beautiful flower
+Mansour;b;victorieux, aidé;victorious, aided
+Negar;g;chérie, bien-aimée;darling, beloved
+Omid;b;espoir, aspiration;hope, aspiration
+Parviz;b;béni, heureux;blessed, happy
+Reza;b;Dieu est content;God is pleased
+Shahnaz;g;fierté du roi;king's pride
+Touraj;b;rapide, agile;swift, agile
+Yasaman;g;jasmin, douceur;jasmine, sweetness
+Zahra;g;radieuse, fleur;radiant, flower
+Ardavan;b;gardien de la vertu;guardian of virtue
+Behnam;b;de bonne réputation;of good reputation
+Chirine;g;douce, agréable;sweet, pleasant
+Dariush;b;qui tient le bien;who holds the good
+Elnaz;g;étoile de beauté;star of beauty
+Fariba;g;charmante, enchanteresse;charming, enchanting
+Golnar;g;fleur de grenade;pomegranate flower
+Hamid;b;digne de louanges;worthy of praise
 `};

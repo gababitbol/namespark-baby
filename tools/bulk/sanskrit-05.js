@@ -1,41 +1,41 @@
 module.exports = { origin: "sanskrit", data: `
-Aarush;b;Première lueur;First ray
-Amol;b;Précieux, sans prix;Priceless
-Bhavin;b;Vivant, plein de vie;Lively
-Devraj;b;Roi des dieux;King of gods
-Gagan;b;Ciel;Sky
-Hriday;b;Cœur;Heart
-Ihit;b;Désir, honneur;Desire, honour
-Jeet;b;Victoire;Victory
-Kavin;b;Beau, savant;Handsome, wise
-Lav;b;Petit fragment, fils;Small part, son
-Mihir;b;Soleil;Sun
-Nilesh;b;Seigneur bleu;Blue lord
-Pratyush;b;Aube, soleil levant;Dawn
-Ranbir;b;Guerrier vaillant;Brave warrior
-Soham;b;Je suis lui, divin;I am he, divine
-Tanmay;b;Absorbé, serein;Absorbed
-Utkarsh;b;Progrès, excellence;Progress
-Vihaan;b;Aube;Dawn
-Yatin;b;Ascète, sage;Ascetic
-Aaradhya;g;Adorée, vénérée;Worshipped
-Bhavana;g;Pensée, émotion;Feeling
-Chaaya;g;Ombre, reflet;Shadow
-Diksha;g;Dévotion, initiation;Initiation
-Ekta;g;Unité;Unity
-Hansa;g;Cygne, pur;Swan, pure
-Ishita;g;Maîtresse, désirée;Mistress, desired
-Jhanvi;g;Du Gange, sacrée;Of the Ganges
-Kiara;g;Lumineuse;Bright
-Malini;g;Jardinière, parfumée;Gardener, fragrant
-Nitya;g;Éternelle;Eternal
-Pari;g;Fée;Fairy
-Rhea;g;Flux, rivière;Flow, river
-Saanvi;g;Déesse Lakshmi;Goddess Lakshmi
-Sneha;g;Tendresse, amour;Affection, love
-Tara;g;Étoile;Star
-Urja;g;Énergie, vigueur;Energy
-Vidya;g;Savoir;Knowledge
-Yashvi;g;Glorieuse, prospère;Glorious
-Zara;g;Aube, fleur;Dawn, flower
+Aaditya;b;soleil, fils d'Aditi;sun, son of Aditi
+Bhuvan;b;monde, terre;world, earth
+Chirag;b;lampe, lumière;lamp, light
+Daksh;b;capable, habile;capable, skilled
+Eklavya;b;dédié, discipliné;dedicated, disciplined
+Girish;b;seigneur de la montagne;lord of the mountain
+Hriday;b;cœur, âme;heart, soul
+Ishaan;b;soleil du matin;morning sun
+Jayesh;b;seigneur de la victoire;lord of victory
+Kshitij;b;horizon;horizon
+Laksh;b;objectif, cible;goal, target
+Manan;b;méditation, réflexion;meditation, reflection
+Nikhil;b;complet, entier;complete, whole
+Partha;b;fils de Pritha;son of Pritha
+Rajeev;b;lotus bleu;blue lotus
+Siddharth;b;celui qui a atteint son but;one who has achieved his goal
+Tanmay;b;absorbé, profond;absorbed, deep
+Ujwal;b;brillant, lumineux;brilliant, luminous
+Vedant;b;fin des Vedas, sagesse;end of Vedas, wisdom
+Yagnesh;b;seigneur du feu sacré;lord of sacred fire
+Zeal;b;zèle, ardeur;zeal, ardor
+Aanya;g;favorable, gracieuse;favorable, gracious
+Bharti;g;Inde, sachant;India, knowing
+Chaandni;g;clair de lune;moonlight
+Dhriti;g;courage, résolution;courage, resolution
+Ekta;g;unité, harmonie;unity, harmony
+Geet;g;chanson, mélodie;song, melody
+Hansika;g;cygne, gracieuse;swan, gracious
+Inika;g;petite terre;little earth
+Jyotika;g;petite lumière;little light
+Kamakshi;g;yeux du désir;eyes of desire
+Laxmi;g;fortune, belle;fortune, beautiful
+Madhulika;g;douce comme le miel;sweet as honey
+Nidhi;g;trésor, richesse;treasure, wealth
+Ojasvi;g;pleine de vitalité;full of vitality
+Priyanka;g;bien-aimée;beloved
+Rajni;g;reine de la nuit;queen of the night
+Saraswati;g;déesse du savoir;goddess of knowledge
+Tanushri;g;belle et fine;beautiful and slender
 `};

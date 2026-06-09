@@ -1,51 +1,48 @@
 module.exports = { origin: "francais", data: `
-Aimé;b;Aimé, chéri;Beloved
-Alphée;b;Rivière, clair;River, bright
-Aubin;b;Blond, lumineux;Fair, bright
-Aurèle;b;Doré;Golden
-Bérenger;b;Ours à la lance;Spear bear
-Brice;b;Tacheté, vif;Speckled, swift
-Célestin;b;Céleste;Heavenly
-Désiré;b;Désiré, souhaité;Desired
-Edern;b;Vigoureux, géant;Strong, giant
-Fabien;b;Cultivateur de fèves;Bean grower
-Gaspard;b;Gardien du trésor;Treasure keeper
-Gontrand;b;Corbeau de guerre;War raven
-Isidore;b;Don d'Isis;Gift of Isis
-Léonce;b;Lion, courageux;Lion, brave
-Marin;b;De la mer;Of the sea
-Modeste;b;Modeste, mesuré;Modest
-Narcisse;b;Fleur, sommeil;Flower, narcissus
-Onésime;b;Utile, profitable;Useful
-Prosper;b;Prospère, favorable;Prosperous
-Romaric;b;Roi glorieux;Glorious king
-Sosthène;b;Force, vigueur;Strength
-Trophime;b;Nourricier;Nourishing
-Venceslas;b;Plus de gloire;More glory
-Wandrille;b;Voyageur vaillant;Bold wanderer
-Zéphyrin;b;Vent doux;Gentle wind
-Aliette;g;Noble, lumineuse;Noble, bright
-Ascension;g;Élévation;Ascension
-Aveline;g;Noisette;Hazelnut
-Bertille;g;Brillante, héroïque;Bright, heroic
-Capucine;g;Fleur capucine;Nasturtium
-Cunégonde;g;Vaillante au combat;Brave in battle
-Edmée;g;Riche protectrice;Wealthy protector
-Eulalie;g;Qui parle bien;Well-spoken
-Fleurine;g;Petite fleur;Little flower
-Gilberte;g;Promesse brillante;Bright pledge
-Hermance;g;Guerrière;Warrior
-Joconde;g;Joyeuse;Joyful
-Léocadie;g;Claire, lumineuse;Clear, bright
-Lucette;g;Petite lumière;Little light
-Maÿlis;g;Mai et lys, mer;May, lily
-Mélaine;g;Sombre, profonde;Dark, deep
-Noéline;g;Née à Noël;Born at Christmas
-Pétronille;g;Petite pierre;Little rock
-Quitterie;g;Tranquille, paisible;Quiet, peaceful
-Radegonde;g;Conseil de combat;Battle counsel
-Rolande;g;Pays glorieux;Famous land
-Sabine;g;Sabine;Sabine woman
-Scholastique;g;Savante, lettrée;Learned
-Yseult;g;Belle, souveraine;Fair ruler
+Ambroise;b;immortel, divin;immortal, divine
+Bertrand;b;corbeau brillant;brilliant raven
+Celestin;b;céleste, divin;heavenly, divine
+Damien;b;qui dompte, soumet;who tames, subdues
+Eustache;b;riche en épis;rich in grain
+Fabrice;b;artisan, forgeron;craftsman, blacksmith
+Gaston;b;étranger, invité;stranger, guest
+Hippolyte;b;qui libère les chevaux;who frees the horses
+Isidore;b;don d'Isis;gift of Isis
+Jacques;b;suiveur de Dieu;follower of God
+Kléber;b;courageux, combat;courageous, combat
+Landry;b;règle du pays;rule of the land
+Médard;b;puissant, fort;powerful, strong
+Noël;b;né à Noël;born at Christmas
+Onuphre;b;force de l'auroch;strength of aurochs
+Parfait;b;parfait, accompli;perfect, accomplished
+Roch;b;rocher, solide;rock, solid
+Sulpice;b;de la famille Sulpicia;of the Sulpician family
+Théodore;b;don de Dieu;gift of God
+Urbain;b;de la ville, cultivé;from the city, cultured
+Valéry;b;fort, sain;strong, healthy
+Wandrille;b;célèbre dans la bataille;famous in battle
+Yves;b;if, archer;yew, archer
+Zénobie;g;force de Zeus;strength of Zeus
+Adalberte;g;noble et brillante;noble and brilliant
+Blandine;g;douce, aimable;gentle, kind
+Clémence;g;douce, clémente;gentle, merciful
+Denise;g;de Dionysos, joyeuse;of Dionysus, joyful
+Eléonore;g;lumière, étrangère;light, foreign
+Flore;g;fleur, florissante;flower, flourishing
+Gersende;g;lance du pays;lance of the land
+Hermine;g;soldats, armée;soldiers, army
+Inès;g;pure, chaste;pure, chaste
+Josèphe;g;Dieu ajoutera;God will add
+Katrijn;g;pure, chaste;pure, chaste
+Laure;g;laurier, victoire;laurel, victory
+Madeleine;g;haute tour;high tower
+Noemie;g;agréable, douce;pleasant, sweet
+Opportune;g;convenable, à propos;suitable, timely
+Prudence;g;prudente, sage;prudent, wise
+Radegonde;g;conseil de la décision;counsel of decision
+Scholastique;g;scolaire, savante;scholarly, learned
+Tiphaine;g;manifestation de Dieu;manifestation of God
+Ursule;g;petite ourse;little bear
+Valérie;g;forte, saine;strong, healthy
+Wiltrudis;g;force de la volonté;strength of will
 `};

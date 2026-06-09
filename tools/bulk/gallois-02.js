@@ -1,47 +1,59 @@
 module.exports = { origin: "gallois", data: `
-Alun;b;Harmonie, rivière;Harmony, river
-Aneirin;b;Noble, honorable;Noble, honourable
-Berwyn;b;Sommet blanc;White peak
-Caradog;b;Aimé, cher;Beloved
-Cledwyn;b;Épée bénie;Blessed sword
-Dewi;b;Bien-aimé;Beloved
-Eifion;b;De la lignée d'Owain;Of Owain's line
-Elis;b;Yahvé est Dieu;The Lord is God
-Emlyn;b;Travailleur, rival;Industrious
-Eurig;b;Doré;Golden
-Gwilym;b;Volonté protectrice;Resolute protector
-Hywel;b;Éminent, remarquable;Eminent
-Ifan;b;Dieu fait grâce;God is gracious
-Iestyn;b;Juste;Just
-Ioan;b;Dieu fait grâce;God is gracious
-Llyr;b;Dieu de la mer;Sea god
-Macsen;b;Le plus grand;The greatest
-Meirion;b;De la mer;Of the sea
-Morgan;m;Cercle de mer;Sea circle
-Osian;b;Petit faon;Little deer
-Padrig;b;Noble, patricien;Noble
-Rhydian;b;Petit gué;Little ford
-Sion;b;Dieu fait grâce;God is gracious
-Tomos;b;Jumeau;Twin
-Wyn;b;Blanc, béni;White, blessed
-Aderyn;g;Oiseau;Bird
-Anwen;g;Très belle, bénie;Very fair
-Arianwen;g;Argent béni;Blessed silver
-Bethan;g;Maison de Dieu;House of God
-Cari;g;Aimer, chérir;To love
-Ceridwen;g;Belle poésie;Fair poetry
-Dwynwen;g;Bénie, sainte de l'amour;Blessed, of love
-Eluned;g;Idole, image;Idol, image
-Enid;g;Âme, vie;Soul, life
-Glenys;g;Pure, sainte;Pure, holy
-Gwenllian;g;Flot blanc;White flow
-Heulwen;g;Rayon de soleil;Sunshine
-Lleucu;g;Lumière, chérie;Light, beloved
-Mali;g;Aimée, goutte de mer;Beloved
-Mari;g;Aimée;Beloved
-Meinir;g;Belle et élancée;Tall and fair
-Myfanwy;g;Ma chère femme;My fine one
-Olwen;g;Trace blanche;White footprint
-Sioned;g;Dieu est gracieux;God is gracious
-Tesni;g;Chaleur du soleil;Warmth of the sun
+Rhys;b;ardeur, enthousiasme;ardor, enthusiasm
+Emrys;b;immortel, éternel;immortal, eternal
+Caradoc;b;fort, aimé;strong, beloved
+Gethin;b;sombre, mystérieux;dark, mysterious
+Idris;b;seigneur ardent;ardent lord
+Mabon;b;fils divin, jeune dieu;divine son, young god
+Padrig;b;noble, patricien;noble, patrician
+Rhodri;b;roi du cercle;king of the wheel
+Tegid;b;beau, élégant;beautiful, elegant
+Cynon;b;grand chien, puissant;great hound, powerful
+Gruffudd;b;prince fort;strong prince
+Hywel;b;distingué, éminent;distinguished, eminent
+Llewelyn;b;ressemblant au lion;lion-like
+Macsen;b;grand, majestueux;great, majestic
+Meurig;b;seigneur de la mer;lord of the sea
+Pryderi;b;inquiétude, soin;worry, care
+Taliesin;b;front brillant;shining brow
+Urien;b;né de la ville;born from the city
+Arwel;b;or brillant;shining gold
+Brân;b;corbeau, sage;raven, wise
+Cadfael;b;bataille de métal;battle of metal
+Cai;b;se réjouir;to rejoice
+Gwydion;b;science divine;divine science
+Nefydd;b;céleste;celestial
+Peredur;b;dure lance;hard spear
+Rhydderch;b;chef généreux;generous chief
+Selyf;b;salut, paix;salvation, peace
+Anarawd;b;discours libre;free speech
+Arthfael;b;prince ours;bear prince
+Gwenllian;g;lin blanc, pure;white linen, pure
+Branwen;g;corbeau blanc, belle;white raven, beautiful
+Angharad;g;très aimée;much loved
+Cerys;g;amour, cœur;love, heart
+Ffion;g;digitale rose, belle;foxglove, beautiful
+Seren;g;étoile, brillante;star, brilliant
+Carys;g;amour pur;pure love
+Bethan;g;promise à Dieu;promised to God
+Eirlys;g;perce-neige, pureté;snowdrop, purity
+Enfys;g;arc-en-ciel, espoir;rainbow, hope
+Lowri;g;laurier, victoire;laurel, victory
+Megan;g;perle, précieuse;pearl, precious
+Nerys;g;noble dame;noble lady
+Sioned;g;Dieu est miséricordieux;God is gracious
+Tanwen;g;feu blanc, brillante;white fire, brilliant
+Tesni;g;chaleur du soleil;warmth of the sun
+Morfudd;g;grande richesse;great wealth
+Nest;g;pure, chaste;pure, chaste
+Olwen;g;trace blanche, lumière;white footprint, light
+Blodeuyn;g;fleur, fraîcheur;flower, freshness
+Dwynwen;g;vague blanche, paix;white wave, peace
+Elan;g;cerf, biche;deer, doe
+Gweneth;g;bienheureuse, chanceuse;blessed, lucky
+Haf;g;été, chaleur;summer, warmth
+Lleucu;g;lumière, éclat;light, brilliance
+Meinir;g;belle et fine;beautiful and slender
+Non;g;sainte, pure;holy, pure
+Rhedyn;g;fougère, nature;fern, nature
 `};

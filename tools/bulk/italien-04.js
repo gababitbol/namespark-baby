@@ -1,52 +1,62 @@
 module.exports = { origin: "italien", data: `
-Achille;b;Héros invincible;Invincible hero
-Amadeo;b;Qui aime Dieu;Lover of God
-Augusto;b;Vénérable;Venerable
-Benvenuto;b;Bienvenu;Welcome
-Calogero;b;Beau vieillard, sage;Fair elder, wise
-Cosimo;b;Ordre, univers;Order, universe
-Donato;b;Donné par Dieu;Given by God
-Elio;b;Soleil;Sun
-Ennio;b;Favori, élu;Favoured
-Ferdinando;b;Voyageur hardi;Bold voyager
-Gaspare;b;Gardien du trésor;Treasure keeper
-Gualtiero;b;Chef de l'armée;Army leader
-Ippolito;b;Qui délie les chevaux;Frees the horses
-Lapo;b;De Jacopo, supplantant;Supplanter
-Loris;b;Couronné de laurier;Laurel-crowned
-Manfredi;b;Paix forte;Strong peace
-Nello;b;Petit, cœur;Little one
-Orazio;b;Gardien du temps;Keeper of time
-Patrizio;b;Noble, patricien;Noble
-Renzo;b;Couronné de laurier;Laurel-crowned
-Sandro;b;Défenseur des hommes;Defender of men
-Severino;b;Sévère, strict;Stern
-Tancredi;b;Conseil avisé;Wise counsel
-Ubaldo;b;Esprit audacieux;Bold spirit
-Valerio;b;Vigoureux;Vigorous
-Agata;g;Bonne, vertueuse;Good, virtuous
-Annunziata;g;Annoncée;Announced
-Assunta;g;Élevée au ciel;Taken up
-Aurora;g;Aube;Dawn
-Bianca;g;Blanche, pure;White, pure
-Carmela;g;Jardin, verger;Garden, orchard
-Cinzia;g;De Cynthe, lune;Of Cynthus, moon
-Cosima;g;Ordre, beauté;Order, beauty
-Dalila;g;Délicate, guide;Delicate, guide
-Elda;g;Combattante;Warrior
-Fedora;g;Don de Dieu;Gift of God
-Fiorenza;g;Florissante;Flourishing
-Gabriella;g;Force de Dieu;God is my strength
-Gioconda;g;Joyeuse;Joyful
-Isotta;g;Belle, souveraine;Fair ruler
-Lia;g;Lasse, délicate;Weary, delicate
-Loredana;g;Lauriers;Laurels
-Mafalda;g;Force au combat;Mighty in battle
-Nerina;g;De la mer, nymphe;Of the sea, nymph
-Ornella;g;Frêne fleuri;Flowering ash
-Perla;g;Perle;Pearl
-Rosalba;g;Rose blanche, aube;White rose dawn
-Severina;g;Sévère, stricte;Stern
-Tiziana;g;Géante, honorée;Honoured
-Viola;g;Violette;Violet
+Adriano;b;de l'Adriatique;from the Adriatic
+Baldassare;b;Dieu protège le roi;God protects the king
+Calogero;b;bon âge, belle vieillesse;good age, beautiful old age
+Domenico;b;du Seigneur;of the Lord
+Edoardo;b;gardien fortuné;fortunate guardian
+Ferrante;b;voyageur de fer;iron traveler
+Giacomo;b;suiveur de Dieu;follower of God
+Ilario;b;joyeux;cheerful
+Leopoldo;b;peuple audacieux;bold people
+Marcello;b;petit Mars;little Mars
+Nino;b;enfant, jeune;child, young
+Onofrio;b;force de l'ours;bear strength
+Pellegrino;b;pèlerin, voyageur;pilgrim, traveler
+Quirino;b;lance, guerrier;spear, warrior
+Rinaldo;b;puissance de la décision;power of decision
+Salvatore;b;sauveur, libérateur;savior, liberator
+Tarcisio;b;de Tarse, noble;from Tarsus, noble
+Ubaldo;b;esprit courageux;courageous spirit
+Vitale;b;plein de vie;full of life
+Zaccaria;b;Dieu se souvient;God remembers
+Annunziata;g;annoncée, porteur de nouvelles;announced, bearer of news
+Beniamina;g;fille de la droite;daughter of the right hand
+Clementina;g;douce, clémente;gentle, merciful
+Delfina;g;dauphin, dauphinoise;dolphin, from Dauphiné
+Elvira;g;vérité étrangère;foreign truth
+Filomena;g;amie de la force;friend of strength
+Giuseppina;g;Dieu ajoutera;God will add
+Immacolata;g;immaculée, pure;immaculate, pure
+Letizia;g;bonheur, allégresse;happiness, joy
+Margherita;g;perle, précieuse;pearl, precious
+Noemi;g;agréable, douce;pleasant, sweet
+Olimpia;g;de l'Olympe;from Olympus
+Patrizia;g;noble, patricienne;noble, patrician
+Quintina;g;cinquième fille;fifth daughter
+Rosaria;g;chapelet, roses;rosary, roses
+Serafina;g;séraphine, ardente;seraphine, ardent
+Teresina;g;chasseresse;huntress
+Ughetta;g;esprit, intelligence;spirit, intelligence
+Violante;g;violette, fleur;violet, flower
+Wanda;g;tribu, vagabonde;tribe, wandering
+Zelinda;g;guerrière noble;noble warrior
+Adelchi;b;noble et intrépide;noble and fearless
+Bassiano;b;seigneur, maître;lord, master
+Corrado;b;conseil courageux;courageous counsel
+Drusiano;b;fort, robuste;strong, robust
+Ermenegildo;b;noble, glorieux;noble, glorious
+Filiberto;b;très brillant;very brilliant
+Guelfo;b;guerrier;warrior
+Herculano;b;héroïque;heroic
+Innocenzo;b;innocent, pur;innocent, pure
+Landolfo;b;loup du pays;land wolf
+Marzio;b;de Mars;of Mars
+Nerino;b;fort, sévère;strong, stern
+Osvaldo;b;puissance divine;divine power
+Pompeo;b;cinq, cinquième;five, fifth
+Rambaldo;b;conseil de l'ours;bear's counsel
+Sigifredo;b;paix victorieuse;victorious peace
+Tranquillo;b;tranquille, serein;tranquil, serene
+Uberto;b;brillant esprit;bright spirit
+Vladimiro;b;grand pouvoir;great power
 `};

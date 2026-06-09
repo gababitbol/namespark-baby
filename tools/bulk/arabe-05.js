@@ -1,46 +1,40 @@
 module.exports = { origin: "arabe", data: `
-Anouar;b;Lumières, rayonnant;Lights, radiant
-Aymane;b;Béni, chanceux;Blessed
-Aziz;b;Cher, puissant;Dear, mighty
-Bilel;b;Eau fraîche;Fresh water
-Djibril;b;Force de Dieu;God's strength
-Fouad;b;Cœur;Heart
-Ghaleb;b;Vainqueur;Victor
-Haitham;b;Jeune aigle;Young eagle
-Ihsan;b;Bienfaisance;Benevolence
-Jaafar;b;Ruisseau, source;Stream
-Kacem;b;Qui partage;One who shares
-Lokmane;b;Sage, prophète;Wise
-Maamoun;b;Digne de confiance;Trustworthy
-Mohcine;b;Bienfaiteur;Benefactor
-Naoufel;b;Généreux, mer;Generous, sea
-Oualid;b;Nouveau-né;Newborn
-Rachad;b;Bonne guidance;Right guidance
-Sami;b;Sublime, élevé;Sublime
-Sohaib;b;Aux cheveux clairs;Fair-haired
-Taoufik;b;Réussite divine;Divine success
-Wael;b;Qui cherche refuge;Seeker of refuge
-Yassir;b;Aisance, facilité;Ease
-Zakariya;b;Dieu se souvient;God remembers
-Aya;g;Verset, miracle;Verse, miracle
-Bouthaina;g;Belle, douce terre;Soft fair land
-Chahrazade;g;Née de la cité;Of the city
-Dina;g;Foi, religion;Faith
-Farida;g;Unique, précieuse;Unique, precious
-Ghizlane;g;Gazelles;Gazelles
-Hind;g;Troupe, courageuse;Brave
-Insaf;g;Justice, équité;Justice
-Jouhaina;g;Petite vague;Little wave
-Khaoula;g;De belle nature;Of fine nature
-Lamya;g;Aux lèvres brunes;Dark-lipped
-Maram;g;Aspiration, désir;Aspiration
-Mouna;g;Souhait, désir;Wish
-Nada;g;Rosée, générosité;Dew
-Ourida;g;Petite rose;Little rose
-Rahma;g;Miséricorde;Mercy
-Salima;g;Saine, paisible;Sound, peaceful
-Souad;g;Bonheur, félicité;Happiness
-Thouraya;g;Les Pléiades;The Pleiades
-Wissam;g;Médaille, honneur;Medal, honour
-Yousra;g;Aisance, prospérité;Ease, prosperity
+Azzam;b;déterminé, résolu;determined, resolute
+Basheer;b;porteur de bonnes nouvelles;bearer of good news
+Fahad;b;léopard, fort;leopard, strong
+Ghassan;b;vigueur de la jeunesse;vigor of youth
+Haytham;b;faucon, perspicace;hawk, perceptive
+Khaled;b;éternel, immortel;eternal, immortal
+Louay;b;bouclier, protecteur;shield, protector
+Moataz;b;fier, honoré;proud, honored
+Nader;b;rare, précieux;rare, precious
+Oussama;b;lion, courageux;lion, courageous
+Qasim;b;qui partage, juste;one who shares, fair
+Rayane;b;bien irrigué, florissant;well-irrigated, flourishing
+Samer;b;causeur de nuit;night talker
+Taim;b;dévoué à Dieu;devoted to God
+Usama;b;lion, fort;lion, strong
+Wissam;b;décoration, médaille;decoration, medal
+Yazid;b;qui augmente;one who increases
+Zaid;b;croissant, abondant;growing, abundant
+Abrar;g;pieuse, bonne;pious, good
+Bushra;g;bonne nouvelle;good news
+Cherine;g;douce, belle;sweet, beautiful
+Dalila;g;guide, douceur;guide, sweetness
+Enas;g;sociable, conviviale;sociable, friendly
+Faten;g;captivante, séduisante;captivating, charming
+Ghofrane;g;pardon, clémence;forgiveness, clemency
+Hoda;g;guide, juste voie;guide, right path
+Inas;g;amicale, douce;friendly, sweet
+Jinan;g;jardins, paradis;gardens, paradise
+Khadija;g;prématurée, honorée;premature, honored
+Lana;g;douce, lumineuse;gentle, luminous
+Mayssam;g;élégante, gracieuse;elegant, gracious
+Nadia;g;appelant, donateur;calling, giving
+Oumaima;g;petite mère;little mother
+Racha;g;jeune gazelle;young gazelle
+Samia;g;élevée, sublime;elevated, sublime
+Tesnime;g;fontaine du paradis;paradise spring
+Wafaa;g;fidélité, loyauté;faithfulness, loyalty
+Yasmina;g;jasmin, fleur;jasmine, flower
 `};
