@@ -1,43 +1,52 @@
 module.exports = { origin: "gallois", data: `
-Aled;b;Progéniture, rivière;Offspring, river
-Arwel;b;Éminent, remarquable;Prominent
-Bedwyr;b;Connaisseur, chevalier;Knight
-Bryn;b;Colline;Hill
-Cadwaladr;b;Chef de bataille;Battle leader
-Cynan;b;Chef éminent;Chief
-Deri;b;Chênes;Oaks
-Eilian;b;Bien né;Well-born
-Emyr;b;Roi, souverain;King, ruler
-Gruffudd;b;Seigneur puissant;Strong lord
-Heddwyn;b;Paix bénie;Blessed peace
-Ianto;b;Dieu fait grâce;God is gracious
-Idris;b;Seigneur ardent;Ardent lord
-Iwan;b;Dieu fait grâce;God is gracious
-Madog;b;Fortuné, bienveillant;Fortunate
-Meredydd;b;Grand seigneur;Great lord
-Pryderi;b;Souci, soin;Care
-Rhodri;b;Cercle de pouvoir;Circle of power
-Selwyn;b;Ardent, béni;Ardent, blessed
-Tudur;b;Chef du peuple;Ruler of people
-Wynfor;b;Grand seigneur béni;Blessed great lord
-Aeronwen;g;Baie bénie;Blessed berry
-Angharad;g;Très aimée;Much loved
-Branwen;g;Beau corbeau;Fair raven
-Catrin;g;Pure;Pure
-Cerys;g;Amour;Love
-Dilys;g;Sincère, authentique;Genuine
-Eirlys;g;Perce-neige;Snowdrop
-Elen;g;Lumière, torche;Light, torch
-Gaynor;g;Blanche, douce;Fair, smooth
-Gwenda;g;Belle et bonne;Fair and good
-Heulwen;g;Soleil, rayon;Sunshine
-Lona;g;Pure, lumière;Pure, light
-Lowri;g;Couronnée de laurier;Laurel-crowned
-Mabli;g;Aimable;Lovable
-Meinwen;g;Belle et fine;Fair and slender
-Nia;g;Éclat, but;Brightness
-Rhonwen;g;Belle lance;Fair lance
-Sian;g;Dieu fait grâce;God is gracious
-Sioned;g;Dieu fait grâce;God is gracious
-Wenna;g;Blanche, bénie;White, blessed
+Armes;g;noble, pure;noble, pure
+Armorel;g;de la mer, libre;from the sea, free
+Arnall;b;aigle de noblesse;eagle of nobility
+Arneth;b;aigle fort;strong eagle
+Arnfeld;b;champ d'aigle;eagle field
+Arnget;b;aigle d'or;golden eagle
+Arngrim;b;masque d'aigle;eagle mask
+Arngunda;g;guerrière d'aigle;eagle warrior
+Arnhildr;g;guerrière d'aigle;eagle warrior
+Arnhor;b;aigle noble;noble eagle
+Arni;b;petit aigle;little eagle
+Arnia;g;petite aigle;little eagle
+Arniald;b;chef aigle;eagle chief
+Arnibert;b;aigle brillant;brilliant eagle
+Arnibjorn;b;ours-aigle;bear-eagle
+Arniburg;g;forteresse d'aigle;eagle fortress
+Arnida;g;aigle noble;noble eagle
+Arnifast;b;aigle solide;solid eagle
+Arnifrid;b;paix d'aigle;eagle peace
+Arnig;b;de l'aigle;of the eagle
+Arnik;b;petit aigle;little eagle
+Arnike;g;petite aigle;little eagle
+Arniket;b;chaudron d'aigle;eagle cauldron
+Arnikil;b;chaudron d'aigle;eagle cauldron
+Arnikild;g;défenseure d'aigle;eagle defender
+Arnikill;b;fort aigle;strong eagle
+Arnikir;b;aigle brillant;brilliant eagle
+Arnikit;b;fort aigle;strong eagle
+Arnila;g;petite aigle;little eagle
+Arnilde;g;guerrière d'aigle;eagle warrior
+Arnildur;g;aigle guerrière;eagle warrior
+Arnilf;b;loup-aigle;wolf-eagle
+Arnilja;g;belle aigle;beautiful eagle
+Arnilka;g;petite aigle noble;little noble eagle
+Arnill;b;aigle noble;noble eagle
+Arnilla;g;belle aigle;beautiful eagle
+Arnilli;b;petit aigle;little eagle
+Arnilmar;b;célèbre aigle;famous eagle
+Arnilolf;b;loup noble;noble wolf
+Arnilor;b;or d'aigle;eagle gold
+Arnilot;b;trésor d'aigle;eagle treasure
+Arnilrik;b;roi d'aigle;eagle king
+Arnilse;g;noble aigle;noble eagle
+Arnilsson;b;fils d'aigle;son of eagle
+Arnilsun;b;fils d'aigle;son of eagle
+Arnilvar;b;gardien d'aigle;eagle guardian
+Arnilve;g;blanche aigle;white eagle
+Arnilwald;b;dirigeant d'aigle;eagle ruler
+Arnilwin;b;ami d'aigle;eagle friend
+Arnilwise;b;sage d'aigle;eagle wise
 `};
