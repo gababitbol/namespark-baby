@@ -124,13 +124,13 @@ const I18N = {
     sel_hint_ready:        "Prêts à voter ensemble ?",
     filters_toggle:        "Affiner les critères",
     filters_active:        (n) => `${n} filtre${n > 1 ? "s" : ""} actif${n > 1 ? "s" : ""}`,
-    /* ---- mon espace ---- */
-    mon_espace: "Mon espace",
-    bonjour: (n) => n ? `Bonjour ${n} 👋` : "Mon espace",
-    create_space_title: "Créez votre espace",
+    /* ---- ma sélection ---- */
+    mon_espace: "Ma sélection",
+    bonjour: (n) => n ? `Bonjour ${n} 👋` : "Ma sélection",
+    create_space_title: "Sauvegardez votre sélection",
     create_space_desc: "Sauvegardez vos prénoms favoris, retrouvez-les plus tard et exportez-les en PDF.",
-    create_space_btn: "Créer mon espace",
-    auth_hint: "Déjà un espace ? Entrez simplement votre email.",
+    create_space_btn: "Sauvegarder ma sélection",
+    auth_hint: "Déjà inscrit·e ? Entrez simplement votre email.",
     space_created: "✓ Votre espace est prêt !",
     space_welcome_back: (n) => n ? `Bon retour ${n} 👋` : "Bon retour !",
     /* ---- page sélection ---- */
@@ -151,12 +151,12 @@ const I18N = {
     prem_sync_title: "Synchroniser",
     prem_sync_desc: "Gardez vos favoris à jour sur tous vos appareils.",
     save_space_title: "Sauvegardez votre sélection",
-    save_space_desc: "Créez votre espace gratuit pour retrouver vos prénoms favoris à tout moment et recevoir votre sélection.",
-    save_space_btn: "Créer mon espace",
+    save_space_desc: "Sauvegardez votre sélection pour retrouver vos prénoms favoris à tout moment et recevoir votre liste.",
+    save_space_btn: "Sauvegarder ma sélection",
     save_space_confirm: "✓ Votre sélection a été sauvegardée.",
     /* ---- modal unlock (gate "Voir ma sélection") ---- */
     unlock_title: "Votre sélection est prête !",
-    unlock_desc: "Créez votre espace gratuit pour y accéder, recevoir votre liste par email et la retrouver à tout moment.",
+    unlock_desc: "Sauvegardez votre sélection pour y accéder, la recevoir par email et la retrouver à tout moment.",
     unlock_benefits: [
       "Retrouvez vos prénoms favoris depuis n'importe quel appareil",
       "Recevez votre sélection complète par email",
@@ -381,13 +381,13 @@ const I18N = {
     sel_hint_ready:        "Ready to vote together?",
     filters_toggle:        "Refine criteria",
     filters_active:        (n) => `${n} filter${n > 1 ? "s" : ""} active`,
-    /* ---- mon espace ---- */
-    mon_espace: "My space",
-    bonjour: (n) => n ? `Hello ${n} 👋` : "My space",
-    create_space_title: "Create your space",
+    /* ---- my selection ---- */
+    mon_espace: "My selection",
+    bonjour: (n) => n ? `Hello ${n} 👋` : "My selection",
+    create_space_title: "Save your selection",
     create_space_desc: "Save your favourite names, find them later and export them as PDF.",
-    create_space_btn: "Create my space",
-    auth_hint: "Already have a space? Just enter your email.",
+    create_space_btn: "Save my selection",
+    auth_hint: "Already registered? Just enter your email.",
     space_created: "✓ Your space is ready!",
     space_welcome_back: (n) => n ? `Welcome back ${n} 👋` : "Welcome back!",
     /* ---- selection page ---- */
@@ -408,12 +408,12 @@ const I18N = {
     prem_sync_title: "Synchronise",
     prem_sync_desc: "Keep your favourites up to date everywhere.",
     save_space_title: "Save your selection",
-    save_space_desc: "Create your free space to access your favourite names at any time and receive your selection.",
-    save_space_btn: "Create my space",
+    save_space_desc: "Save your selection to access your favourite names at any time and receive your list.",
+    save_space_btn: "Save my selection",
     save_space_confirm: "✓ Your selection has been saved.",
     /* ---- unlock modal ---- */
     unlock_title: "Your selection is ready!",
-    unlock_desc: "Create your free space to access it, receive your list by email and find it again at any time.",
+    unlock_desc: "Save your selection to access it, receive your list by email and find it at any time.",
     unlock_benefits: [
       "Access your favourite names from any device",
       "Receive your full selection by email",
@@ -3036,7 +3036,14 @@ async function handleFamilyNameSubmit(e) {
 function _showEmailNudgeIfNeeded() {
   const nudge = document.getElementById("inviteEmailNudge");
   if (!nudge) return;
-  if (currentUser?.email) { nudge.style.display = "none"; return; }
+  if (currentUser?.email) {
+    const msg = lang === "fr"
+      ? `✅ Vous serez prévenu·e par email dès que votre partenaire a voté.`
+      : `✅ You'll be notified by email as soon as your partner has voted.`;
+    nudge.innerHTML = `<p class="email-nudge-text" style="color:#27ae60;font-weight:600;">${msg}</p>`;
+    nudge.style.display = "";
+    return;
+  }
 
   nudge.style.display = "";
   const input = document.getElementById("inviteNudgeEmail");
