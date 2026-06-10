@@ -757,7 +757,7 @@ function readFilters() {
    Remplacer generateDemo(...) par generateViaBackend(...)
    quand le backend Vercel sera actif (cf. api/generate.js).
    ============================================================= */
-function generateDemo(f, limit = 8) {
+function generateDemo(f, limit = 20) {
   /* Deduplicate NAMES by name (data.js may contain duplicates) */
   const _seen = new Set();
   const scored = NAMES.filter(n => {
@@ -1045,7 +1045,7 @@ function initForm() {
     e.preventDefault();
     const f = readFilters();
     lastSurname = f.surname;
-    const results = generateDemo(f, 8); // ← mode démo (remplacer par generateViaBackend)
+    const results = generateDemo(f, 20); // ← mode démo (remplacer par generateViaBackend)
     renderResults(results, t("res_title"));
     addToHistory(f, results);            // ← sauvegarde dans l'historique
     window.plausible?.("Génération", { props: { genre: f.gender || "tous", origine: f.origin || "toutes" } });
@@ -1526,7 +1526,7 @@ function applyQueryPrefill() {
     }
   }
 
-  const results = generateDemo(readFilters(), 8);
+  const results = generateDemo(readFilters(), 20);
   renderResults(results, t("res_title"));
   setTimeout(() => document.getElementById("generateur").scrollIntoView({ behavior: "smooth" }), 300);
 }
@@ -3326,7 +3326,7 @@ function buildSigIndex() {
   }
 }
 
-function sigSearch(q, limit = 8) {
+function sigSearch(q, limit = 24) {
   buildSigIndex();
   const nq = q.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
   if (!nq) return [];
@@ -3334,7 +3334,7 @@ function sigSearch(q, limit = 8) {
   for (const e of _sigIndex) {
     if (e.norm.startsWith(nq)) starts.push(e);
     else if (e.norm.includes(nq)) contains.push(e);
-    if (starts.length >= limit) break;
+    // no early break — we must scan all entries to collect both starts and contains
   }
   return starts.concat(contains).slice(0, limit);
 }
@@ -3427,7 +3427,7 @@ function initSignification() {
 
   const showSuggest = () => {
     const q = input.value.trim();
-    const res = sigSearch(q, 8);
+    const res = sigSearch(q, 24);
     if (!res.length) { sug.hidden = true; sug.innerHTML = ""; return; }
     sug.innerHTML = res.map((e) => {
       const o = (t("origins") || {})[e.ref.origin] || e.ref.origin;
