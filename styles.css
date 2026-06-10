@@ -1580,6 +1580,18 @@ body { animation: pageIn .5s ease; }
   font-size: .8rem;
   margin-top: 14px;
 }
+/* Indicateur de statut email (compte trouvé / nouveau) */
+.auth-email-status {
+  font-size: .8rem;
+  min-height: 18px;
+  margin-top: 5px;
+  transition: opacity .2s;
+}
+.auth-email-status:empty { opacity: 0; }
+.auth-email-status.auth-found {
+  color: #166534;
+  font-weight: 600;
+}
 /* Bouton "Passer" (skip) dans les modals à email facultatif */
 .auth-hint-btn {
   display: block; width: 100%;

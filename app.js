@@ -133,6 +133,11 @@ const I18N = {
     auth_hint: "Déjà inscrit·e ? Entrez simplement votre email.",
     space_created: "✓ Votre espace est prêt !",
     space_welcome_back: (n) => n ? `Bon retour ${n} 👋` : "Bon retour !",
+    /* ---- mode reconnexion (email déjà connu) ---- */
+    login_title:   "Bon retour !",
+    login_desc:    "Nous avons retrouvé votre espace. Entrez votre email pour y accéder.",
+    login_btn:     "Accéder à mon espace",
+    login_found:   "✓ Compte trouvé",
     /* ---- page sélection ---- */
     sel_see_btn: "Voir ma sélection",
     sel_page_eyebrow: "Votre sélection",
@@ -399,6 +404,11 @@ const I18N = {
     auth_hint: "Already registered? Just enter your email.",
     space_created: "✓ Your space is ready!",
     space_welcome_back: (n) => n ? `Welcome back ${n} 👋` : "Welcome back!",
+    /* ---- reconnect mode (existing email) ---- */
+    login_title:   "Welcome back!",
+    login_desc:    "We found your space. Enter your email to access it.",
+    login_btn:     "Access my space",
+    login_found:   "✓ Account found",
     /* ---- selection page ---- */
     sel_see_btn: "View my selection",
     sel_page_eyebrow: "Your selection",
@@ -605,6 +615,8 @@ let lastSurname = "";
 const favorites = new Set();
 let currentUser   = null; /* { email, firstName, createdAt, surname } */
 let pendingAction = null; /* action en attente avant authentification */
+let _authMode     = "unknown"; /* "unknown" | "existing" | "new" — détection email en temps réel */
+let _authEmailTimer = null;   /* debounce pour la détection email */
 
 function saveFavorites() {
   saveSelection([...favorites]);
@@ -1657,6 +1669,7 @@ function saveUser() {
 function logoutUser() {
   currentUser = null;
   clearUser();
+  clearAdminSession(); // ← effacer aussi la session admin, sinon elle persiste après déconnexion
   updateEspaceButton();
   closeEspace();
   showToast(t("logout_bye"));
@@ -1948,11 +1961,41 @@ function closeEspace() {
 }
 
 /* ---- Auth Modal ---- */
+/* Met à jour la modale auth selon que l'email est connu ou nouveau */
+function setAuthMode(mode) {
+  _authMode = mode;
+  const titleEl  = document.getElementById("authModalTitle");
+  const descEl   = document.querySelector("#authModal .auth-modal-desc");
+  const fnField  = document.getElementById("authFirstName")?.closest(".field");
+  const submitEl = document.getElementById("authSubmit");
+  const statusEl = document.getElementById("authEmailStatus");
+  if (!titleEl || !submitEl || !statusEl) return;
+
+  if (mode === "existing") {
+    titleEl.textContent   = t("login_title");
+    descEl.textContent    = t("login_desc");
+    if (fnField) fnField.style.display = "none";
+    submitEl.textContent  = t("login_btn");
+    statusEl.textContent  = t("login_found");
+    statusEl.className    = "auth-email-status auth-found";
+  } else {
+    /* "new" ou "unknown" → formulaire inscription par défaut */
+    titleEl.textContent   = t("create_space_title");
+    descEl.textContent    = t("create_space_desc");
+    if (fnField) fnField.style.display = "";
+    submitEl.textContent  = t("create_space_btn");
+    statusEl.textContent  = "";
+    statusEl.className    = "auth-email-status";
+  }
+}
+
 function openAuthModal() {
   document.getElementById("authEmail").value = "";
   document.getElementById("authFirstName").value = "";
   document.getElementById("authEmail").classList.remove("field-error");
   document.getElementById("authEmailError").classList.remove("visible");
+  clearTimeout(_authEmailTimer);
+  setAuthMode("unknown"); // ← réinitialise le mode à chaque ouverture
   document.getElementById("authModal").classList.add("open");
   document.body.style.overflow = "hidden";
   setTimeout(() => document.getElementById("authEmail").focus(), 200);
@@ -2030,6 +2073,25 @@ function initMonEspace() {
   document.getElementById("authEmail").addEventListener("input", () => {
     document.getElementById("authEmail").classList.remove("field-error");
     document.getElementById("authEmailError").classList.remove("visible");
+
+    /* Détection en temps réel : email existant → mode connexion, nouveau → mode inscription */
+    clearTimeout(_authEmailTimer);
+    const email = document.getElementById("authEmail").value.trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!emailOk) { if (_authMode !== "unknown") setAuthMode("unknown"); return; }
+
+    _authEmailTimer = setTimeout(async () => {
+      /* Vérifier que l'utilisateur n'a pas changé l'email entre-temps */
+      const current = document.getElementById("authEmail")?.value.trim();
+      if (current !== email) return;
+      try {
+        const existing = await findUserByEmail(email);
+        if (document.getElementById("authEmail")?.value.trim() !== email) return;
+        setAuthMode(existing ? "existing" : "new");
+      } catch (_) {
+        setAuthMode("unknown");
+      }
+    }, 700); /* 700 ms de debounce — évite de spammer à chaque frappe */
   });
   document.getElementById("closeSelection").addEventListener("click", closeSelection);
 
