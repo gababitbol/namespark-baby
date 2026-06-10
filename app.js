@@ -617,6 +617,8 @@ let currentUser   = null; /* { email, firstName, createdAt, surname } */
 let pendingAction = null; /* action en attente avant authentification */
 let _authMode     = "unknown"; /* "unknown" | "existing" | "new" — détection email en temps réel */
 let _authEmailTimer = null;   /* debounce pour la détection email */
+let _genShown   = new Set(); /* prénoms déjà affichés dans la session filtre courante */
+let _genFilSig  = "";        /* signature JSON des filtres de la dernière génération */
 
 function saveFavorites() {
   saveSelection([...favorites]);
@@ -769,7 +771,13 @@ function readFilters() {
    Remplacer generateDemo(...) par generateViaBackend(...)
    quand le backend Vercel sera actif (cf. api/generate.js).
    ============================================================= */
-function generateDemo(f, limit = 20) {
+/* Retourne une clé courte représentant la combinaison de filtres actifs */
+function filterSignature(f) {
+  return JSON.stringify([f.gender||"", f.origin||"", f.letter||"",
+                         f.style||"",  f.meaning||"", f.length||""]);
+}
+
+function generateDemo(f, limit = 20, exclude = null) {
   /* Deduplicate NAMES by name (data.js may contain duplicates) */
   const _seen = new Set();
   const scored = NAMES.filter(n => {
@@ -801,7 +809,9 @@ function generateDemo(f, limit = 20) {
     return { n, score, hardFail };
   });
 
-  let pool = scored.filter((s) => !s.hardFail).sort((a, b) => b.score - a.score);
+  let pool = scored
+    .filter((s) => !s.hardFail && !(exclude && exclude.has(s.n.name)))
+    .sort((a, b) => b.score - a.score);
   pool = shuffleByScore(pool);
   return pool.slice(0, limit).map((s) => s.n);
 }
@@ -1057,7 +1067,28 @@ function initForm() {
     e.preventDefault();
     const f = readFilters();
     lastSurname = f.surname;
-    const results = generateDemo(f, 20); // ← mode démo (remplacer par generateViaBackend)
+    /* ── Génération progressive : on exclut les noms déjà montrés ── */
+    const sig = filterSignature(f);
+    if (sig !== _genFilSig) {
+      /* Les filtres ont changé → on repart de zéro */
+      _genShown  = new Set();
+      _genFilSig = sig;
+    }
+
+    let results = generateDemo(f, 20, _genShown); // ← mode démo
+
+    if (!results.length && _genShown.size > 0) {
+      /* Pool épuisé → réinitialiser silencieusement et recommencer */
+      _genShown  = new Set();
+      _genFilSig = sig;
+      results    = generateDemo(f, 20);
+      showToast(lang === "fr"
+        ? "Vous avez vu tous les prénoms correspondants — on recommence !"
+        : "You've seen all matching names — starting over!");
+    }
+
+    results.forEach(n => _genShown.add(n.name));
+
     renderResults(results, t("res_title"));
     addToHistory(f, results);            // ← sauvegarde dans l'historique
     window.plausible?.("Génération", { props: { genre: f.gender || "tous", origine: f.origin || "toutes" } });
@@ -1947,8 +1978,9 @@ function loadHistoryEntry(entry) {
 
 /* ---- Ouverture / Fermeture drawer ---- */
 function openEspace() {
-  /* Non connecté : montre la sélection (email demandé UNIQUEMENT sur action premium) */
-  if (!currentUser) { openSelection(); return; }
+  /* Non connecté : Mon espace nécessite un compte → ouvrir la modale d'auth.
+     Ma sélection (selSeeBtn) reste accessible sans compte. */
+  if (!currentUser) { openAuthModal(); return; }
   renderEspaceDrawer();
   document.getElementById("espaceDrawer").classList.add("open");
   document.getElementById("espaceOverlay").classList.add("open");
