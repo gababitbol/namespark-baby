@@ -6,7 +6,7 @@
    Fait    : envoie un email récapitulatif via Resend
    ============================================================= */
 
-import { unsubscribeUrl } from "./_helpers.js";
+import { unsubscribeUrl, sendEmail } from "./_helpers.js";
 
 const LOGO_IMG = `<img src="https://namespark.baby/email-logo.png" alt="NameSpark Baby" width="220" height="51" style="display:block;margin:0 auto;border:0;max-width:220px;" />`;
 
@@ -159,24 +159,21 @@ export default async function handler(req, res) {
 
   try {
     const html = buildSelectionEmail({ lang, firstName, names, email });
-    const emailRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: "NameSpark Baby <bonjour@namespark.baby>",
-        to: [email],
-        subject: isFr
-          ? `Vos ${names.length} prénoms favoris — NameSpark Baby`
-          : `Your ${names.length} favourite names — NameSpark Baby`,
-        html,
-      }),
+    const { ok, result } = await sendEmail({
+      apiKey:     resendKey,
+      from:       "NameSpark Baby <bonjour@namespark.baby>",
+      to:         email,
+      subject:    isFr
+        ? `Vos ${names.length} prénoms favoris — NameSpark Baby`
+        : `Your ${names.length} favourite names — NameSpark Baby`,
+      html,
+      unsubEmail: email,
     });
-    const result = await emailRes.json();
-    if (!emailRes.ok) {
+    if (!ok) {
       console.error("[save-list] Resend error:", result);
       return res.status(500).json({ error: "Email send failed", detail: result });
     }
-    return res.status(200).json({ sent: true, id: result.id });
+    return res.status(200).json({ sent: true, id: result?.id });
   } catch (err) {
     console.error("[save-list] error:", err);
     return res.status(500).json({ error: "Send error", detail: String(err && err.message || err) });

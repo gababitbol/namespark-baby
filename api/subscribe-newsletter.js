@@ -19,7 +19,7 @@
    );
    ============================================================= */
 
-import { unsubscribeUrl } from "./_helpers.js";
+import { unsubscribeUrl, sendEmail } from "./_helpers.js";
 
 const ALLOWED_ORIGINS = [
   "https://namespark.baby",
@@ -150,21 +150,18 @@ export default async function handler(req, res) {
 
   try {
     const html = confirmationEmail({ firstName, lang, email });
-    const emailRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: "NameSpark Baby <bonjour@namespark.baby>",
-        to: [email],
-        subject: isFr
-          ? "Bienvenue dans la newsletter NameSpark Baby ✦"
-          : "Welcome to the NameSpark Baby newsletter ✦",
-        html,
-      }),
+    const { ok, result } = await sendEmail({
+      apiKey:      resendKey,
+      from:        "NameSpark Baby <bonjour@namespark.baby>",
+      to:          email,
+      subject:     isFr
+        ? "Bienvenue dans la newsletter NameSpark Baby ✦"
+        : "Welcome to the NameSpark Baby newsletter ✦",
+      html,
+      unsubEmail:  email,
     });
-    const result = await emailRes.json();
-    if (!emailRes.ok) console.error("[subscribe-newsletter] Resend:", result);
-    return res.status(200).json({ subscribed: true, emailSent: emailRes.ok, id: result.id });
+    if (!ok) console.error("[subscribe-newsletter] Resend:", result);
+    return res.status(200).json({ subscribed: true, emailSent: ok, id: result?.id });
   } catch (err) {
     console.error("[subscribe-newsletter] Fetch error:", err);
     return res.status(200).json({ subscribed: true, emailSent: false });

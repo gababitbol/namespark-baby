@@ -7,7 +7,7 @@
              envoie un email via Resend.
    ============================================================= */
 
-import { unsubscribeUrl } from "./_helpers.js";
+import { unsubscribeUrl, sendEmail } from "./_helpers.js";
 
 const ALLOWED_ORIGINS = [
   "https://namespark.baby",
@@ -194,23 +194,20 @@ export default async function handler(req, res) {
 
   try {
     const html = buildVoteEmail({ voterName, greeting, resultsUrl, yes, maybe, no, creatorEmail });
-    const emailRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: "NameSpark Baby <votes@namespark.baby>",
-        to: [creatorEmail],
-        subject: `${voterName} a voté sur votre sélection ✦`,
-        html,
-      }),
+    const { ok, result } = await sendEmail({
+      apiKey:     resendKey,
+      from:       "NameSpark Baby <bonjour@namespark.baby>",
+      to:         creatorEmail,
+      subject:    `${voterName} a voté sur votre sélection ✦`,
+      html,
+      unsubEmail: creatorEmail,
     });
-    const result = await emailRes.json();
-    if (!emailRes.ok) {
+    if (!ok) {
       console.error("[notify-vote] Resend error:", result);
       return res.status(500).json({ error: "Email send failed", detail: result });
     }
-    console.log("[notify-vote] Sent:", { to: creatorEmail, voter: voterName, id: result.id });
-    return res.status(200).json({ sent: true, id: result.id });
+    console.log("[notify-vote] Sent:", { to: creatorEmail, voter: voterName, id: result?.id });
+    return res.status(200).json({ sent: true, id: result?.id });
   } catch (err) {
     console.error("[notify-vote] error:", err);
     return res.status(500).json({ error: "Send error", detail: String(err && err.message || err) });
