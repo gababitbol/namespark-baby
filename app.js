@@ -220,10 +220,15 @@ const I18N = {
     /* ---- PDF ---- */
     pdf_header: "Ma sélection de prénoms",
     /* ---- comment / populaires / FAQ ---- */
-    how_title: "Comment ça fonctionne", how_sub: "De l'idée à la décision partagée, en trois étapes.",
-    how_1_t: "Ajoutez vos coups de cœur", how_1_d: "Parcourez les prénoms, filtrez selon vos envies et ajoutez ceux qui vous touchent à votre sélection.",
-    how_2_t: "Partagez en un clic", how_2_d: "Envoyez un lien à votre partenaire ou à toute la famille. Chacun vote de son côté, sans se concerter.",
-    how_3_t: "Découvrez votre accord", how_3_d: "Voyez quels prénoms vous réunissent vraiment. Couple : les matchs ❤️. Famille : le classement complet.",
+    how_title: "Comment ça marche", how_sub: "Quatre étapes simples pour trouver le prénom parfait.",
+    how_1_t: "Générez des prénoms",
+    how_1_d: "Définissez vos envies — genre, origine, style, longueur. Cliquez sur Générer pour découvrir une sélection personnalisée avec la signification de chaque prénom.",
+    how_2_t: "Likez vos coups de cœur ❤️",
+    how_2_d: "Un prénom vous touche ? Cliquez sur ❤️ — il s'ajoute instantanément à votre sélection. Régénérez autant de fois que vous voulez : de nouveaux prénoms apparaissent à chaque fois.",
+    how_3_t: "Consultez Ma sélection",
+    how_3_d: "Retrouvez tous vos coups de cœur dans « Ma sélection ». Comparez-les, exportez-les en PDF ou ajoutez votre nom de famille pour visualiser le résultat final.",
+    how_4_t: "Décidez ensemble",
+    how_4_d: "Partagez votre sélection avec votre partenaire ou votre famille. Chacun vote en secret. NameSpark révèle les prénoms sur lesquels vous êtes vraiment d'accord.",
     pop_title: "Exemples de prénoms populaires", pop_sub: "Cliquez sur un prénom pour voir des idées similaires dans le générateur.",
     faq_title: "Questions fréquentes",
     /* ---- footer ---- */
@@ -485,10 +490,15 @@ const I18N = {
     share_copied: "✓ Link copied to clipboard!",
     share_no_fav: "Add names to favourites first.",
     pdf_header: "My name selection",
-    how_title: "How it works", how_sub: "From idea to shared decision, in three steps.",
-    how_1_t: "Save your favourites", how_1_d: "Browse names, filter by your preferences and add the ones that speak to you.",
-    how_2_t: "Share in one tap", how_2_d: "Send a link to your partner or the whole family. Everyone votes on their own, no influence.",
-    how_3_t: "Find your agreement", how_3_d: "See which names bring you together. Couple: the ❤️ matches. Family: the full ranking.",
+    how_title: "How it works", how_sub: "Four simple steps to find the perfect name.",
+    how_1_t: "Generate names",
+    how_1_d: "Set your preferences — gender, origin, style, length. Click Generate to get a personalised selection with the meaning of each name.",
+    how_2_t: "Like your favourites ❤️",
+    how_2_d: "Love a name? Click ❤️ — it's added to your selection instantly. Generate again as many times as you like: new names appear every time.",
+    how_3_t: "Browse My Selection",
+    how_3_d: "Find all your favourites in 'My Selection'. Compare them side by side, export as PDF, or add your last name to see the full picture.",
+    how_4_t: "Decide together",
+    how_4_d: "Share your selection with your partner or family. Everyone votes in secret. NameSpark reveals the names you truly agree on.",
     pop_title: "Popular name examples", pop_sub: "Click a name to see similar ideas in the generator.",
     faq_title: "Frequently asked questions",
     foot_tag: "Choose your baby's name, together.",
@@ -580,22 +590,64 @@ const I18N = {
    ============================================================= */
 const FAQ_DATA = {
   fr: [
-    { q: "NameSpark Baby est-il gratuit ?", a: "Oui, entièrement gratuit. Créez votre sélection, votez en couple ou faites voter la famille — sans inscription obligatoire." },
-    { q: "En quoi NameSpark Baby est-il différent de ChatGPT ?", a: "ChatGPT vous donne une liste de prénoms. NameSpark Baby vous permet de décider à deux : votre partenaire vote de son côté sur votre sélection, et on vous montre les prénoms où vous êtes vraiment d'accord. C'est un outil de décision partagée, pas juste une recherche." },
-    { q: "Comment fonctionne le vote en couple ?", a: "Générez des prénoms, ajoutez vos coups de cœur, puis cliquez sur « Décider à deux ». Un lien est créé : envoyez-le à votre partenaire. Il vote de son côté, vous de votre côté. NameSpark vous montre ensuite les prénoms que vous avez tous les deux adorés." },
-    { q: "Comment fonctionne le vote famille ?", a: "Même principe : vous créez une session et partagez un lien. Chaque membre de la famille vote (juste avec son prénom, sans compte). Vous voyez le classement complet en temps réel — qui a voté quoi, pour chaque prénom." },
-    { q: "Comment fonctionne le score de compatibilité ?", a: "Si vous renseignez un nom de famille, chaque prénom reçoit un score de 1 à 10 estimant la fluidité de la combinaison (longueur totale, équilibre syllabique, enchaînement sonore). C'est une estimation locale, purement indicative." },
-    { q: "Comment fonctionne le bouton « prénoms similaires » ?", a: "Il analyse l'origine, le style et l'ambiance du prénom choisi, puis vous propose des prénoms proches pour affiner votre sélection." },
-    { q: "Mes données sont-elles enregistrées ?", a: "Vos favoris sont sauvegardés dans votre navigateur et persistent entre les sessions. Si vous laissez votre email, vos résultats de vote pourront être récupérés. Aucune donnée n'est vendue ni partagée." }
+    {
+      q: "Par où commencer ?",
+      a: "C'est immédiat : cliquez sur <strong>Générer des prénoms</strong>, parcourez les résultats et cliquez sur le ❤️ dès qu'un prénom vous plaît. Vos coups de cœur s'accumulent dans <strong>Ma sélection</strong>. Régénérez autant de fois que vous voulez — de nouveaux prénoms apparaissent à chaque fois. Quand votre liste est prête, partagez-la pour voter en couple ou en famille."
+    },
+    {
+      q: "NameSpark Baby est-il gratuit ?",
+      a: "Oui, entièrement gratuit. Le générateur, les favoris, la recherche par signification, le vote en couple, le vote famille et l'export PDF sont tous accessibles sans abonnement ni carte bancaire. Vous pouvez créer un espace personnel (email facultatif) pour retrouver vos favoris d'une session à l'autre, depuis n'importe quel appareil."
+    },
+    {
+      q: "En quoi NameSpark Baby est-il différent de ChatGPT ?",
+      a: "ChatGPT vous produit une liste statique de prénoms. NameSpark Baby vous accompagne dans <strong>la décision</strong> : vous générez, vous likez, vous comparez, et vous invitez votre partenaire ou votre famille à voter en secret sur votre sélection. L'outil révèle ensuite les prénoms sur lesquels vous êtes vraiment d'accord, sans vous être influencés mutuellement. C'est un outil de décision partagée, pas juste une recherche."
+    },
+    {
+      q: "Comment fonctionne le vote en couple ?",
+      a: "1. Générez des prénoms et cliquez sur ❤️ pour remplir votre sélection.<br>2. Ouvrez <strong>Ma sélection</strong> et cliquez sur « Décider à deux ».<br>3. Un lien unique est créé — envoyez-le à votre partenaire.<br>4. Chacun vote en secret : ❤️ j'adore, ? peut-être, ✗ non.<br>5. NameSpark vous révèle les prénoms que vous avez tous les deux adorés."
+    },
+    {
+      q: "Comment fonctionne le vote famille ?",
+      a: "Même principe que le vote couple, mais ouvert à tous les proches. Depuis <strong>Ma sélection</strong>, choisissez « Décider en famille » et partagez le lien. Chaque participant vote juste avec son prénom, sans créer de compte. Vous suivez le classement en temps réel — qui a voté quoi, pour chaque prénom."
+    },
+    {
+      q: "Comment fonctionne le score de compatibilité ?",
+      a: "Renseignez votre nom de famille dans le générateur. Chaque prénom reçoit un score de 1 à 10 estimant la fluidité de la combinaison : longueur totale, équilibre syllabique, enchaînement sonore. C'est une aide indicative — pas une règle absolue — pour repérer les combinaisons naturellement harmonieuses."
+    },
+    {
+      q: "Mes favoris sont-ils sauvegardés si je ferme l'onglet ?",
+      a: "Oui. Vos favoris sont sauvegardés automatiquement dans votre navigateur et restent disponibles à la prochaine visite. Pour les retrouver sur un autre appareil ou les partager, créez un espace personnel en laissant votre email — c'est gratuit et facultatif. Aucune donnée n'est vendue ni partagée avec des tiers."
+    }
   ],
   en: [
-    { q: "Is NameSpark Baby free?", a: "Yes, completely free. Build your selection, vote as a couple or with the whole family — no mandatory sign-up." },
-    { q: "How is NameSpark Baby different from ChatGPT?", a: "ChatGPT gives you a list of names. NameSpark Baby helps you decide together: your partner votes on your selection separately, and we show you the names you both truly agreed on. It's a shared decision tool, not just a search." },
-    { q: "How does the couple vote work?", a: "Generate names, add your favourites, then click 'Decide together'. A link is created — send it to your partner. They vote on their side, you vote on yours. NameSpark then shows you the names you both loved." },
-    { q: "How does the family vote work?", a: "Same idea: you create a session and share a link. Each family member votes (just with their first name, no account needed). You see the full real-time ranking — who voted what, for each name." },
-    { q: "How does the compatibility score work?", a: "If you enter a last name, each first name receives a score from 1 to 10 estimating the flow of the combination (total length, syllable balance, sound transition). It's a local, purely indicative estimate." },
-    { q: "How does the 'similar names' button work?", a: "It analyses the origin, style and mood of the chosen name, then suggests close names to refine your selection." },
-    { q: "Is my data stored?", a: "Your favourites are saved in your browser and persist between sessions. If you leave your email, your vote results can be retrieved. No data is sold or shared." }
+    {
+      q: "Where do I start?",
+      a: "It's instant: click <strong>Generate names</strong>, browse the results and click ❤️ on any name you like. Your favourites build up in <strong>My Selection</strong>. Generate as many times as you want — new names appear every time. When your list is ready, share it to vote as a couple or with family."
+    },
+    {
+      q: "Is NameSpark Baby free?",
+      a: "Yes, completely free. The generator, favourites, meaning search, couple vote, family vote and PDF export are all available without a subscription or credit card. You can create a personal space (email optional) to find your favourites across sessions and devices."
+    },
+    {
+      q: "How is NameSpark Baby different from ChatGPT?",
+      a: "ChatGPT produces a static list of names. NameSpark Baby guides you through <strong>the decision</strong>: you generate, you like, you compare, and you invite your partner or family to vote in secret on your selection. The tool then reveals the names you truly agree on — without having influenced each other. It's a shared decision tool, not just a search."
+    },
+    {
+      q: "How does the couple vote work?",
+      a: "1. Generate names and click ❤️ to build your selection.<br>2. Open <strong>My Selection</strong> and click 'Decide together'.<br>3. A unique link is created — send it to your partner.<br>4. Each of you votes in secret: ❤️ love it, ? maybe, ✗ no.<br>5. NameSpark reveals the names you both loved."
+    },
+    {
+      q: "How does the family vote work?",
+      a: "Same principle as the couple vote, but open to everyone. From <strong>My Selection</strong>, choose 'Decide with family' and share the link. Each participant votes with just their first name — no account needed. You follow the real-time ranking: who voted what, for each name."
+    },
+    {
+      q: "How does the compatibility score work?",
+      a: "Enter your last name in the generator. Each first name gets a score from 1 to 10 estimating how well the combination flows: total length, syllable balance, sound transition. It's a helpful guide — not a hard rule — for spotting naturally harmonious combinations."
+    },
+    {
+      q: "Are my favourites saved if I close the tab?",
+      a: "Yes. Your favourites are automatically saved in your browser and will be there on your next visit. To access them on another device or share them, create a personal space by leaving your email — it's free and optional. No data is sold or shared with third parties."
+    }
   ]
 };
 
