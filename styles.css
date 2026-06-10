@@ -1456,6 +1456,99 @@ body { animation: pageIn .5s ease; }
 }
 .drawer-logout:hover { border-color: #e05050; color: #c05050; background: #fef2f2; }
 
+/* ── Profil : wrapper + badge connecté ── */
+.drawer-profile-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.drawer-connected-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 2px 9px 2px 7px;
+  background: #edfcf2;
+  border: 1px solid #86efac;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 700;
+  color: #166534;
+  letter-spacing: .04em;
+  width: fit-content;
+}
+.drawer-connected-pill::before {
+  content: "";
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+/* ── Cartes vote ── */
+.drawer-vote-card {
+  position: relative;
+  padding: 11px 13px;
+  margin-bottom: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  transition: border-color .15s ease;
+}
+.drawer-vote-card:last-child { margin-bottom: 0; }
+.drawer-vote-card.drawer-vote-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.drawer-vote-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.drawer-vote-mode {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+.drawer-vote-info {
+  font-size: .78rem;
+  color: var(--ink-soft);
+}
+.drawer-vote-date {
+  font-size: .72rem;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.drawer-vote-resume {
+  display: inline-block;
+  padding: 5px 13px;
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .15s ease;
+}
+.drawer-vote-resume:hover { filter: brightness(1.1); }
+
+/* ── Lien admin dans le drawer ── */
+.drawer-admin-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: #1e1b18 !important;
+  color: #f5d9a8 !important;
+  border: 0 !important;
+  font-weight: 700;
+  letter-spacing: .03em;
+  transition: filter .15s ease;
+}
+.drawer-admin-link:hover { filter: brightness(1.15); color: #fff !important; }
+
 /* ---- Modal Auth (Créez votre espace) ---- */
 .auth-modal { max-width: 450px; }
 .auth-modal-icon {

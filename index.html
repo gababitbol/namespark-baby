@@ -666,7 +666,7 @@
   <!-- ============================ OVERLAY + DRAWER MON ESPACE ============================ -->
   <div class="espace-overlay" id="espaceOverlay"></div>
 
-  <aside class="espace-drawer" id="espaceDrawer" role="dialog" aria-modal="true" aria-label="Ma sélection">
+  <aside class="espace-drawer" id="espaceDrawer" role="dialog" aria-modal="true" aria-label="Mon espace">
     <!-- En-tête -->
     <div class="drawer-head">
       <span class="drawer-head-title" data-i18n="mon_espace">Mon espace</span>
@@ -675,9 +675,10 @@
     <!-- Profil (rempli par JS) -->
     <div class="drawer-profile" id="drawerProfile">
       <div class="drawer-avatar" id="drawerAvatar">?</div>
-      <div>
+      <div class="drawer-profile-info">
         <div class="drawer-greeting" id="drawerGreeting"></div>
         <div class="drawer-user-email" id="drawerUserEmail"></div>
+        <span class="drawer-connected-pill" data-i18n="drawer_connected">Connecté·e</span>
       </div>
     </div>
     <!-- Corps (rendu par JS) -->
@@ -825,6 +826,6 @@
   <script src="storage.js?v=11"></script>
   <!-- data.js et app.js (data.js en premier) -->
   <script src="data.js?v=31"></script>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

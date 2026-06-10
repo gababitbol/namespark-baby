@@ -124,9 +124,9 @@ const I18N = {
     sel_hint_ready:        "Prêts à voter ensemble ?",
     filters_toggle:        "Affiner les critères",
     filters_active:        (n) => `${n} filtre${n > 1 ? "s" : ""} actif${n > 1 ? "s" : ""}`,
-    /* ---- ma sélection ---- */
-    mon_espace: "Ma sélection",
-    bonjour: (n) => n ? `Bonjour ${n} 👋` : "Ma sélection",
+    /* ---- mon espace / ma sélection ---- */
+    mon_espace: "Mon espace",
+    bonjour: (n) => n ? `Bonjour ${n} 👋` : "Mon espace",
     create_space_title: "Sauvegardez votre sélection",
     create_space_desc: "Sauvegardez vos prénoms favoris, retrouvez-les plus tard et exportez-les en PDF.",
     create_space_btn: "Sauvegarder ma sélection",
@@ -165,12 +165,19 @@ const I18N = {
     ],
     unlock_submit: "Accéder à ma sélection →",
     unlock_trust: "🔒 Gratuit • Sans engagement • Données protégées",
+    drawer_selection_title: "Ma sélection",
     drawer_favs_title: "Mes favoris",
     drawer_no_favs: "Cliquez sur ❤️ pour ajouter des favoris.",
     drawer_surname_title: "Nom de famille",
     drawer_surname_ph: "Ajouter un nom de famille…",
     drawer_surname_save: "Enregistrer",
     drawer_surname_saved: "✓ Nom de famille enregistré.",
+    drawer_votes_title: "Mes votes & invitations",
+    drawer_votes_empty: "Aucun vote en cours.",
+    drawer_vote_couple: "Vote couple",
+    drawer_vote_family: "Vote famille",
+    drawer_vote_resume: "Reprendre →",
+    drawer_vote_names: (n) => `${n} prénom${n > 1 ? "s" : ""}`,
     drawer_history_title: "Historique",
     drawer_history_empty: "Lancez une génération pour voir l'historique.",
     drawer_history_from: "Depuis l'historique",
@@ -179,6 +186,8 @@ const I18N = {
     drawer_pdf_btn: "📄 Télécharger en PDF",
     drawer_email_btn: "📩 M'envoyer par email",
     drawer_compare_btn: "⚖️ Comparer mes favoris",
+    drawer_admin_btn: "🔐 Panneau admin",
+    drawer_connected: "Connecté·e",
     drawer_logout: "Se déconnecter",
     email_sent_ok: "📩 Email envoyé ! Vérifiez votre boîte mail.",
     email_already_sent: "📩 Cet email a déjà été envoyé pour cette sélection.",
@@ -381,9 +390,9 @@ const I18N = {
     sel_hint_ready:        "Ready to vote together?",
     filters_toggle:        "Refine criteria",
     filters_active:        (n) => `${n} filter${n > 1 ? "s" : ""} active`,
-    /* ---- my selection ---- */
-    mon_espace: "My selection",
-    bonjour: (n) => n ? `Hello ${n} 👋` : "My selection",
+    /* ---- my space / my selection ---- */
+    mon_espace: "My space",
+    bonjour: (n) => n ? `Hello ${n} 👋` : "My space",
     create_space_title: "Save your selection",
     create_space_desc: "Save your favourite names, find them later and export them as PDF.",
     create_space_btn: "Save my selection",
@@ -422,12 +431,19 @@ const I18N = {
     ],
     unlock_submit: "Access my selection →",
     unlock_trust: "🔒 Free • No commitment • Data protected",
+    drawer_selection_title: "My selection",
     drawer_favs_title: "My favourites",
     drawer_no_favs: "Click ❤️ to add favourites.",
     drawer_surname_title: "Last name",
     drawer_surname_ph: "Add a last name…",
     drawer_surname_save: "Save",
     drawer_surname_saved: "✓ Last name saved.",
+    drawer_votes_title: "My votes & invitations",
+    drawer_votes_empty: "No active votes.",
+    drawer_vote_couple: "Couple vote",
+    drawer_vote_family: "Family vote",
+    drawer_vote_resume: "Resume →",
+    drawer_vote_names: (n) => `${n} name${n > 1 ? "s" : ""}`,
     drawer_history_title: "History",
     drawer_history_empty: "Run a generation to see history.",
     drawer_history_from: "From history",
@@ -436,6 +452,8 @@ const I18N = {
     drawer_pdf_btn: "📄 Download as PDF",
     drawer_email_btn: "📩 Send by email",
     drawer_compare_btn: "⚖️ Compare favourites",
+    drawer_admin_btn: "🔐 Admin panel",
+    drawer_connected: "Connected",
     drawer_logout: "Sign out",
     email_sent_ok: "📩 Email sent! Check your inbox.",
     email_already_sent: "📩 This email has already been sent for this selection.",
@@ -1711,23 +1729,27 @@ function updateEspaceButton() {
 function renderEspaceDrawer() {
   if (!currentUser) return;
 
-  /* Profil */
+  /* ── En-tête profil ── */
   const initial = (currentUser.firstName || currentUser.email)[0].toUpperCase();
   document.getElementById("drawerAvatar").textContent = initial;
   const greetFn = t("bonjour");
   document.getElementById("drawerGreeting").textContent =
     typeof greetFn === "function" ? greetFn(currentUser.firstName) : "Mon espace";
-  document.getElementById("drawerUserEmail").textContent = currentUser.email;
+  document.getElementById("drawerUserEmail").textContent = currentUser.email || "";
 
-  const favList    = [...favorites].map((n) => NAMES.find((x) => x.name === n)).filter(Boolean);
-  const history    = loadHistory();
+  const favList     = [...favorites].map((n) => NAMES.find((x) => x.name === n)).filter(Boolean);
+  const history     = loadHistory();
   const comparisons = loadComparisons();
+  const allDecisions = (typeof getAllDecisions === "function") ? getAllDecisions() : [];
+  const isAdmin     = (typeof hasAdminSession === "function") && hasAdminSession();
   let html = "";
 
-  /* ── Section Mes favoris ── */
+  /* ══════════════════════════════════════════════════
+     SECTION 1 — Ma sélection
+  ══════════════════════════════════════════════════ */
   html += `<div class="drawer-section">
     <div class="drawer-section-label">
-      ${t("drawer_favs_title")}
+      ${t("drawer_selection_title")}
       ${favList.length ? `<span class="drawer-badge">${favList.length}</span>` : ""}
     </div>`;
   if (!favList.length) {
@@ -1742,26 +1764,56 @@ function renderEspaceDrawer() {
       <button class="d-btn" id="dCmpBtn">${t("drawer_compare_btn")}</button>
     </div>`;
   }
-  html += `</div>`;
-
-  /* ── Section Nom de famille ── */
+  /* Nom de famille inline dans la section sélection */
   const snVal = lastSurname || currentUser.surname || "";
-  html += `<div class="drawer-section">
-    <div class="drawer-section-label">${t("drawer_surname_title")}</div>
+  html += `<div style="margin-top:12px;">
+    <div class="drawer-section-label" style="margin-bottom:8px;">${t("drawer_surname_title")}</div>
     <div class="drawer-surname-row">
       <input type="text" id="drawerSurnameInput" value="${snVal}"
              placeholder="${t("drawer_surname_ph")}" />
       <button id="drawerSurnameBtn">${t("drawer_surname_save")}</button>
     </div>
   </div>`;
+  html += `</div>`;
 
-  /* ── Section Historique ── */
+  /* ══════════════════════════════════════════════════
+     SECTION 2 — Mes votes & invitations
+  ══════════════════════════════════════════════════ */
+  html += `<div class="drawer-section">
+    <div class="drawer-section-label">${t("drawer_votes_title")}</div>`;
+
+  if (!allDecisions.length) {
+    html += `<p class="drawer-empty">${t("drawer_votes_empty")}</p>`;
+  } else {
+    html += allDecisions.slice(0, 5).map((dec) => {
+      const modeLabel  = dec.mode === "family" ? t("drawer_vote_family") : t("drawer_vote_couple");
+      const nameCount  = Array.isArray(dec.items) ? dec.items.length : 0;
+      const participants = dec.participants ? Object.values(dec.participants) : [];
+      const voterCount = participants.filter((p) => p.role !== "creator").length;
+      const nameFn     = t("drawer_vote_names");
+      const nameStr    = typeof nameFn === "function" ? nameFn(nameCount) : `${nameCount} prénoms`;
+      const isCurrent  = decideState.decisionId === dec.id;
+      return `<div class="drawer-vote-card ${isCurrent ? "drawer-vote-active" : ""}" data-dec="${dec.id}">
+        <div class="drawer-vote-meta">
+          <span class="drawer-vote-mode">${modeLabel}</span>
+          <span class="drawer-vote-info">${nameStr} · ${voterCount} votant${voterCount > 1 ? "s" : ""}</span>
+        </div>
+        <div class="drawer-vote-date">${formatDate(dec.createdAt)}</div>
+        <button class="drawer-vote-resume" data-resume="${dec.id}">${t("drawer_vote_resume")}</button>
+      </div>`;
+    }).join("");
+  }
+  html += `</div>`;
+
+  /* ══════════════════════════════════════════════════
+     SECTION 3 — Historique des générations
+  ══════════════════════════════════════════════════ */
   html += `<div class="drawer-section">
     <div class="drawer-section-label">${t("drawer_history_title")}</div>`;
   if (!history.length) {
     html += `<p class="drawer-empty">${t("drawer_history_empty")}</p>`;
   } else {
-    html += history.slice(0, 6).map((entry, i) => `
+    html += history.slice(0, 5).map((entry, i) => `
       <div class="drawer-hist-item" data-hist="${i}">
         <div class="drawer-hist-date">${formatDate(entry.date)}</div>
         <div class="drawer-hist-filters">${formatFilters(entry.filters)}</div>
@@ -1770,31 +1822,47 @@ function renderEspaceDrawer() {
   }
   html += `</div>`;
 
-  /* ── Section Comparaisons ── */
-  html += `<div class="drawer-section">
-    <div class="drawer-section-label">${t("drawer_compare_title")}</div>`;
-  if (!comparisons.length) {
-    html += `<p class="drawer-empty">${t("drawer_compare_empty")}</p>`;
-  } else {
-    html += comparisons.slice(0, 4).map((entry) => `
-      <div class="drawer-hist-item">
-        <div class="drawer-hist-date">${formatDate(entry.date)}</div>
-        <div class="drawer-hist-names">${entry.names.slice(0, 5).join(", ")}${entry.names.length > 5 ? "…" : ""}</div>
-      </div>`).join("");
+  /* ══════════════════════════════════════════════════
+     SECTION 4 — Admin (si session active)
+  ══════════════════════════════════════════════════ */
+  if (isAdmin) {
+    html += `<div class="drawer-section">
+      <a href="admin.html" class="d-btn drawer-admin-link">${t("drawer_admin_btn")}</a>
+    </div>`;
   }
-  html += `</div>`;
 
   document.getElementById("drawerBody").innerHTML = html;
 
-  /* Branchement événements */
+  /* ── Événements ── */
   if (favList.length) {
     document.getElementById("dPdfBtn").addEventListener("click", () => { exportPDF(); closeEspace(); });
     document.getElementById("dEmailBtn").addEventListener("click", sendEmailFromEspace);
     document.getElementById("dCmpBtn").addEventListener("click", () => { closeEspace(); openCompare(); });
   }
-  document.getElementById("drawerSurnameBtn").addEventListener("click", saveDrawerSurname);
+  document.getElementById("drawerSurnameBtn")?.addEventListener("click", saveDrawerSurname);
   document.querySelectorAll("[data-hist]").forEach((el) => {
     el.addEventListener("click", () => loadHistoryEntry(history[+el.dataset.hist]));
+  });
+  document.querySelectorAll("[data-resume]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const decId = el.dataset.resume;
+      closeEspace();
+      /* Si c'est le vote en cours, réouvre directement l'overlay */
+      if (decideState.decisionId === decId) {
+        openDecide();
+      } else {
+        /* Charge la décision et reprend en tant que créateur */
+        getDecision(decId).then((dec) => {
+          if (!dec) return;
+          const myPid = getMyParticipantId(decId);
+          if (myPid) {
+            decideState = { decisionId: decId, role: "creator", participantId: myPid, mode: dec.mode || "couple" };
+            openDecide();
+          }
+        }).catch(() => {});
+      }
+    });
   });
 }
 
