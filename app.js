@@ -3197,9 +3197,30 @@ async function openFamilyVoteAsVoter(decisionId) {
     const decision = await getDecision(decisionId);
     if (!decision) { showToast(t("decide_invite_invalid")); return false; }
 
-    decideState = { decisionId, role: "family", participantId: null, mode: "family" };
     if (decision.surname) lastSurname = decision.surname;
 
+    /* Si l'utilisateur connecté est le créateur de cette décision,
+       le reconnaître par email et l'emmener directement aux résultats. */
+    if (currentUser?.email) {
+      const creatorEntry = Object.entries(decision.participants || {}).find(
+        ([, p]) => p.role === "creator" && p.email &&
+                   p.email.toLowerCase() === currentUser.email.toLowerCase()
+      );
+      if (creatorEntry) {
+        const [pid] = creatorEntry;
+        decideState = { decisionId, role: "creator", participantId: pid, mode: "family" };
+        setDecideHeader("family_creator");
+        generateFamilyLink();
+        renderFamilyResults();
+        showDecideStep("familyResults");
+        document.getElementById("decideOverlay").classList.add("open");
+        document.body.style.overflow = "hidden";
+        return true;
+      }
+    }
+
+    /* Flux votant normal */
+    decideState = { decisionId, role: "family", participantId: null, mode: "family" };
     setDecideHeader("family_voter");
     document.getElementById("familyNameSub").textContent = t("family_name_sub");
     showDecideStep("familyName");

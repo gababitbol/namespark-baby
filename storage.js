@@ -365,10 +365,33 @@ async function updateParticipantEmail(participantId, email) {
   }
 }
 
-/* Rejoint une décision — get-or-create du participant pour CET appareil */
+/* Rejoint une décision — get-or-create du participant pour CET appareil.
+   Si un email est fourni et qu'un participant avec cet email existe déjà
+   dans la décision (ex : même utilisateur, nouvel appareil ou nouvelle
+   session), on récupère son participantId existant plutôt que d'en créer
+   un nouveau — ses votes précédents sont ainsi ré-associés. */
 async function joinDecision(decisionId, opts = {}) {
+  /* 1. Vérification localStorage (même appareil/session) */
   const existing = getMyParticipantId(decisionId);
   if (existing) return existing;
+
+  /* 2. Lookup par email dans le cache de la décision
+        (décision déjà fetchée par l'appelant via getDecision) */
+  if (opts.email) {
+    const cached = _getDecisionFromCache(decisionId);
+    if (cached?.participants) {
+      const matchEntry = Object.entries(cached.participants).find(
+        ([, p]) => p.email && p.email.toLowerCase() === opts.email.toLowerCase()
+      );
+      if (matchEntry) {
+        const pid = matchEntry[0];
+        _setMyParticipant(decisionId, pid);
+        return pid;
+      }
+    }
+  }
+
+  /* 3. Pas trouvé → créer un nouveau participant */
   const pid = await addParticipant(decisionId, opts);
   if (pid) _setMyParticipant(decisionId, pid);
   return pid;
