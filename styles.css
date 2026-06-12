@@ -1614,6 +1614,16 @@ body { animation: pageIn .5s ease; }
   .drawer-hist-item:hover { margin: 0 -6px; padding-left: 6px; padding-right: 6px; }
 }
 
+/* Nav compacte sur très petit écran — évite le débordement horizontal */
+@media (max-width: 460px) {
+  .nav-right { gap: 8px; }
+  #espaceBtnLabel { display: none; }
+  .espace-avatar-mini { display: inline-grid !important; }
+  .espace-avatar-mini:empty::before { content: '✶'; font-size: .6rem; }
+  .espace-btn { padding: 6px 8px; gap: 0; }
+  .lang-switch button { padding: 5px 9px; }
+}
+
 /* =============================================================
    MON ESPACE v2 — Widget compact + Page Ma sélection + Actions premium
    ============================================================= */
@@ -2241,6 +2251,10 @@ body { animation: pageIn .5s ease; }
   .decide-head { flex-direction: column; gap: 12px; padding: 20px 16px 14px; }
   .decide-title { font-size: 1.5rem; }
   .decide-body { padding: 16px; }
+}
+@media (max-width: 480px) {
+  .vote-btn { padding: 7px 8px; font-size: .8rem; }
+  .vote-actions { gap: 6px; }
 }
 
 /* ---- Nudge email manquant (écran d'invitation) ---- */
