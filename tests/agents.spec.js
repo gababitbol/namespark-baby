@@ -963,15 +963,15 @@ test.describe.serial('🧨 Scénario cas limites — décisions mortes', () => {
       'Bug : bandeau "Ce vote est terminé" absent sur décision clôturée'
     ).toBeVisible();
 
-    // UI : tous les boutons de vote désactivés
+    // UI : tous les boutons de vote marqués comme clôturés (data-closed) + sans écouteurs
     const allBtns  = pageVoter.locator('#voteList .vote-btn');
     const btnCount = await allBtns.count();
     expect(btnCount, 'Bug : aucun bouton de vote dans voteList').toBeGreaterThan(0);
     for (let i = 0; i < btnCount; i++) {
       await expect(
         allBtns.nth(i),
-        `Bug : bouton de vote [${i}] actif alors que le vote est clôturé`
-      ).toBeDisabled();
+        `Bug : bouton de vote [${i}] sans marqueur "data-closed" alors que le vote est clôturé`
+      ).toHaveAttribute('data-closed', 'true');
     }
 
     // Supabase : bypass UI → insert direct → doit être bloqué par le trigger

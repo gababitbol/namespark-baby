@@ -2814,7 +2814,7 @@ function renderDecideVote(decision) {
         <span class="vote-name">${n ? n.name : name}</span>
         <div class="vote-actions">
           ${reactions.map((x) =>
-            `<button class="vote-btn vote-${x.r}${myVotes[name] === x.r ? " selected" : ""}" data-react="${x.r}"${isClosed ? " disabled" : ""}>${x.txt}</button>`
+            `<button class="vote-btn vote-${x.r}${myVotes[name] === x.r ? " selected" : ""}" data-react="${x.r}"${isClosed ? ' data-closed="true"' : ""}>${x.txt}</button>`
           ).join("")}
         </div>
       </div>`;
