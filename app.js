@@ -283,6 +283,10 @@ const I18N = {
     family_copy_link: "Copier le lien",
     family_refresh: "🔄 Actualiser les votes",
     family_simulate: "Simuler des votes (démo)",
+    family_close_vote:    "🔒 Clôturer le vote",
+    family_close_confirm: "Clôturer le vote ? Les votants ne pourront plus modifier leurs votes.",
+    vote_closed_banner:   "🔒 Ce vote est terminé.",
+    err_vote_closed:      "Ce vote est clôturé — vote non enregistré.",
     /* ---- Gate email au lancement d'un vote ---- */
     /* ---- Détail votes couple (vue créateur) ---- */
     couple_detail_title: "Détail complet des votes",
@@ -552,6 +556,10 @@ const I18N = {
     family_copy_link: "Copy link",
     family_refresh: "🔄 Refresh votes",
     family_simulate: "Simulate votes (demo)",
+    family_close_vote:    "🔒 Close vote",
+    family_close_confirm: "Close the vote? Voters will no longer be able to change their votes.",
+    vote_closed_banner:   "🔒 This vote is closed.",
+    err_vote_closed:      "This vote is closed — vote not saved.",
     /* ---- Email gate when starting a vote ---- */
     /* ---- Couple detail view ---- */
     couple_detail_title: "Full vote breakdown",
@@ -1953,7 +1961,7 @@ function renderEspaceDrawer() {
           if (!dec) return;
           const myPid = getMyParticipantId(decId);
           if (myPid) {
-            decideState = { decisionId: decId, role: "creator", participantId: myPid, mode: dec.mode || "couple" };
+            decideState = { decisionId: decId, role: "creator", participantId: myPid, mode: dec.mode || "couple", status: dec.status || 'open' };
             openDecide();
           }
         }).catch(() => {});
@@ -2437,8 +2445,9 @@ function openSaveSpaceModal() {
 /* État du module — simple POINTEUR. La vérité vit dans storage.js (Decision). */
 let decideState = {
   decisionId:    null,
-  role:          null, // "creator" | "partner"
+  role:          null, // "creator" | "partner" | "family"
   participantId: null,
+  status:        null, // "open" | "closed"
 };
 /* Timer d'auto-polling (s'active quand le créateur est sur l'écran d'attente) */
 let _pollTimer = null;
@@ -2589,7 +2598,7 @@ async function openDecide() {
       items:        [...favorites],
     });
     console.log("[NS:openDecide] décision créée:", decision.id);
-    decideState = { decisionId: decision.id, role: "creator", participantId, mode: "couple" };
+    decideState = { decisionId: decision.id, role: "creator", participantId, mode: "couple", status: 'open' };
     if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
 
     setDecideHeader("couple_creator");
@@ -2706,7 +2715,7 @@ async function _joinAndShowPartnerVote(decision, decisionId) {
     name:  currentUser?.firstName || null,
     email: currentUser?.email || null,
   });
-  decideState = { decisionId, role: "partner", participantId, mode: "couple" };
+  decideState = { decisionId, role: "partner", participantId, mode: "couple", status: decision.status || 'open' };
   renderDecideVote(decision);
   showDecideStep("decideVote");
   document.getElementById("decideOverlay")?.classList.add("open");
@@ -2769,10 +2778,26 @@ async function handlePartnerRegSubmit(e) {
 /* ---- Rendu de la liste de vote (partenaire OU votant famille) ---- */
 function renderDecideVote(decision) {
   const isFamily = decideState.mode === "family";
+  const isClosed = decision.status === 'closed';
+
+  /* Sync status dans decideState (utile pour handleFamilyNameSubmit → handleVote) */
+  decideState.status = decision.status || 'open';
+
   document.getElementById("decideVoteSub").textContent =
     isFamily ? t("family_vote_sub") : t("decide_vote_sub");
   const seeBtn = document.getElementById("seeMatchsBtn");
   if (seeBtn) seeBtn.textContent = isFamily ? t("family_finish_vote") : t("decide_see_matchs");
+
+  /* Bandeau "vote terminé" */
+  const banner = document.getElementById("voteClosedBanner");
+  if (banner) {
+    if (isClosed) {
+      banner.textContent = t("vote_closed_banner");
+      banner.style.display = "";
+    } else {
+      banner.style.display = "none";
+    }
+  }
 
   const myVotes = getVotes(decideState.decisionId)[decideState.participantId] || {};
   const reactions = [
@@ -2789,11 +2814,13 @@ function renderDecideVote(decision) {
         <span class="vote-name">${n ? n.name : name}</span>
         <div class="vote-actions">
           ${reactions.map((x) =>
-            `<button class="vote-btn vote-${x.r}${myVotes[name] === x.r ? " selected" : ""}" data-react="${x.r}">${x.txt}</button>`
+            `<button class="vote-btn vote-${x.r}${myVotes[name] === x.r ? " selected" : ""}" data-react="${x.r}"${isClosed ? " disabled" : ""}>${x.txt}</button>`
           ).join("")}
         </div>
       </div>`;
   }).join("");
+
+  if (isClosed) return; /* Pas d'écouteurs sur un vote clôturé */
 
   wrap.querySelectorAll(".vote-item").forEach((item) => {
     const name = item.dataset.voteName;
@@ -2804,10 +2831,10 @@ function renderDecideVote(decision) {
         btn.classList.add("selected");
         try {
           await handleVote(name, btn.dataset.react);
-        } catch (_) {
+        } catch (err) {
           /* Annule la mise à jour optimiste si l'enregistrement Supabase échoue */
           btn.classList.remove("selected");
-          showToast(t("err_vote_failed"));
+          showToast(err?.message === 'decision_closed' ? t("err_vote_closed") : t("err_vote_failed"));
         }
       });
     });
@@ -2816,6 +2843,7 @@ function renderDecideVote(decision) {
 
 /* ---- Enregistrer un vote (créateur OU partenaire) ---- */
 async function handleVote(prenameName, reaction) {
+  if (decideState.status === 'closed') throw Object.assign(new Error('decision_closed'), { code: 'VOTE_CLOSED' });
   await saveVote(decideState.decisionId, decideState.participantId, prenameName, reaction);
   window.plausible?.("Vote effectué", { props: { mode: decideState.mode, reaction } });
 }
@@ -3102,6 +3130,24 @@ function wireDecideButtons() {
   });
 
   document.getElementById("simulateFamilyBtn")?.addEventListener("click", simulateFamilyVotes);
+
+  document.getElementById("closeVoteBtn")?.addEventListener("click", async () => {
+    if (!confirm(t("family_close_confirm"))) return;
+    const btn = document.getElementById("closeVoteBtn");
+    const orig = btn.textContent;
+    btn.disabled = true; btn.textContent = "…";
+    try {
+      await closeDecision(decideState.decisionId);
+      decideState.status = "closed";
+      renderFamilyResults();
+      showToast(t("vote_closed_banner"));
+    } catch (err) {
+      console.error("[NameSpark] closeDecision:", err);
+      showToast(t("err_network"));
+    } finally {
+      btn.disabled = false; btn.textContent = orig;
+    }
+  });
 }
 
 /* ---- Démo : simule un partenaire DISTINCT qui vote (via storage) ---- */
@@ -3142,7 +3188,7 @@ async function openFamilyVote() {
       mode:         "family",
       items:        [...favorites],
     });
-    decideState = { decisionId: decision.id, role: "creator", participantId, mode: "family" };
+    decideState = { decisionId: decision.id, role: "creator", participantId, mode: "family", status: 'open' };
     if (currentUser) registerLead(currentUser.email, currentUser.firstName, favorites.size, true);
 
     setDecideHeader("family_creator");
@@ -3208,7 +3254,7 @@ async function openFamilyVoteAsVoter(decisionId) {
       );
       if (creatorEntry) {
         const [pid] = creatorEntry;
-        decideState = { decisionId, role: "creator", participantId: pid, mode: "family" };
+        decideState = { decisionId, role: "creator", participantId: pid, mode: "family", status: decision.status || 'open' };
         setDecideHeader("family_creator");
         generateFamilyLink();
         renderFamilyResults();
@@ -3220,7 +3266,7 @@ async function openFamilyVoteAsVoter(decisionId) {
     }
 
     /* Flux votant normal */
-    decideState = { decisionId, role: "family", participantId: null, mode: "family" };
+    decideState = { decisionId, role: "family", participantId: null, mode: "family", status: decision.status || 'open' };
     setDecideHeader("family_voter");
     document.getElementById("familyNameSub").textContent = t("family_name_sub");
     showDecideStep("familyName");
@@ -3344,6 +3390,14 @@ function finishFamilyVote() {
 /* ---- Résultats famille : classement + détail (qui a voté quoi) ---- */
 function renderFamilyResults() {
   if (decideState.role === "creator") generateFamilyLink();
+
+  /* Bouton Clôturer : visible seulement pour le créateur sur un vote encore ouvert */
+  const closeBtn = document.getElementById("closeVoteBtn");
+  if (closeBtn) {
+    const showClose = decideState.role === "creator" && decideState.status !== "closed";
+    closeBtn.textContent = t("family_close_vote");
+    closeBtn.style.display = showClose ? "" : "none";
+  }
 
   const rows = computeRanking(decideState.decisionId);
   const wrap = document.getElementById("familyRanking");

@@ -213,6 +213,7 @@ function _reconstructDecision(dec, participants, votes) {
     items:        dec.items || [],
     participants: p,
     votes:        v,
+    status:       dec.status || 'open',
   };
 }
 
@@ -437,6 +438,20 @@ async function saveVote(decisionId, participantId, name, reaction) {
   }
 }
 
+/* Clôture une décision — Supabase + cache local */
+async function closeDecision(decisionId) {
+  if (!_sb) throw new Error("[NameSpark] Supabase requis pour clôturer");
+  const { error } = await _sb.from("decisions")
+    .update({ status: "closed" })
+    .eq("id", decisionId);
+  if (error) throw error;
+  const all = _allDecisions();
+  if (all[decisionId]) {
+    all[decisionId].status = "closed";
+    _saveDecisions(all);
+  }
+}
+
 /* Retourne les votes depuis le cache (mis à jour par getDecision) */
 function getVotes(decisionId) {
   const d = _getDecisionFromCache(decisionId);
@@ -601,7 +616,7 @@ if (typeof module !== "undefined" && module.exports) {
     getSelection, saveSelection, addToSelection, removeFromSelection,
     getSavedLists, addSavedList, getHistory, addHistory, getComparisons, addComparison,
     createDecision, getDecision, getCurrentDecisionId, setCurrentDecisionId,
-    addParticipant, updateParticipantEmail, joinDecision, getMyParticipantId, saveVote, getVotes,
+    addParticipant, updateParticipantEmail, joinDecision, getMyParticipantId, saveVote, closeDecision, getVotes,
     fetchAllLeadsAdmin, fetchAllDecisionsAdmin,
     computeMatches, computeRanking,
     addNotification, getNotifications, markNotificationRead, clearNotifications,
