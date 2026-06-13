@@ -10,6 +10,9 @@
 
 "use strict";
 
+/* Token pour l'API /api/subscribers-admin (doit correspondre à ADMIN_API_TOKEN sur Vercel) */
+const ADMIN_API_TOKEN = "namespark-admin-2026";
+
 let sortField = "createdAt";
 let sortAsc = false;
 
@@ -39,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("refreshBtn").addEventListener("click", renderAll);
   document.getElementById("exportBtn").addEventListener("click", exportCSV);
   document.getElementById("leadSearch").addEventListener("input", renderLeads);
+  document.getElementById("subscribersSearch").addEventListener("input", renderSubscribers);
   document.getElementById("filterFamily").addEventListener("change", renderSessions);
   document.getElementById("filterCouple").addEventListener("change", renderSessions);
 
@@ -71,29 +75,84 @@ function showDashboard() {
 let _adminLeads = [];
 let _adminDecisions = [];
 let _adminNewsletter = [];
+let _adminSubscribers = [];
 
 /* ---- RENDER ALL ---- */
 async function renderAll() {
   document.getElementById("refreshBtn").textContent = "⏳";
   document.getElementById("refreshBtn").disabled = true;
   try {
-    [_adminLeads, _adminDecisions, _adminNewsletter] = await Promise.all([
+    [_adminLeads, _adminDecisions, _adminNewsletter, _adminSubscribers] = await Promise.all([
       fetchAllLeadsAdmin(),
       fetchAllDecisionsAdmin(),
       fetchNewsletterSubscribers(),
+      fetchSubscribersFromApi(),
     ]);
   } catch (e) {
     console.warn("[Admin] Supabase fetch failed, using local cache", e);
     _adminLeads = getLeads();
     _adminDecisions = getAllDecisions();
     _adminNewsletter = [];
+    _adminSubscribers = [];
   }
   renderStats();
+  renderSubscribers();
   renderLeads();
   renderNewsletter();
   renderSessions();
   document.getElementById("refreshBtn").textContent = "🔄 Actualiser";
   document.getElementById("refreshBtn").disabled = false;
+}
+
+/* ---- SUBSCRIBERS (API sécurisée service_role) ---- */
+async function fetchSubscribersFromApi() {
+  try {
+    const res = await fetch("/api/subscribers-admin", {
+      headers: { "X-Admin-Token": ADMIN_API_TOKEN },
+    });
+    if (!res.ok) { console.warn("[Admin] subscribers-admin:", res.status); return []; }
+    const json = await res.json();
+    return Array.isArray(json.subscribers) ? json.subscribers : [];
+  } catch (e) {
+    console.warn("[Admin] fetchSubscribersFromApi:", e);
+    return [];
+  }
+}
+
+function renderSubscribers() {
+  const search = (document.getElementById("subscribersSearch")?.value || "").toLowerCase();
+  const subs = _adminSubscribers.filter((s) =>
+    (s.email      || "").toLowerCase().includes(search) ||
+    (s.first_name || "").toLowerCase().includes(search) ||
+    (s.last_name  || "").toLowerCase().includes(search)
+  );
+
+  /* Badge total (non filtré) */
+  const badge = document.getElementById("subscribersBadge");
+  if (badge) {
+    const total = _adminSubscribers.length;
+    badge.textContent = `${total} inscrit${total !== 1 ? "s" : ""}`;
+    badge.style.display = total > 0 ? "" : "none";
+  }
+
+  const body = document.getElementById("subscribersBody");
+  if (!body) return;
+
+  if (!subs.length) {
+    body.innerHTML = `<tr class="empty-row"><td colspan="5">${
+      search ? "Aucun résultat pour cette recherche." : "Aucun inscrit pour l'instant."
+    }</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = subs.map((s) => `
+    <tr>
+      <td class="td-email">${esc(s.email)}</td>
+      <td>${s.first_name ? esc(s.first_name) : "<span style='color:var(--ink-soft)'>—</span>"}</td>
+      <td>${s.last_name  ? esc(s.last_name)  : "<span style='color:var(--ink-soft)'>—</span>"}</td>
+      <td>${fmtDate(s.created_at)}</td>
+      <td>${fmtDate(s.updated_at)}</td>
+    </tr>`).join("");
 }
 
 /* ---- KPIs ---- */
@@ -108,6 +167,7 @@ function renderStats() {
   }, 0);
 
   const stats = [
+    { label: "Inscrits", value: _adminSubscribers.length, sub: "sans doublons, toutes sources" },
     { label: "Emails captés", value: leads.length, sub: `${leads.filter((l) => l.sessions > 0).length} avec vote créé` },
     { label: "Sessions couple", value: couple.length, sub: `${couple.filter((d)=>Object.keys(d.votes).length>=2).length} avec votes partenaire` },
     { label: "Sessions famille", value: family.length, sub: `${family.filter((d)=>Object.keys(d.votes).length>=2).length} avec ≥2 votants` },

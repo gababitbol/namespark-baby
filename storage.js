@@ -131,6 +131,13 @@ function setUser(user) {
           _write(KEYS.user, { ...user, id: data[0].id });
         }
       } catch (e) { console.warn("[NameSpark] setUser:", e); }
+      /* Dual-write vers subscribers pour avoir first_name + last_name dans le panel admin */
+      try {
+        await _sb.from("subscribers").upsert(
+          { email: user.email, first_name: user.firstName || null, last_name: user.surname || null },
+          { onConflict: "email" }
+        );
+      } catch (e) { console.warn("[NameSpark] setUser→subscribers:", e); }
     })();
   }
 }
@@ -554,6 +561,13 @@ function registerLead(email, firstName, favoritesCount = 0, bumpSession = false)
         if (u.surname) payload.surname = u.surname;
         await _sb.from("leads").upsert(payload, { onConflict: "email" });
       } catch (e) { console.warn("[NameSpark] registerLead:", e); }
+      /* Dual-write vers subscribers (source de vérité admin, sans doublons) */
+      try {
+        await _sb.from("subscribers").upsert(
+          { email: u.email, first_name: u.firstName || null, last_name: u.surname || null },
+          { onConflict: "email" }
+        );
+      } catch (e) { console.warn("[NameSpark] registerLead→subscribers:", e); }
     })();
   }
 }

@@ -166,6 +166,35 @@
       <!-- KPIs -->
       <div class="admin-stats" id="statsGrid"></div>
 
+      <!-- Section : Subscribers (table principale, sans doublons) -->
+      <div class="admin-section">
+        <div class="admin-section-head">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="admin-section-title">👥 Inscrits</span>
+            <span id="subscribersBadge" style="display:none;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.06em"></span>
+          </div>
+          <div class="admin-controls">
+            <input type="text" class="admin-search" id="subscribersSearch" placeholder="Rechercher…" />
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="subscribersTable">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Inscrit le</th>
+                <th>Mis à jour</th>
+              </tr>
+            </thead>
+            <tbody id="subscribersBody">
+              <tr class="empty-row"><td colspan="5">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Section : Leads (emails captés) -->
       <div class="admin-section">
         <div class="admin-section-head">
