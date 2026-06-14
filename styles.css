@@ -1597,6 +1597,22 @@ body { animation: pageIn .5s ease; }
   color: #166534;
   font-weight: 600;
 }
+/* Ligne de consentement légal sous les boutons d'inscription */
+.consent-line {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: center;
+  margin-top: 9px;
+  line-height: 1.5;
+  opacity: .8;
+}
+.consent-line a {
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.consent-line a:hover { color: var(--accent-deep); }
+
 /* Bouton "Passer" (skip) dans les modals à email facultatif */
 .auth-hint-btn {
   display: block; width: 100%;

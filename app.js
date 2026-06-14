@@ -130,6 +130,7 @@ const I18N = {
     create_space_title: "Sauvegardez votre sélection",
     create_space_desc: "Sauvegardez vos prénoms favoris, retrouvez-les plus tard et exportez-les en PDF.",
     create_space_btn: "Sauvegarder ma sélection",
+    consent_text: `En continuant, vous acceptez nos <a href="/terms" target="_blank" rel="noopener">Conditions d'utilisation</a> et notre <a href="/privacy" target="_blank" rel="noopener">Politique de confidentialité</a>.`,
     auth_hint: "Déjà inscrit·e ? Entrez simplement votre email.",
     space_created: "✓ Votre espace est prêt !",
     space_welcome_back: (n) => n ? `Bon retour ${n} 👋` : "Bon retour !",
@@ -410,6 +411,7 @@ const I18N = {
     create_space_title: "Save your selection",
     create_space_desc: "Save your favourite names, find them later and export them as PDF.",
     create_space_btn: "Save my selection",
+    consent_text: `By continuing, you agree to our <a href="/terms" target="_blank" rel="noopener">Terms of Use</a> and our <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.`,
     auth_hint: "Already registered? Just enter your email.",
     space_created: "✓ Your space is ready!",
     space_welcome_back: (n) => n ? `Welcome back ${n} 👋` : "Welcome back!",
@@ -712,6 +714,11 @@ function applyLang(next) {
   document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
     const val = I18N[lang][el.getAttribute("data-i18n-ph")];
     if (typeof val === "string") el.setAttribute("placeholder", val);
+  });
+
+  document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+    const val = I18N[lang][el.getAttribute("data-i18n-html")];
+    if (typeof val === "string") el.innerHTML = val;
   });
 
   document.querySelectorAll("#langSwitch button").forEach((b) =>
