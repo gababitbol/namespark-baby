@@ -266,8 +266,10 @@
     </div>
   </div>
 
-  <!-- storage.js DOIT être chargé AVANT admin.js -->
-  <script src="storage.js?v=3"></script>
-  <script src="admin.js?v=3"></script>
+  <!-- SDK Supabase requis par storage.js (_sb ne peut s'initialiser sans) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- storage.js DOIT être chargé APRÈS le SDK et AVANT admin.js -->
+  <script src="storage.js?v=4"></script>
+  <script src="admin.js?v=4"></script>
 </body>
 </html>

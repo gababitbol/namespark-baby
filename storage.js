@@ -592,8 +592,12 @@ async function fetchAllDecisionsAdmin() {
   const { data: decisions, error: dErr } = await _sb.from("decisions").select("*").order("created_at", { ascending: false });
   if (dErr || !decisions) { console.warn("[Admin] fetchAllDecisionsAdmin:", dErr); return getAllDecisions(); }
 
-  const { data: participants } = await _sb.from("participants").select("*");
-  const { data: votes } = await _sb.from("votes").select("*");
+  /* PostgREST coupe à 1 000 lignes sans range explicite — spécifier le plafond */
+  const decisionIds = decisions.map((d) => d.id);
+  const { data: participants } = await _sb.from("participants").select("*")
+    .in("decision_id", decisionIds).range(0, 4999);
+  const { data: votes } = await _sb.from("votes").select("*")
+    .in("decision_id", decisionIds).range(0, 19999);
 
   return decisions.map((d) => {
     const parts = (participants || []).filter((p) => p.decision_id === d.id);
