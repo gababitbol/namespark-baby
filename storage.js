@@ -111,6 +111,7 @@ function clearUser() { _remove(KEYS.user); }
    Utilise async IIFE car .catch() n'existe PAS directement sur les
    query builders Supabase JS v2 récents (depuis postgrest-js 1.9+). */
 function setUser(user) {
+  if (user?.email) user = { ...user, email: user.email.trim().toLowerCase() };
   _write(KEYS.user, user);
   if (_sb && user?.email) {
     const payload = {
@@ -146,6 +147,7 @@ function setUser(user) {
    Important : queryPromise.catch() évite un UnhandledPromiseRejection si le réseau
    répond APRÈS la fin du race (ce qui peut corrompre l'état dans certains navigateurs). */
 async function findUserByEmail(email) {
+  email = email.trim().toLowerCase();
   const local = getUser();
   if (local && local.email === email) return local;
 
@@ -331,6 +333,7 @@ function getMyParticipantId(decisionId)     { return _myParticipants()[decisionI
 
 /* Ajoute un participant à une décision */
 async function addParticipant(decisionId, { role = "partner", name = null, email = null } = {}) {
+  if (email) email = email.trim().toLowerCase();
   const pid = uid("p");
   const now = new Date().toISOString();
 
@@ -355,6 +358,7 @@ async function addParticipant(decisionId, { role = "partner", name = null, email
 
 /* Met à jour l'email d'un participant existant (ex: créateur sans email au départ) */
 async function updateParticipantEmail(participantId, email) {
+  if (email) email = email.trim().toLowerCase();
   /* Cache local */
   const all = _allDecisions();
   for (const did of Object.keys(all)) {
@@ -529,7 +533,9 @@ function clearNotifications()      { _remove(KEYS.notifications); }
    explicitement, car il est déjà enregistré lors de la génération de prénoms.
    Migration Supabase requise : ALTER TABLE leads ADD COLUMN IF NOT EXISTS surname TEXT; */
 function registerLead(email, firstName, favoritesCount = 0, bumpSession = false) {
-  if (!email || email.trim().toLowerCase() === "admin") return;
+  if (!email) return;
+  email = email.trim().toLowerCase();
+  if (email === "admin") return;
   const all = _read(KEYS.leads, []);
   const now = new Date().toISOString();
   /* Récupère le nom de famille depuis le cache local s'il existe */
