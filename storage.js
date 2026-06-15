@@ -134,7 +134,7 @@ function setUser(user) {
       /* Dual-write vers subscribers pour avoir first_name + last_name dans le panel admin */
       try {
         await _sb.from("subscribers").upsert(
-          { email: user.email, first_name: user.firstName || null, last_name: user.surname || null, consent_terms: true },
+          { email: user.email, first_name: user.firstName || null, last_name: user.surname || null },
           { onConflict: "email" }
         );
       } catch (e) { console.warn("[NameSpark] setUser→subscribers:", e); }
@@ -564,7 +564,7 @@ function registerLead(email, firstName, favoritesCount = 0, bumpSession = false)
       /* Dual-write vers subscribers (source de vérité admin, sans doublons) */
       try {
         await _sb.from("subscribers").upsert(
-          { email: u.email, first_name: u.firstName || null, last_name: u.surname || null, consent_terms: true },
+          { email: u.email, first_name: u.firstName || null, last_name: u.surname || null },
           { onConflict: "email" }
         );
       } catch (e) { console.warn("[NameSpark] registerLead→subscribers:", e); }
