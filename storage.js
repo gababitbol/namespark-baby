@@ -552,13 +552,13 @@ function registerLead(email, firstName, favoritesCount = 0, bumpSession = false)
     (async () => {
       try {
         const payload = {
-          email:      u.email,
-          first_name: u.firstName,
-          favorites:  u.favorites,
-          sessions:   u.sessions,
-          last_seen:  now,
+          email:     u.email,
+          favorites: u.favorites,
+          sessions:  u.sessions,
+          last_seen: now,
         };
-        if (u.surname) payload.surname = u.surname;
+        if (u.firstName) payload.first_name = u.firstName;
+        if (u.surname)   payload.surname    = u.surname;
         await _sb.from("leads").upsert(payload, { onConflict: "email" });
       } catch (e) { console.warn("[NameSpark] registerLead:", e); }
       /* Dual-write vers subscribers (source de vérité admin, sans doublons) */
