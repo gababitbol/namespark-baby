@@ -316,6 +316,8 @@ const I18N = {
     notif_partner_voted: (n) => `Votre partenaire a voté sur ${n} prénom${n > 1 ? "s" : ""} !`,
     notif_match_found: (n) => `🎉 ${n} nouveau${n > 1 ? "x" : ""} match${n > 1 ? "s" : ""} !`,
     notif_weeks_left: (n) => `⏳ Plus que ${n} semaine${n > 1 ? "s" : ""} avant la date prévue`,
+    heart_hint_title: (n) => `Tu as vu ${n} prénoms — lequel te plaît le plus ? 💛`,
+    heart_hint_text: "Mets en favori tes préférés pour les retrouver et en discuter avec ton·ta partenaire ou ta famille",
     /* ---- listes ---- */
     origins: { hebreu: "Hébreu", francais: "Français", anglais: "Anglais", arabe: "Arabe", italien: "Italien", espagnol: "Espagnol", grec: "Grec", latin: "Latin", nordique: "Nordique", irlandais: "Irlandais", japonais: "Japonais", slave: "Slave", sanskrit: "Sanskrit", persan: "Persan", africain: "Africain", portugais: "Portugais", coreen: "Coréen", chinois: "Chinois", gallois: "Gallois", basque: "Basque", armenien: "Arménien", georgien: "Géorgien" },
     styles: { classique: "Classique", moderne: "Moderne", rare: "Rare", elegant: "Élégant", court: "Court", poetique: "Poétique" }
@@ -590,6 +592,8 @@ const I18N = {
     notif_partner_voted: (n) => `Your partner voted on ${n} name${n > 1 ? "s" : ""}!`,
     notif_match_found: (n) => `🎉 ${n} new match${n > 1 ? "es" : ""}!`,
     notif_weeks_left: (n) => `⏳ ${n} week${n > 1 ? "s" : ""} left until your due date`,
+    heart_hint_title: (n) => `You've seen ${n} names — which one do you like best? 💛`,
+    heart_hint_text: "Add your favourites to find them again and discuss them with your partner or family",
     origins: { hebreu: "Hebrew", francais: "French", anglais: "English", arabe: "Arabic", italien: "Italian", espagnol: "Spanish", grec: "Greek", latin: "Latin", nordique: "Nordic", irlandais: "Irish", japonais: "Japanese", slave: "Slavic", sanskrit: "Sanskrit", persan: "Persian", africain: "African", portugais: "Portuguese", coreen: "Korean", chinois: "Chinese", gallois: "Welsh", basque: "Basque", armenien: "Armenian", georgien: "Georgian" },
     styles: { classique: "Classic", moderne: "Modern", rare: "Rare", elegant: "Elegant", court: "Short", poetique: "Poetic" }
   }
@@ -681,6 +685,8 @@ let _authMode     = "unknown"; /* "unknown" | "existing" | "new" — détection 
 let _authEmailTimer = null;   /* debounce pour la détection email */
 let _genShown   = new Set(); /* prénoms déjà affichés dans la session filtre courante */
 let _genFilSig  = "";        /* signature JSON des filtres de la dernière génération */
+let _heartHintShown    = false; /* popup incitation favoris — une seule fois par session */
+let _heartHintSeenCount = 0;   /* nb de cartes vues sans favori */
 
 function saveFavorites() {
   saveSelection([...favorites]);
@@ -1053,7 +1059,7 @@ function wireCards(container, scrollTarget = "generateur") {
       const nowFaved = !favorites.has(name);
       if (nowFaved) favorites.add(name); else favorites.delete(name);
       saveFavorites();
-      if (nowFaved) window.plausible?.("Favori ajouté");
+      if (nowFaved) { _dismissHeartHint(); window.plausible?.("Favori ajouté"); }
 
       // Mise à jour immédiate de tous les boutons cœur pour ce prénom
       document.querySelectorAll(`[data-heart="${name}"]`).forEach((b) => {
@@ -1123,6 +1129,20 @@ function renderResults(list, title) {
   count.textContent = t("res_count")(list.length);
   wrap.innerHTML = list.map((n, i) => nameCardHTML(n, i, lastSurname)).join("");
   wireCards(wrap);
+
+  /* Compteur de cartes vues — déclenche l'incitation favoris après 5 cartes sans cœur */
+  if (!_heartHintShown) {
+    const hintObs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        hintObs.unobserve(entry.target);
+        if (_heartHintShown || favorites.size > 0) return;
+        _heartHintSeenCount++;
+        if (_heartHintSeenCount >= 5) _showHeartHint(_heartHintSeenCount);
+      });
+    }, { threshold: 0.3 });
+    wrap.querySelectorAll(".name-card").forEach((c) => hintObs.observe(c));
+  }
 }
 
 /* =============================================================
@@ -1574,6 +1594,20 @@ function showToast(msg, duration = 3200) {
   el.classList.add("show");
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.remove("show"), duration);
+}
+
+function _showHeartHint(count) {
+  if (_heartHintShown) return;
+  _heartHintShown = true;
+  const el = document.getElementById("heartHint");
+  if (!el) return;
+  document.getElementById("heartHintTitle").textContent = t("heart_hint_title")(count);
+  document.getElementById("heartHintText").textContent  = t("heart_hint_text");
+  el.classList.add("show");
+}
+
+function _dismissHeartHint() {
+  document.getElementById("heartHint")?.classList.remove("show");
 }
 
 /* =============================================================
@@ -3471,6 +3505,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const btn = e.target.closest("button");
     if (btn) applyLang(btn.dataset.lang);
   });
+
+  // Popup incitation favoris — bouton fermer
+  document.getElementById("closeHeartHint").addEventListener("click", _dismissHeartHint);
 
   // Widget compact → ouvre Ma sélection
   document.getElementById("selSeeBtn").addEventListener("click", openSelection);

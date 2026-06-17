@@ -1399,3 +1399,104 @@ test.describe.serial('🚀 Scénario charge — 50 votants simultanés', () => {
   });
 
 });
+
+// =============================================================================
+// SCÉNARIO POPUP INCITATION FAVORIS
+// =============================================================================
+test.describe('💛 Popup incitation favoris — cœur hint', () => {
+
+  test('[Hint] Apparaît après 5 prénoms vus sans favori', async ({ browser }) => {
+    const ctx  = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.waitForSelector('#espaceBtn:not([disabled])', { timeout: 15_000 });
+
+    // Vérifier que la popup est invisible au départ
+    const hint = page.locator('#heartHint');
+    const isShownAtStart = await hint.evaluate((el) => el.classList.contains('show'));
+    expect(
+      isShownAtStart,
+      'Bug : la popup cœur est visible dès le chargement sans aucun prénom vu'
+    ).toBe(false);
+
+    // Générer des prénoms (sans favori au préalable)
+    await page.click('#genForm [type="submit"]');
+    await page.waitForSelector('.name-card', { timeout: 10_000 });
+
+    // Scroller pour faire entrer les cartes dans le viewport (déclenche IntersectionObserver)
+    await page.evaluate(() => document.querySelector(".name-card")?.scrollIntoView({ behavior: "instant" }) ?? window.scrollTo({ top: 9999, behavior: "instant" }));
+
+    // Attendre que la popup apparaisse (jusqu'à 6s)
+    await expect(hint).toHaveClass(/show/, { timeout: 6_000 });
+
+    // Vérifier que le titre contient un nombre et un cœur
+    const title = await page.locator('#heartHintTitle').textContent();
+    expect(
+      /\d+/.test(title) && /💛/.test(title),
+      `Bug : titre de la popup incorrect ("${title}") — doit contenir un nombre et 💛`
+    ).toBe(true);
+
+    await ctx.close();
+  });
+
+  test('[Hint] Disparaît au clic sur un cœur', async ({ browser }) => {
+    const ctx  = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.waitForSelector('#espaceBtn:not([disabled])', { timeout: 15_000 });
+
+    // Générer des prénoms et déclencher la popup naturellement
+    await page.click('#genForm [type="submit"]');
+    await page.waitForSelector('.name-card', { timeout: 10_000 });
+    await page.evaluate(() => document.querySelector(".name-card")?.scrollIntoView({ behavior: "instant" }) ?? window.scrollTo({ top: 9999, behavior: "instant" }));
+
+    const hint = page.locator('#heartHint');
+    await expect(hint).toHaveClass(/show/, { timeout: 6_000 });
+
+    // Cliquer sur le premier cœur visible
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    const heartBtn = page.locator('[data-heart]').first();
+    await heartBtn.click();
+
+    // La popup doit disparaître
+    await expect(hint).not.toHaveClass(/show/, { timeout: 3_000 });
+
+    await ctx.close();
+  });
+
+  test('[Hint] Ne réapparaît pas après fermeture manuelle', async ({ browser }) => {
+    const ctx  = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.waitForSelector('#espaceBtn:not([disabled])', { timeout: 15_000 });
+
+    // Générer des prénoms et attendre la popup
+    await page.click('#genForm [type="submit"]');
+    await page.waitForSelector('.name-card', { timeout: 10_000 });
+    await page.evaluate(() => document.querySelector(".name-card")?.scrollIntoView({ behavior: "instant" }) ?? window.scrollTo({ top: 9999, behavior: "instant" }));
+
+    const hint = page.locator('#heartHint');
+    await expect(hint).toHaveClass(/show/, { timeout: 6_000 });
+
+    // Fermer via le bouton ✕
+    await page.click('#closeHeartHint');
+    await expect(hint).not.toHaveClass(/show/, { timeout: 2_000 });
+
+    // Regénérer et rescroller
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.click('#genForm [type="submit"]');
+    await page.waitForTimeout(400);
+    await page.evaluate(() => document.querySelector(".name-card")?.scrollIntoView({ behavior: "instant" }) ?? window.scrollTo({ top: 9999, behavior: "instant" }));
+    await page.waitForTimeout(1_500);
+
+    // La popup NE DOIT PAS réapparaître (_heartHintShown = true côté app)
+    const isShownAgain = await hint.evaluate((el) => el.classList.contains('show'));
+    expect(
+      isShownAgain,
+      'Bug : la popup incitation favoris réapparaît après avoir été fermée manuellement'
+    ).toBe(false);
+
+    await ctx.close();
+  });
+
+});

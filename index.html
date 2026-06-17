@@ -829,14 +829,21 @@
     <p id="loadingMsg">Chargement…</p>
   </div>
 
+  <!-- ============================ POPUP INCITATION FAVORIS ============================ -->
+  <div class="heart-hint" id="heartHint" role="status">
+    <p class="heart-hint-title" id="heartHintTitle"></p>
+    <p class="heart-hint-text"  id="heartHintText"></p>
+    <button class="heart-hint-close" id="closeHeartHint" aria-label="Fermer">✕</button>
+  </div>
+
   <!-- ============================ TOAST ============================ -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <!-- Storage abstrait doit être chargé AVANT app.js -->
   <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
-  <script src="storage.js?v=15"></script>
+  <script src="storage.js?v=16"></script>
   <!-- data.js et app.js (data.js en premier) -->
   <script src="data.js?v=31"></script>
-  <script src="app.js?v=19"></script>
+  <script src="app.js?v=20"></script>
 </body>
 </html>

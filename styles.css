@@ -895,6 +895,58 @@ body { animation: pageIn .5s ease; }
   transform: translateX(-50%) translateY(0);
 }
 
+/* ---- Popup incitation favoris ---- */
+.heart-hint {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  max-width: 460px;
+  width: calc(100% - 32px);
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px 48px 16px 20px;
+  box-shadow: 0 16px 48px -12px rgba(0,0,0,.22);
+  z-index: 65;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .38s cubic-bezier(.2,.7,.3,1), opacity .28s ease;
+}
+.heart-hint.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.heart-hint-title {
+  font-weight: 700;
+  font-size: .95rem;
+  color: var(--ink);
+  margin: 0 0 5px;
+}
+.heart-hint-text {
+  font-size: .84rem;
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.5;
+}
+.heart-hint-close {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: none;
+  border: none;
+  font-size: .95rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+}
+.heart-hint-close:hover { color: var(--ink); background: var(--bg-soft); }
+@media (max-width: 480px) {
+  .heart-hint { bottom: 16px; padding: 14px 44px 14px 16px; }
+  .heart-hint-title { font-size: .9rem; }
+}
+
 /* ---- Container PDF (invisible sur la page, visible à l'impression) ---- */
 #printContainer { display: none; }
 .print-header    { display: none; }
