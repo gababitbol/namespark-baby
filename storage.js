@@ -123,38 +123,31 @@ function saveSurname(s)   { _write(KEYS.surname, s || ""); }
 function getUser()   { return _read(KEYS.user, null); }
 function clearUser() { _remove(KEYS.user); }
 
-/* Écriture locale immédiate + sync Supabase en arrière-plan.
-   Utilise async IIFE car .catch() n'existe PAS directement sur les
-   query builders Supabase JS v2 récents (depuis postgrest-js 1.9+). */
+/* Écriture locale immédiate + persistance serveur en arrière-plan.
+   La persistance passe par /api/track (clé service_role) : l'écriture anon
+   directe dans `users` est interdite par RLS. Le dual-write subscribers est
+   fait côté serveur dans le même endpoint. */
 function setUser(user) {
   if (user?.email) user = { ...user, email: user.email.trim().toLowerCase() };
   _write(KEYS.user, user);
-  if (_sb && user?.email) {
-    const payload = {
-      email:      user.email,
-      first_name: user.firstName || null,
-      surname:    user.surname   || null,
-      last_seen:  new Date().toISOString(),
-    };
-    if (user.id) payload.id = user.id;
-
+  if (user?.email) {
     (async () => {
       try {
-        const { data, error } = await _sb
-          .from("users")
-          .upsert(payload, { onConflict: "email" })
-          .select("id");
-        if (!error && data?.[0]?.id && !user.id) {
-          _write(KEYS.user, { ...user, id: data[0].id });
+        const res = await fetch("/api/track", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({
+            kind:      "user",
+            email:     user.email,
+            firstName: user.firstName || null,
+            surname:   user.surname   || null,
+          }),
+        });
+        const data = await res.json().catch(() => null);
+        if (data?.id && !user.id) {
+          _write(KEYS.user, { ...user, id: data.id });
         }
-      } catch (e) { console.warn("[NameSpark] setUser:", e); }
-      /* Dual-write vers subscribers pour avoir first_name + last_name dans le panel admin */
-      try {
-        await _sb.from("subscribers").upsert(
-          { email: user.email, first_name: user.firstName || null, last_name: user.surname || null },
-          { onConflict: "email" }
-        );
-      } catch (e) { console.warn("[NameSpark] setUser→subscribers:", e); }
+      } catch (e) { console.warn("[NameSpark] setUser→track:", e); }
     })();
   }
 }
@@ -553,29 +546,25 @@ function registerLead(email, firstName, favoritesCount = 0, bumpSession = false)
   if (bumpSession) u.sessions = (u.sessions || 0) + 1;
   _write(KEYS.leads, all);
 
-  /* Supabase fire-and-forget — async IIFE car .catch() absent sur Supabase JS v2 récent */
-  if (_sb) {
-    (async () => {
-      try {
-        const payload = {
+  /* Persistance serveur fire-and-forget via /api/track (clé service_role).
+     L'écriture anon directe dans `leads` est interdite par RLS ; le dual-write
+     subscribers est fait côté serveur dans le même endpoint. */
+  (async () => {
+    try {
+      await fetch("/api/track", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          kind:      "lead",
           email:     u.email,
+          firstName: u.firstName || null,
+          surname:   u.surname   || null,
           favorites: u.favorites,
           sessions:  u.sessions,
-          last_seen: now,
-        };
-        if (u.firstName) payload.first_name = u.firstName;
-        if (u.surname)   payload.surname    = u.surname;
-        await _sb.from("leads").upsert(payload, { onConflict: "email" });
-      } catch (e) { console.warn("[NameSpark] registerLead:", e); }
-      /* Dual-write vers subscribers (source de vérité admin, sans doublons) */
-      try {
-        await _sb.from("subscribers").upsert(
-          { email: u.email, first_name: u.firstName || null, last_name: u.surname || null },
-          { onConflict: "email" }
-        );
-      } catch (e) { console.warn("[NameSpark] registerLead→subscribers:", e); }
-    })();
-  }
+        }),
+      });
+    } catch (e) { console.warn("[NameSpark] registerLead→track:", e); }
+  })();
 }
 
 function getLeads()       { return _read(KEYS.leads, []); }
