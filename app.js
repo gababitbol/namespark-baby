@@ -1993,20 +1993,9 @@ function renderEspaceDrawer() {
       e.stopPropagation();
       const decId = el.dataset.resume;
       closeEspace();
-      /* Si c'est le vote en cours, réouvre directement l'overlay */
-      if (decideState.decisionId === decId) {
-        openDecide();
-      } else {
-        /* Charge la décision et reprend en tant que créateur */
-        getDecision(decId).then((dec) => {
-          if (!dec) return;
-          const myPid = getMyParticipantId(decId);
-          if (myPid) {
-            decideState = { decisionId: decId, role: "creator", participantId: myPid, mode: dec.mode || "couple", status: dec.status || 'open' };
-            openDecide();
-          }
-        }).catch(() => {});
-      }
+      /* Rouvre la décision EXISTANTE (ne crée jamais une nouvelle décision)
+         et affiche les votes déjà reçus. */
+      reopenDecide(decId);
     });
   });
 }
@@ -2654,6 +2643,53 @@ async function openDecide() {
     console.error("[NS:openDecide] ❌ ERREUR:", err?.message || err, err);
     /* Affiche le détail de l'erreur pour le debug */
     showToast(`${t("err_session_create")} [${err?.message || "unknown"}]`);
+  }
+}
+
+/* ---- Créateur : ROUVRIR une décision existante (sans en créer une nouvelle) ----
+   Utilisé par « Reprendre » dans Mon espace et par le lien email ?decision=<id>.
+   Différence clé avec openDecide() : ne crée AUCUNE décision — recharge l'existante
+   depuis Supabase et affiche directement les votes/matchs reçus. */
+async function reopenDecide(decisionId) {
+  if (!decisionId) return false;
+  try {
+    const decision = await getDecision(decisionId);
+    if (!decision) { showToast(t("decide_invite_invalid")); return false; }
+
+    /* participantId du créateur : cet appareil d'abord, sinon le créateur de la décision
+       (ex : ouverture du lien email depuis un autre appareil). */
+    let myPid = (typeof getMyParticipantId === "function") ? getMyParticipantId(decisionId) : null;
+    if (!myPid) {
+      const creatorEntry = Object.entries(decision.participants || {})
+        .find(([, p]) => p.role === "creator");
+      if (creatorEntry) {
+        myPid = creatorEntry[0];
+        if (typeof _setMyParticipant === "function") _setMyParticipant(decisionId, myPid);
+      }
+    }
+
+    const mode = decision.mode === "family" ? "family" : "couple";
+    decideState = {
+      decisionId,
+      role:          "creator",
+      participantId: myPid,
+      mode,
+      status:        decision.status || "open",
+    };
+    if (decision.surname) lastSurname = decision.surname;
+
+    setDecideHeader(mode === "family" ? "family_creator" : "couple_creator");
+    const overlay = document.getElementById("decideOverlay");
+    if (overlay) { overlay.classList.add("open"); document.body.style.overflow = "hidden"; }
+
+    /* Affiche directement les résultats : la décision vient d'être re-fetchée,
+       les votes du conjoint/famille sont donc à jour. */
+    await showDecideResults();
+    return true;
+  } catch (err) {
+    console.error("[NS:reopenDecide]", err?.message || err);
+    showToast(t("err_session_load"));
+    return false;
   }
 }
 
@@ -3545,6 +3581,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const params       = new URLSearchParams(location.search);
   const inviteId     = params.get("invite");
   const familyVoteId = params.get("familyVote");
+  const decisionId   = params.get("decision");   /* lien email « Voir les résultats » (créateur) */
   const urlLang      = params.get("lang");
   if (inviteId || familyVoteId) {
     if (urlLang === "fr" || urlLang === "en") applyLang(urlLang);
@@ -3554,6 +3591,13 @@ document.addEventListener("DOMContentLoaded", () => {
       ? openFamilyVoteAsVoter(familyVoteId)
       : openDecideAsPartner(inviteId);
     bootPromise
+      .catch(() => showToast(t("err_session_load")))
+      .finally(() => hideLoadingScreen());
+  } else if (decisionId) {
+    /* Créateur revenant depuis l'email de notification de vote → rouvrir ses résultats */
+    if (urlLang === "fr" || urlLang === "en") applyLang(urlLang);
+    showLoadingScreen(t("loading_session"));
+    reopenDecide(decisionId)
       .catch(() => showToast(t("err_session_load")))
       .finally(() => hideLoadingScreen());
   } else {
