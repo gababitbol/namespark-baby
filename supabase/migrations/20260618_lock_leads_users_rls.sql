@@ -12,15 +12,26 @@
 --   /api/leads-admin  et  /api/subscribers-admin
 -- (la clé service_role contourne RLS et n'est jamais exposée au client).
 --
+-- Robuste : on SUPPRIME D'ABORD TOUTES les policies existantes sur chaque table
+-- (y compris une éventuelle policy SELECT permissive préexistante, qui est la
+-- cause probable de la fuite), puis on recrée uniquement insert/update.
+--
 -- À EXÉCUTER une fois dans le SQL Editor Supabase (idempotent).
 -- =============================================================
 
 -- ── leads ────────────────────────────────────────────────────
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "leads_anon_select" ON public.leads;
-DROP POLICY IF EXISTS "leads_anon_insert" ON public.leads;
-DROP POLICY IF EXISTS "leads_anon_update" ON public.leads;
+DO $$
+DECLARE pol record;
+BEGIN
+  FOR pol IN
+    SELECT policyname FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'leads'
+  LOOP
+    EXECUTE format('DROP POLICY %I ON public.leads', pol.policyname);
+  END LOOP;
+END $$;
 
 -- Écriture autorisée pour l'app publique (upsert = insert + update)
 CREATE POLICY "leads_anon_insert" ON public.leads
@@ -32,9 +43,16 @@ CREATE POLICY "leads_anon_update" ON public.leads
 -- ── users ────────────────────────────────────────────────────
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "users_anon_select" ON public.users;
-DROP POLICY IF EXISTS "users_anon_insert" ON public.users;
-DROP POLICY IF EXISTS "users_anon_update" ON public.users;
+DO $$
+DECLARE pol record;
+BEGIN
+  FOR pol IN
+    SELECT policyname FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'users'
+  LOOP
+    EXECUTE format('DROP POLICY %I ON public.users', pol.policyname);
+  END LOOP;
+END $$;
 
 CREATE POLICY "users_anon_insert" ON public.users
   FOR INSERT TO anon WITH CHECK (true);
