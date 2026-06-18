@@ -99,6 +99,18 @@ function _migrateLegacy() {
 }
 try { _migrateLegacy(); } catch (_) {}
 
+/* Nettoyage d'un flag admin périmé : l'ancien code posait `admin_session=1` en
+   localStorage (collant, jamais expiré). La session admin exige désormais un token
+   en sessionStorage (login serveur). Si le flag est présent SANS token → on l'efface,
+   pour qu'un flag oublié ne puisse plus simuler une session admin. */
+try {
+  if (_read(KEYS.adminSession, null) === "1") {
+    let _tok = null;
+    try { _tok = sessionStorage.getItem(ADMIN_TOKEN_KEY); } catch (_) {}
+    if (!_tok) _remove(KEYS.adminSession);
+  }
+} catch (_) {}
+
 /* ── 6. PRÉFÉRENCES — sync ───────────────────────────────────────────────── */
 function getLang()        { return _read(KEYS.lang, "fr"); }
 function saveLang(lang)   { _write(KEYS.lang, lang); }

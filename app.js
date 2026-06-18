@@ -1886,7 +1886,6 @@ function renderEspaceDrawer() {
   const history     = loadHistory();
   const comparisons = loadComparisons();
   const allDecisions = (typeof getAllDecisions === "function") ? getAllDecisions() : [];
-  const isAdmin     = (typeof hasAdminSession === "function") && hasAdminSession();
   let html = "";
 
   /* ══════════════════════════════════════════════════
@@ -1967,14 +1966,9 @@ function renderEspaceDrawer() {
   }
   html += `</div>`;
 
-  /* ══════════════════════════════════════════════════
-     SECTION 4 — Admin (si session active)
-  ══════════════════════════════════════════════════ */
-  if (isAdmin) {
-    html += `<div class="drawer-section">
-      <a href="admin.html" class="d-btn drawer-admin-link">${t("drawer_admin_btn")}</a>
-    </div>`;
-  }
+  /* Aucun lien admin dans l'espace utilisateur : le panneau admin est volontairement
+     ABSENT du drawer « Mon espace » pour rester totalement invisible aux utilisateurs.
+     L'accès admin se fait uniquement via /admin.html (login serveur /api/admin-login). */
 
   document.getElementById("drawerBody").innerHTML = html;
 
