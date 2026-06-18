@@ -192,7 +192,6 @@ const I18N = {
     drawer_pdf_btn: "📄 Télécharger en PDF",
     drawer_email_btn: "📩 M'envoyer par email",
     drawer_compare_btn: "⚖️ Comparer mes favoris",
-    drawer_admin_btn: "🔐 Panneau admin",
     drawer_connected: "Connecté·e",
     drawer_logout: "Se déconnecter",
     email_sent_ok: "📩 Email envoyé ! Vérifiez votre boîte mail.",
@@ -475,7 +474,6 @@ const I18N = {
     drawer_pdf_btn: "📄 Download as PDF",
     drawer_email_btn: "📩 Send by email",
     drawer_compare_btn: "⚖️ Compare favourites",
-    drawer_admin_btn: "🔐 Admin panel",
     drawer_connected: "Connected",
     drawer_logout: "Sign out",
     email_sent_ok: "📩 Email sent! Check your inbox.",
@@ -1886,7 +1884,6 @@ function renderEspaceDrawer() {
   const history     = loadHistory();
   const comparisons = loadComparisons();
   const allDecisions = (typeof getAllDecisions === "function") ? getAllDecisions() : [];
-  const isAdmin     = (typeof hasAdminSession === "function") && hasAdminSession();
   let html = "";
 
   /* ══════════════════════════════════════════════════
@@ -1967,14 +1964,9 @@ function renderEspaceDrawer() {
   }
   html += `</div>`;
 
-  /* ══════════════════════════════════════════════════
-     SECTION 4 — Admin (si session active)
-  ══════════════════════════════════════════════════ */
-  if (isAdmin) {
-    html += `<div class="drawer-section">
-      <a href="admin.html" class="d-btn drawer-admin-link">${t("drawer_admin_btn")}</a>
-    </div>`;
-  }
+  /* Aucun lien admin dans l'espace utilisateur : le panneau admin est volontairement
+     ABSENT du drawer « Mon espace » pour rester totalement invisible aux utilisateurs.
+     L'accès admin se fait uniquement via /admin.html (login serveur /api/admin-login). */
 
   document.getElementById("drawerBody").innerHTML = html;
 
@@ -1993,20 +1985,9 @@ function renderEspaceDrawer() {
       e.stopPropagation();
       const decId = el.dataset.resume;
       closeEspace();
-      /* Si c'est le vote en cours, réouvre directement l'overlay */
-      if (decideState.decisionId === decId) {
-        openDecide();
-      } else {
-        /* Charge la décision et reprend en tant que créateur */
-        getDecision(decId).then((dec) => {
-          if (!dec) return;
-          const myPid = getMyParticipantId(decId);
-          if (myPid) {
-            decideState = { decisionId: decId, role: "creator", participantId: myPid, mode: dec.mode || "couple", status: dec.status || 'open' };
-            openDecide();
-          }
-        }).catch(() => {});
-      }
+      /* Rouvre la décision EXISTANTE (ne crée jamais une nouvelle décision)
+         et affiche les votes déjà reçus. */
+      reopenDecide(decId);
     });
   });
 }
@@ -2525,11 +2506,12 @@ function setDecideHeader(context) {
    (à consommer : ne pas la traiter comme un email normal). */
 function tryAdminLogin(email, password) {
   if ((email || "").trim().toLowerCase() !== "admin") return false;
-  if (adminLogin((password || "").trim())) {
-    window.location.href = "admin.html";
-  } else {
-    showToast(t("admin_wrong_pass"));
-  }
+  /* Tentative admin détectée (à consommer côté appelant). La vérification du
+     mot de passe est asynchrone (serveur) — on ne bloque pas le flux. */
+  Promise.resolve(adminLogin((password || "").trim())).then((ok) => {
+    if (ok) window.location.href = "admin.html";
+    else showToast(t("admin_wrong_pass"));
+  });
   return true;
 }
 
@@ -2654,6 +2636,53 @@ async function openDecide() {
     console.error("[NS:openDecide] ❌ ERREUR:", err?.message || err, err);
     /* Affiche le détail de l'erreur pour le debug */
     showToast(`${t("err_session_create")} [${err?.message || "unknown"}]`);
+  }
+}
+
+/* ---- Créateur : ROUVRIR une décision existante (sans en créer une nouvelle) ----
+   Utilisé par « Reprendre » dans Mon espace et par le lien email ?decision=<id>.
+   Différence clé avec openDecide() : ne crée AUCUNE décision — recharge l'existante
+   depuis Supabase et affiche directement les votes/matchs reçus. */
+async function reopenDecide(decisionId) {
+  if (!decisionId) return false;
+  try {
+    const decision = await getDecision(decisionId);
+    if (!decision) { showToast(t("decide_invite_invalid")); return false; }
+
+    /* participantId du créateur : cet appareil d'abord, sinon le créateur de la décision
+       (ex : ouverture du lien email depuis un autre appareil). */
+    let myPid = (typeof getMyParticipantId === "function") ? getMyParticipantId(decisionId) : null;
+    if (!myPid) {
+      const creatorEntry = Object.entries(decision.participants || {})
+        .find(([, p]) => p.role === "creator");
+      if (creatorEntry) {
+        myPid = creatorEntry[0];
+        if (typeof _setMyParticipant === "function") _setMyParticipant(decisionId, myPid);
+      }
+    }
+
+    const mode = decision.mode === "family" ? "family" : "couple";
+    decideState = {
+      decisionId,
+      role:          "creator",
+      participantId: myPid,
+      mode,
+      status:        decision.status || "open",
+    };
+    if (decision.surname) lastSurname = decision.surname;
+
+    setDecideHeader(mode === "family" ? "family_creator" : "couple_creator");
+    const overlay = document.getElementById("decideOverlay");
+    if (overlay) { overlay.classList.add("open"); document.body.style.overflow = "hidden"; }
+
+    /* Affiche directement les résultats : la décision vient d'être re-fetchée,
+       les votes du conjoint/famille sont donc à jour. */
+    await showDecideResults();
+    return true;
+  } catch (err) {
+    console.error("[NS:reopenDecide]", err?.message || err);
+    showToast(t("err_session_load"));
+    return false;
   }
 }
 
@@ -3545,6 +3574,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const params       = new URLSearchParams(location.search);
   const inviteId     = params.get("invite");
   const familyVoteId = params.get("familyVote");
+  const decisionId   = params.get("decision");   /* lien email « Voir les résultats » (créateur) */
   const urlLang      = params.get("lang");
   if (inviteId || familyVoteId) {
     if (urlLang === "fr" || urlLang === "en") applyLang(urlLang);
@@ -3554,6 +3584,13 @@ document.addEventListener("DOMContentLoaded", () => {
       ? openFamilyVoteAsVoter(familyVoteId)
       : openDecideAsPartner(inviteId);
     bootPromise
+      .catch(() => showToast(t("err_session_load")))
+      .finally(() => hideLoadingScreen());
+  } else if (decisionId) {
+    /* Créateur revenant depuis l'email de notification de vote → rouvrir ses résultats */
+    if (urlLang === "fr" || urlLang === "en") applyLang(urlLang);
+    showLoadingScreen(t("loading_session"));
+    reopenDecide(decisionId)
       .catch(() => showToast(t("err_session_load")))
       .finally(() => hideLoadingScreen());
   } else {
