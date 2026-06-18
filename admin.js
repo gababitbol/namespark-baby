@@ -10,8 +10,8 @@
 
 "use strict";
 
-/* Token pour l'API /api/subscribers-admin (doit correspondre à ADMIN_API_TOKEN sur Vercel) */
-const ADMIN_API_TOKEN = "namespark-admin-2026";
+/* Le token admin n'est plus codé en dur ici. Il est obtenu du serveur après
+   login (/api/admin-login) et lu via getAdminToken() (sessionStorage). */
 
 let sortField = "createdAt";
 let sortAsc = false;
@@ -22,10 +22,16 @@ document.addEventListener("DOMContentLoaded", () => {
     showDashboard();
   }
 
-  document.getElementById("loginForm").addEventListener("submit", (e) => {
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const pw = document.getElementById("loginPassword").value.trim();
-    if (adminLogin(pw)) {
+    const pw  = document.getElementById("loginPassword").value.trim();
+    const btn = document.querySelector("#loginForm button[type=submit]") || document.querySelector("#loginForm button");
+    const orig = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = "…"; }
+    let ok = false;
+    try { ok = await adminLogin(pw); } catch (_) { ok = false; }
+    if (btn) { btn.disabled = false; btn.textContent = orig; }
+    if (ok) {
       showDashboard();
     } else {
       document.getElementById("loginError").textContent = "Mot de passe incorrect.";
@@ -108,7 +114,7 @@ async function renderAll() {
 async function fetchSubscribersFromApi() {
   try {
     const res = await fetch("/api/subscribers-admin", {
-      headers: { "X-Admin-Token": ADMIN_API_TOKEN },
+      headers: { "X-Admin-Token": getAdminToken() || "" },
     });
     if (!res.ok) { console.warn("[Admin] subscribers-admin:", res.status); return []; }
     const json = await res.json();

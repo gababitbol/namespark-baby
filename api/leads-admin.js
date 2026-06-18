@@ -1,9 +1,11 @@
 /* =============================================================
-   NameSpark Baby — Lecture sécurisée des subscribers (admin)
-   GET /api/subscribers-admin
+   NameSpark Baby — Lecture sécurisée des leads (admin)
+   GET /api/leads-admin
    -------------------------------------------------------------
-   Authentification : header X-Admin-Token ou ?token=…
+   Authentification : header X-Admin-Token (ou ?token=…).
    La clé service_role n'est jamais exposée côté client.
+   La table `leads` est protégée par RLS (lecture anon interdite) ;
+   seule cette route, avec la clé service_role, peut la lire.
    ============================================================= */
 
 const ALLOWED_ORIGINS = [
@@ -21,7 +23,7 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "GET") return res.status(405).end();
 
-  /* Vérification du token admin — aucune valeur par défaut devinable */
+  /* Token admin obligatoire — aucune valeur par défaut devinable */
   const token      = req.headers["x-admin-token"] || req.query.token || "";
   const adminToken = process.env.ADMIN_API_TOKEN;
   if (!adminToken) {
@@ -33,14 +35,13 @@ export default async function handler(req, res) {
 
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
   if (!supabaseUrl || !serviceKey) {
     return res.status(503).json({ error: "Service not configured" });
   }
 
   try {
     const response = await fetch(
-      `${supabaseUrl}/rest/v1/subscribers?select=id,email,first_name,last_name,created_at,updated_at&order=created_at.desc`,
+      `${supabaseUrl}/rest/v1/leads?select=id,email,first_name,surname,favorites,sessions,created_at,last_seen&order=last_seen.desc`,
       {
         headers: {
           apikey:        serviceKey,
@@ -52,14 +53,14 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("[subscribers-admin] Supabase error:", err);
+      console.error("[leads-admin] Supabase error:", err);
       return res.status(502).json({ error: "Database error" });
     }
 
     const data = await response.json();
-    return res.status(200).json({ subscribers: Array.isArray(data) ? data : [] });
+    return res.status(200).json({ leads: Array.isArray(data) ? data : [] });
   } catch (err) {
-    console.error("[subscribers-admin] Fetch error:", err);
+    console.error("[leads-admin] Fetch error:", err);
     return res.status(500).json({ error: "Internal error" });
   }
 }

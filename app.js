@@ -2514,11 +2514,12 @@ function setDecideHeader(context) {
    (à consommer : ne pas la traiter comme un email normal). */
 function tryAdminLogin(email, password) {
   if ((email || "").trim().toLowerCase() !== "admin") return false;
-  if (adminLogin((password || "").trim())) {
-    window.location.href = "admin.html";
-  } else {
-    showToast(t("admin_wrong_pass"));
-  }
+  /* Tentative admin détectée (à consommer côté appelant). La vérification du
+     mot de passe est asynchrone (serveur) — on ne bloque pas le flux. */
+  Promise.resolve(adminLogin((password || "").trim())).then((ok) => {
+    if (ok) window.location.href = "admin.html";
+    else showToast(t("admin_wrong_pass"));
+  });
   return true;
 }
 

@@ -52,8 +52,12 @@ const KEYS = {
   adminSession:    NS + "admin_session",
 };
 
-/* ── 3. CONFIG ADMIN ─────────────────────────────────────────────────────── */
-const ADMIN_PASSWORD = "namespark-admin-2026";
+/* ── 3. CONFIG ADMIN ───────────────────────────────────────────────────────
+   Le mot de passe admin n'est PLUS stocké côté client. La vérification se fait
+   sur le serveur (/api/admin-login, env ADMIN_PASSWORD). Au succès, le serveur
+   renvoie un token (env ADMIN_API_TOKEN) gardé en sessionStorage pour appeler
+   les API admin protégées (/api/leads-admin, /api/subscribers-admin). */
+const ADMIN_TOKEN_KEY = NS + "admin_token";
 
 /* ── 4. PERSISTANCE BAS NIVEAU — localStorage (cache + fallback offline) ─── */
 function _read(key, fallback) {
@@ -143,36 +147,20 @@ function setUser(user) {
   }
 }
 
-/* Recherche cross-appareil : cache local d'abord, puis Supabase avec timeout 4s.
-   Important : queryPromise.catch() évite un UnhandledPromiseRejection si le réseau
-   répond APRÈS la fin du race (ce qui peut corrompre l'état dans certains navigateurs). */
+/* Recherche d'un utilisateur connu sur CET appareil (cache local uniquement).
+
+   ⚠️ Sécurité : on NE lit plus la table `users` avec la clé anon publique.
+   Auparavant, `_sb.from("users").select("*").eq("email", …)` permettait à
+   n'importe qui (clé anon = livrée au navigateur) d'interroger / énumérer
+   tous les emails. La table `users` est désormais protégée par RLS
+   (lecture anon interdite). La reconnaissance cross-appareil par email est
+   un confort, pas une exigence : un utilisateur revenant sur un nouvel
+   appareil ressaisit simplement son prénom. `setUser()` continue d'upserter
+   la ligne côté Supabase (onConflict email), donc rien n'est perdu en base. */
 async function findUserByEmail(email) {
   email = email.trim().toLowerCase();
   const local = getUser();
   if (local && local.email === email) return local;
-
-  if (_sb) {
-    try {
-      /* Pas de .catch() sur le query builder — Supabase JS v2 récent ne l'a plus.
-         On enveloppe dans Promise.resolve() pour avoir un vrai Promise. */
-      const queryPromise = Promise.resolve(_sb.from("users").select("*").eq("email", email).maybeSingle());
-      const timeout = new Promise((resolve) => setTimeout(() => resolve({ data: null, error: "timeout" }), 4000));
-      const { data, error } = await Promise.race([queryPromise, timeout]);
-      if (!error && data) {
-        const user = {
-          id:        data.id,
-          email:     data.email,
-          firstName: data.first_name,
-          surname:   data.surname,
-          createdAt: data.created_at,
-        };
-        _write(KEYS.user, user);
-        return user;
-      }
-    } catch (_) {
-      /* Réseau indisponible ou timeout — fallback local */
-    }
-  }
   return null;
 }
 
@@ -581,16 +569,26 @@ function registerLead(email, firstName, favoritesCount = 0, bumpSession = false)
 function getLeads()       { return _read(KEYS.leads, []); }
 function getAllDecisions() { return Object.values(_allDecisions()); }
 
-/* Versions Supabase pour l'admin (données complètes, cross-appareils) */
+/* Leads pour l'admin — via API service_role (/api/leads-admin).
+   La table `leads` n'est plus lisible avec la clé anon (RLS), donc on passe
+   par l'endpoint serveur protégé par le token admin (jamais en clair côté client). */
 async function fetchAllLeadsAdmin() {
-  if (!_sb) return getLeads();
-  const { data, error } = await _sb.from("leads").select("*").order("last_seen", { ascending: false });
-  if (error || !data) { console.warn("[Admin] fetchAllLeadsAdmin:", error); return getLeads(); }
-  return data.map((r) => ({
-    email: r.email, firstName: r.first_name, surname: r.surname || null,
-    createdAt: r.created_at, lastSeen: r.last_seen,
-    favorites: r.favorites || 0, sessions: r.sessions || 0,
-  }));
+  try {
+    const res = await fetch("/api/leads-admin", {
+      headers: { "X-Admin-Token": getAdminToken() || "" },
+    });
+    if (!res.ok) { console.warn("[Admin] leads-admin:", res.status); return getLeads(); }
+    const json = await res.json();
+    const data = Array.isArray(json.leads) ? json.leads : [];
+    return data.map((r) => ({
+      email: r.email, firstName: r.first_name, surname: r.surname || null,
+      createdAt: r.created_at, lastSeen: r.last_seen,
+      favorites: r.favorites || 0, sessions: r.sessions || 0,
+    }));
+  } catch (e) {
+    console.warn("[Admin] fetchAllLeadsAdmin:", e);
+    return getLeads();
+  }
 }
 
 async function fetchAllDecisionsAdmin() {
@@ -624,13 +622,34 @@ async function fetchAllDecisionsAdmin() {
   });
 }
 
-/* Auth admin (mot de passe fixe, V1) */
-function adminLogin(password)  {
-  if (password === ADMIN_PASSWORD) { _write(KEYS.adminSession, "1"); return true; }
-  return false;
+/* Auth admin — vérification serveur. Le mot de passe est validé par
+   /api/admin-login (env ADMIN_PASSWORD) ; au succès on stocke le token admin
+   en sessionStorage (effacé à la fermeture de l'onglet). */
+async function adminLogin(password) {
+  try {
+    const res = await fetch("/api/admin-login", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ password: password || "" }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (data && data.ok && data.token) {
+      _write(KEYS.adminSession, "1");
+      try { sessionStorage.setItem(ADMIN_TOKEN_KEY, data.token); } catch (_) {}
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.warn("[NameSpark] adminLogin:", e);
+    return false;
+  }
 }
-function hasAdminSession()     { return _read(KEYS.adminSession, null) === "1"; }
-function clearAdminSession()   { _remove(KEYS.adminSession); }
+function getAdminToken()       { try { return sessionStorage.getItem(ADMIN_TOKEN_KEY); } catch (_) { return null; } }
+/* Session admin valide uniquement si le flag ET le token (sessionStorage) sont présents.
+   Au rechargement d'onglet, sessionStorage est vidé → re-login requis. */
+function hasAdminSession()     { return _read(KEYS.adminSession, null) === "1" && !!getAdminToken(); }
+function clearAdminSession()   { _remove(KEYS.adminSession); try { sessionStorage.removeItem(ADMIN_TOKEN_KEY); } catch (_) {} }
 
 /* ── 15. EXPORT (Node / tests) ───────────────────────────────────────────── */
 if (typeof module !== "undefined" && module.exports) {
@@ -644,7 +663,7 @@ if (typeof module !== "undefined" && module.exports) {
     fetchAllLeadsAdmin, fetchAllDecisionsAdmin,
     computeMatches, computeRanking,
     addNotification, getNotifications, markNotificationRead, clearNotifications,
-    registerLead, getLeads, getAllDecisions, adminLogin, hasAdminSession, clearAdminSession,
+    registerLead, getLeads, getAllDecisions, adminLogin, getAdminToken, hasAdminSession, clearAdminSession,
     uid,
   };
 }
