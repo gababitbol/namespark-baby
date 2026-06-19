@@ -1615,7 +1615,8 @@ function applyQueryPrefill() {
   const p = new URLSearchParams(location.search);
 
   // Liens de vote (couple/famille) : gérés par le module "Décider ensemble" (voir init)
-  if (p.get("invite") || p.get("familyVote")) return;
+  const [, _pt] = location.pathname.split("/");
+  if (p.get("invite") || p.get("familyVote") || _pt === "vote" || _pt === "family") return;
 
   // Chargement d'une sélection partagée
   if (p.get("share")) {
@@ -2722,15 +2723,14 @@ function stopPolling() {
   if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
 }
 
-/* ---- Lien d'invitation : ?invite=<decisionId> ---- */
+/* ---- Lien d'invitation : /vote/<decisionId> (path-based, jamais strippé) ---- */
 function generateInviteLink() {
   if (!decideState.decisionId) return;
-  const baseUrl = window.location.href.split("?")[0].split("#")[0];
-  const inviteUrl = `${baseUrl}?invite=${decideState.decisionId}&lang=${lang}`;
+  const inviteUrl = `${location.origin}/vote/${decideState.decisionId}?lang=${lang}`;
   const input = document.getElementById("inviteLinkInput");
-  if (!input) return; /* null-safe — ne jette plus d'exception */
+  if (!input) return;
   input.value = inviteUrl;
-  try { input.select(); } catch (_) {} /* input.select() peut échouer sur iOS */
+  try { input.select(); } catch (_) {}
 }
 
 /* ---- Partager le lien d'invitation (feuille native / clipboard) ---- */
@@ -2752,8 +2752,7 @@ function _getOrBuildInviteUrl() {
   const input = document.getElementById("inviteLinkInput");
   let url = input?.value || "";
   if (!url && decideState.decisionId) {
-    const baseUrl = window.location.href.split("?")[0].split("#")[0];
-    url = `${baseUrl}?invite=${decideState.decisionId}&lang=${lang}`;
+    url = `${location.origin}/vote/${decideState.decisionId}?lang=${lang}`;
     if (input) input.value = url;
   }
   return url;
@@ -3314,10 +3313,9 @@ async function openFamilyVote() {
   }
 }
 
-/* ---- Lien partageable : ?familyVote=<decisionId> ---- */
+/* ---- Lien partageable : /family/<decisionId> (path-based, jamais strippé) ---- */
 function generateFamilyLink() {
-  const baseUrl = window.location.href.split("?")[0].split("#")[0];
-  const url = `${baseUrl}?familyVote=${decideState.decisionId}&lang=${lang}`;
+  const url = `${location.origin}/family/${decideState.decisionId}?lang=${lang}`;
   const input = document.getElementById("familyLinkInput");
   if (input) input.value = url;
 }
@@ -3340,8 +3338,7 @@ function _getOrBuildFamilyUrl() {
   const input = document.getElementById("familyLinkInput");
   let url = input?.value || "";
   if (!url && decideState.decisionId) {
-    const baseUrl = window.location.href.split("?")[0].split("#")[0];
-    url = `${baseUrl}?familyVote=${decideState.decisionId}&lang=${lang}`;
+    url = `${location.origin}/family/${decideState.decisionId}?lang=${lang}`;
     if (input) input.value = url;
   }
   return url;
@@ -3610,10 +3607,11 @@ document.addEventListener("DOMContentLoaded", () => {
   /* Module "Décider ensemble" */
   wireDecideButtons();
 
-  /* Liens de vote : ?invite= (couple) et ?familyVote= (famille) ont la priorité */
+  /* Liens de vote : path-based (/vote/:id, /family/:id) OU query params legacy (?invite=, ?familyVote=) */
   const params       = new URLSearchParams(location.search);
-  const inviteId     = params.get("invite");
-  const familyVoteId = params.get("familyVote");
+  const [, _pathType, _pathId] = location.pathname.split("/");
+  const inviteId     = params.get("invite")     || (_pathType === "vote"   ? _pathId : null);
+  const familyVoteId = params.get("familyVote") || (_pathType === "family" ? _pathId : null);
   const decisionId   = params.get("decision");   /* lien email « Voir les résultats » (créateur) */
   const urlLang      = params.get("lang");
   if (inviteId || familyVoteId) {

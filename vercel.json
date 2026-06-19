@@ -3,6 +3,8 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/vote/:decisionId",   "destination": "/index.html" },
+    { "source": "/family/:decisionId", "destination": "/index.html" },
     { "source": "/prenom-garcon", "destination": "/seo/prenom-garcon.html" },
     { "source": "/prenom-fille", "destination": "/seo/prenom-fille.html" },
     { "source": "/prenom-hebreu", "destination": "/seo/prenom-hebreu.html" },
