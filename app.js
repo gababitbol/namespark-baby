@@ -2725,7 +2725,7 @@ function stopPolling() {
 /* ---- Lien d'invitation : /vote/<decisionId> (path-based, jamais strippé) ---- */
 function generateInviteLink() {
   if (!decideState.decisionId) return;
-  const inviteUrl = `${location.origin}/vote/${decideState.decisionId}?lang=${lang}`;
+  const inviteUrl = `${location.origin}/?invite=${decideState.decisionId}&lang=${lang}`;
   const input = document.getElementById("inviteLinkInput");
   if (!input) return;
   input.value = inviteUrl;
@@ -2751,7 +2751,7 @@ function _getOrBuildInviteUrl() {
   const input = document.getElementById("inviteLinkInput");
   let url = input?.value || "";
   if (!url && decideState.decisionId) {
-    url = `${location.origin}/vote/${decideState.decisionId}?lang=${lang}`;
+    url = `${location.origin}/?invite=${decideState.decisionId}&lang=${lang}`;
     if (input) input.value = url;
   }
   return url;
@@ -3314,7 +3314,7 @@ async function openFamilyVote() {
 
 /* ---- Lien partageable : /family/<decisionId> (path-based, jamais strippé) ---- */
 function generateFamilyLink() {
-  const url = `${location.origin}/family/${decideState.decisionId}?lang=${lang}`;
+  const url = `${location.origin}/?familyVote=${decideState.decisionId}&lang=${lang}`;
   const input = document.getElementById("familyLinkInput");
   if (input) input.value = url;
 }
@@ -3337,7 +3337,7 @@ function _getOrBuildFamilyUrl() {
   const input = document.getElementById("familyLinkInput");
   let url = input?.value || "";
   if (!url && decideState.decisionId) {
-    url = `${location.origin}/family/${decideState.decisionId}?lang=${lang}`;
+    url = `${location.origin}/?familyVote=${decideState.decisionId}&lang=${lang}`;
     if (input) input.value = url;
   }
   return url;
