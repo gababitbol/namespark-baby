@@ -5,11 +5,13 @@
 -- 1. Colonne status (idempotent)
 ALTER TABLE decisions ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'open';
 
--- 2. RLS : le créateur (authentifié ou anonyme) peut passer son vote à 'closed'
---    Règle : creator_id IS NULL = créateur sans compte Supabase Auth (localStorage uniquement)
+-- 2. RLS : tout utilisateur anon peut mettre à jour une décision (l'ID est le secret)
+--    Note : creator_id n'est pas un auth.uid() — c'est un ID custom localStorage.
+--    La sécurité est assurée par l'imprévisibilité de l'ID de décision.
+DROP POLICY IF EXISTS "creator_can_close_decision" ON decisions;
 CREATE POLICY "creator_can_close_decision" ON decisions
 FOR UPDATE TO anon, authenticated
-USING (creator_id IS NULL OR creator_id = auth.uid())
+USING (true)
 WITH CHECK (status IN ('open', 'closed'));
 
 -- 3. Trigger : bloquer les votes sur une décision clôturée côté base

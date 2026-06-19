@@ -277,9 +277,9 @@ async function getDecision(id) {
   if (_sb) {
     try {
       const [decRes, partRes, voteRes] = await Promise.all([
-        Promise.resolve(_sb.from("decisions").select("*").eq("id", id).maybeSingle()),
-        Promise.resolve(_sb.from("participants").select("*").eq("decision_id", id)),
-        Promise.resolve(_sb.from("votes").select("*").eq("decision_id", id)),
+        _sb.from("decisions").select("*").eq("id", id).maybeSingle(),
+        _sb.from("participants").select("*").eq("decision_id", id),
+        _sb.from("votes").select("*").eq("decision_id", id),
       ]);
 
       if (decRes.error) console.warn("[NameSpark] getDecision (decisions):", decRes.error);

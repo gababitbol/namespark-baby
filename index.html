@@ -612,6 +612,7 @@
             <div class="couple-detail-list" id="coupleDetailList"></div>
           </div>
 
+          <button class="btn btn-ghost" id="refreshResultsBtn" data-i18n="decide_refresh">🔄 Actualiser</button>
           <button class="btn btn-primary" id="shareMatchsBtn" data-i18n="decide_share_matchs">🔗 Partager ces matchs</button>
           <button class="btn btn-ghost btn-sm" id="saveMatchsBtn" data-i18n="save_results_email">📩 Recevoir par email</button>
         </div>
@@ -841,9 +842,9 @@
 
   <!-- Storage abstrait doit être chargé AVANT app.js -->
   <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
-  <script src="storage.js?v=19"></script>
+  <script src="storage.js?v=20"></script>
   <!-- data.js et app.js (data.js en premier) -->
   <script src="data.js?v=31"></script>
-  <script src="app.js?v=23"></script>
+  <script src="app.js?v=24"></script>
 </body>
 </html>

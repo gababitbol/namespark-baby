@@ -189,7 +189,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ sent: false, reason: "no_resend_key" });
   }
 
-  const resultsUrl = `https://namespark.baby/?decision=${encodeURIComponent(decisionId)}`;
+  const resultsUrl = `https://namespark.baby/?decision=${encodeURIComponent(decisionId)}&lang=fr`;
   const greeting   = creatorName ? `Bonjour ${creatorName},` : "Bonjour,";
 
   try {

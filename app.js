@@ -2652,6 +2652,13 @@ async function reopenDecide(decisionId) {
     /* participantId du créateur : cet appareil d'abord, sinon le créateur de la décision
        (ex : ouverture du lien email depuis un autre appareil). */
     let myPid = (typeof getMyParticipantId === "function") ? getMyParticipantId(decisionId) : null;
+
+    /* Valide que le PID stocké est bien celui du créateur — pas d'un votant
+       (scénario : même appareil utilisé successivement comme créateur et partenaire). */
+    if (myPid && decision.participants[myPid]?.role !== "creator") {
+      myPid = null;
+    }
+
     if (!myPid) {
       const creatorEntry = Object.entries(decision.participants || {})
         .find(([, p]) => p.role === "creator");
@@ -2675,9 +2682,16 @@ async function reopenDecide(decisionId) {
     const overlay = document.getElementById("decideOverlay");
     if (overlay) { overlay.classList.add("open"); document.body.style.overflow = "hidden"; }
 
-    /* Affiche directement les résultats : la décision vient d'être re-fetchée,
-       les votes du conjoint/famille sont donc à jour. */
-    await showDecideResults();
+    /* Affiche les résultats adaptés au mode :
+       - couple → décide-résultats (matchs + détail)
+       - famille → classement famille */
+    if (mode === "family") {
+      generateFamilyLink();
+      renderFamilyResults();
+      showDecideStep("familyResults");
+    } else {
+      await showDecideResults();
+    }
     return true;
   } catch (err) {
     console.error("[NS:reopenDecide]", err?.message || err);
@@ -2918,11 +2932,22 @@ async function handleVote(prenameName, reaction) {
   window.plausible?.("Vote effectué", { props: { mode: decideState.mode, reaction } });
 }
 
-/* ---- Afficher les résultats (matchs DÉRIVÉS via storage.computeMatches) ---- */
-/* Async pour pouvoir re-fetcher la décision et passer les données à renderCoupleVoteDetail */
+/* ---- Afficher les résultats (matchs DÉRIVÉS depuis Supabase en temps réel) ---- */
 async function showDecideResults() {
   showDecideStep("decideResults");
-  const matchs = computeMatches(decideState.decisionId);
+
+  /* Re-fetch systématique avant tout calcul : garantit que les matchs et le détail
+     affichés sont toujours synchronisés avec Supabase, même après un long délai ou
+     un changement d'appareil. Un seul aller-retour réseau. */
+  const d = await getDecision(decideState.decisionId);
+
+  /* Calcul des matchs directement depuis la décision fraîche (bypass cache) */
+  const matchs = d ? d.items.filter((name) => {
+    const reactions = Object.values(d.votes)
+      .map((byName) => byName[name])
+      .filter(Boolean);
+    return reactions.length > 0 && reactions.every((r) => r === "yes");
+  }) : computeMatches(decideState.decisionId); /* fallback cache si Supabase indisponible */
 
   /* ---- Grille des matchs ---- */
   const grid = document.getElementById("decideMatchsGrid");
@@ -2949,9 +2974,7 @@ async function showDecideResults() {
     return;
   }
 
-  /* Récupère la décision depuis le cache (déjà mis à jour par refreshWaiting/getDecision)
-     ou re-fetch si nécessaire. Pas d'appel async sans await. */
-  const d = await getDecision(decideState.decisionId);
+  /* Utilise la décision déjà fetchée — pas de deuxième aller-retour Supabase */
   renderCoupleVoteDetail(d);
   detailWrap.style.display = "";
 }
@@ -3019,11 +3042,23 @@ async function refreshWaiting() {
     const decision = await getDecision(decideState.decisionId);
     const votes = decision ? decision.votes : getVotes(decideState.decisionId);
 
-    console.log("[NS:refresh] participants avec votes:", Object.keys(votes).length);
+    /* Identifie le PID créateur de façon fiable : d'abord via decideState si le rôle
+       est confirmé dans Supabase, sinon en cherchant le créateur dans les participants.
+       Évite d'exclure les votes du partenaire si decideState.participantId est erroné
+       (appareil ayant servi à la fois de créateur et de partenaire). */
+    const participants = decision?.participants || {};
+    const creatorPid = (() => {
+      const pid = decideState.participantId;
+      if (pid && participants[pid]?.role === "creator") return pid;
+      const entry = Object.entries(participants).find(([, p]) => p.role === "creator");
+      return entry ? entry[0] : pid; /* fallback : garder le pid en mémoire si inconnu */
+    })();
+
+    console.log("[NS:refresh] participants avec votes:", Object.keys(votes).length, "creatorPid:", creatorPid);
 
     let yes = 0, no = 0, maybe = 0, voteCount = 0;
     Object.entries(votes).forEach(([pid, byName]) => {
-      if (pid === decideState.participantId) return; /* ignorer mes propres votes */
+      if (pid === creatorPid) return; /* ignorer les votes du créateur */
       Object.values(byName).forEach((r) => {
         voteCount++;
         if (r === "yes") yes++; else if (r === "no") no++; else maybe++;
@@ -3102,6 +3137,11 @@ function wireDecideButtons() {
   document.getElementById("seeResultsBtn")?.addEventListener("click", () => {
     stopPolling();
     showDecideResults();
+  });
+
+  /* Créateur : actualiser sur l'écran résultats (re-fetch Supabase + re-render) */
+  document.getElementById("refreshResultsBtn")?.addEventListener("click", async (e) => {
+    await _withBtnLoading(e.currentTarget, showDecideResults);
   });
 
   /* Démo : simuler le vote d'un partenaire (passe par storage) */
