@@ -1615,8 +1615,7 @@ function applyQueryPrefill() {
   const p = new URLSearchParams(location.search);
 
   // Liens de vote (couple/famille) : gérés par le module "Décider ensemble" (voir init)
-  const [, _pt] = location.pathname.split("/");
-  if (p.get("invite") || p.get("familyVote") || _pt === "vote" || _pt === "family") return;
+  if (p.get("invite") || p.get("familyVote")) return;
 
   // Chargement d'une sélection partagée
   if (p.get("share")) {
@@ -3607,11 +3606,11 @@ document.addEventListener("DOMContentLoaded", () => {
   /* Module "Décider ensemble" */
   wireDecideButtons();
 
-  /* Liens de vote : path-based (/vote/:id, /family/:id) OU query params legacy (?invite=, ?familyVote=) */
+  /* Liens de vote : ?invite= (couple) et ?familyVote= (famille)
+     Les URLs path-based (/vote/:id, /family/:id) sont redirigées vers ces params par Vercel */
   const params       = new URLSearchParams(location.search);
-  const [, _pathType, _pathId] = location.pathname.split("/");
-  const inviteId     = params.get("invite")     || (_pathType === "vote"   ? _pathId : null);
-  const familyVoteId = params.get("familyVote") || (_pathType === "family" ? _pathId : null);
+  const inviteId     = params.get("invite");
+  const familyVoteId = params.get("familyVote");
   const decisionId   = params.get("decision");   /* lien email « Voir les résultats » (créateur) */
   const urlLang      = params.get("lang");
   if (inviteId || familyVoteId) {

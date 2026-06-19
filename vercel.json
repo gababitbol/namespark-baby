@@ -2,9 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/vote/:id",   "destination": "/?invite=:id",      "permanent": false },
+    { "source": "/family/:id", "destination": "/?familyVote=:id",   "permanent": false }
+  ],
   "rewrites": [
-    { "source": "/vote/:decisionId",   "destination": "/index.html" },
-    { "source": "/family/:decisionId", "destination": "/index.html" },
     { "source": "/prenom-garcon", "destination": "/seo/prenom-garcon.html" },
     { "source": "/prenom-fille", "destination": "/seo/prenom-fille.html" },
     { "source": "/prenom-hebreu", "destination": "/seo/prenom-hebreu.html" },
