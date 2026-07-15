@@ -303,6 +303,8 @@ const I18N = {
     vote_gate_continue: "Continuer",
     vote_gate_skip: "Passer →",
     vote_gate_email_invalid: "Cette adresse email semble invalide.",
+    email_disposable:   "Cette adresse est temporaire. Utilisez votre vrai email.",
+    email_no_mx:        "Ce domaine email n'existe pas. Vérifiez votre adresse.",
     save_results_email: "📩 Recevoir par email",
     err_network:       "Erreur de connexion. Vérifiez votre réseau et réessayez.",
     err_vote_failed:   "Vote non enregistré. Réessayez.",
@@ -578,6 +580,8 @@ const I18N = {
     vote_gate_continue: "Continue",
     vote_gate_skip: "Skip →",
     vote_gate_email_invalid: "This email address looks invalid.",
+    email_disposable:   "This is a temporary email. Please use your real email address.",
+    email_no_mx:        "This email domain doesn't exist. Please check your address.",
     save_results_email: "📩 Receive by email",
     err_network:       "Connection error. Check your network and try again.",
     err_vote_failed:   "Vote not saved. Please try again.",
@@ -2547,6 +2551,27 @@ async function launchVote(mode) {
   else await openDecide();
 }
 
+/* Vérifie la qualité d'un email via l'API (MX + domaines jetables).
+   Fail-open : si l'API est indisponible ou timeout, on laisse passer. */
+async function _checkEmailQuality(email) {
+  try {
+    const r = await fetch("/api/verify-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!r.ok) return { ok: true };
+    const data = await r.json();
+    if (data.valid) return { ok: true };
+    if (data.reason === "disposable") return { ok: false, msg: t("email_disposable") };
+    if (data.reason === "no_mx")      return { ok: false, msg: t("email_no_mx") };
+    return { ok: true };
+  } catch {
+    return { ok: true }; /* réseau indisponible → on laisse passer */
+  }
+}
+
 function openVoteStartModal() {
   document.getElementById("voteStartEmail").value = "";
   document.getElementById("voteStartFirstName").value = "";
@@ -2581,6 +2606,13 @@ async function handleVoteStartSubmit(e) {
     btn.disabled = true;
     btn.textContent = "…";
     try {
+      const quality = await _checkEmailQuality(email);
+      if (!quality.ok) {
+        document.getElementById("voteStartEmail").classList.add("field-error");
+        document.getElementById("voteStartEmailError").textContent = quality.msg;
+        document.getElementById("voteStartEmailError").classList.add("visible");
+        return;
+      }
       const existing = await findUserByEmail(email);
       currentUser = existing || {
         email, firstName: firstName || null, createdAt: new Date().toISOString(), surname: lastSurname || null,
@@ -2834,6 +2866,14 @@ async function handlePartnerRegSubmit(e) {
   btn.textContent = "…";
 
   try {
+    const quality = await _checkEmailQuality(email);
+    if (!quality.ok) {
+      document.getElementById("partnerEmail").classList.add("field-error");
+      document.getElementById("partnerEmailError").textContent = quality.msg;
+      document.getElementById("partnerEmailError").classList.add("visible");
+      document.getElementById("partnerEmail").focus();
+      return;
+    }
     const existing = await findUserByEmail(email);
     currentUser = existing || {
       email, firstName, createdAt: new Date().toISOString(), surname: lastSurname || null,
@@ -3437,13 +3477,21 @@ function _showEmailNudgeIfNeeded() {
   const saveBtn = document.getElementById("inviteNudgeSave");
   if (!input || !saveBtn) return;
 
-  saveBtn.onclick = () => {
+  saveBtn.onclick = async () => {
     const email = input.value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       input.style.borderColor = "var(--error, #e74c3c)";
       return;
     }
     input.style.borderColor = "";
+    saveBtn.disabled = true;
+    const quality = await _checkEmailQuality(email);
+    saveBtn.disabled = false;
+    if (!quality.ok) {
+      input.style.borderColor = "var(--error, #e74c3c)";
+      input.title = quality.msg;
+      return;
+    }
     if (!currentUser) {
       currentUser = { email, firstName: null, createdAt: new Date().toISOString() };
     } else {
