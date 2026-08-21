@@ -6,6 +6,9 @@
     { "source": "/vote/:id",   "destination": "/?invite=:id",      "permanent": false },
     { "source": "/family/:id", "destination": "/?familyVote=:id",   "permanent": false }
   ],
+  "crons": [
+    { "path": "/api/keepalive", "schedule": "0 9 * * *" }
+  ],
   "rewrites": [
     { "source": "/prenom-garcon", "destination": "/seo/prenom-garcon.html" },
     { "source": "/prenom-fille", "destination": "/seo/prenom-fille.html" },
