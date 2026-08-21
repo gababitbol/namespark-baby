@@ -102,6 +102,15 @@ const I18N = {
     save_modal_title: "Sauvegarder ma liste",
     save_modal_desc: "Recevez votre sélection par email et retrouvez-la plus tard.",
     save_field_fname: "Votre prénom (optionnel)",
+    weeks_field_label: "Où en êtes-vous ? (optionnel)",
+    weeks_field_hint:  "Pour vous montrer le temps qu'il vous reste pour choisir.",
+    weeks_opt_none:    "Je préfère ne pas dire",
+    weeks_opt_week:    "Semaine {n}",
+    weeks_opt_born:    "Bébé est déjà né",
+    weeks_cd_left:     "Semaine {w} · plus que {n} semaines pour choisir",
+    weeks_cd_last:     "Semaine {w} · plus qu'une semaine pour choisir",
+    weeks_cd_soon:     "Semaine {w} · bébé peut arriver d'un jour à l'autre",
+    weeks_cd_born:     "Félicitations ! Le plus beau des prénoms est choisi",
     save_field_email: "Votre adresse email",
     save_submit: "Recevoir ma liste",
     save_success_title: "Votre sélection a été sauvegardée.",
@@ -386,6 +395,15 @@ const I18N = {
     save_modal_title: "Save my list",
     save_modal_desc: "Receive your selection by email and find it again later.",
     save_field_fname: "Your first name (optional)",
+    weeks_field_label: "How far along are you? (optional)",
+    weeks_field_hint:  "So we can show you how much time is left to choose.",
+    weeks_opt_none:    "I'd rather not say",
+    weeks_opt_week:    "Week {n}",
+    weeks_opt_born:    "Baby is already here",
+    weeks_cd_left:     "Week {w} · {n} weeks left to choose",
+    weeks_cd_last:     "Week {w} · one week left to choose",
+    weeks_cd_soon:     "Week {w} · baby could arrive any day now",
+    weeks_cd_born:     "Congratulations! The loveliest name has been chosen",
     save_field_email: "Your email address",
     save_submit: "Receive my list",
     save_success_title: "Your selection has been saved.",
@@ -1709,10 +1727,92 @@ function closeSaveListeModal() {
   document.body.style.overflow = "";
 }
 
+/* =============================================================
+   SUIVI DE GROSSESSE — compte à rebours « temps restant pour choisir »
+   -------------------------------------------------------------
+   On stocke la semaine déclarée ET la date de déclaration, pas un
+   simple nombre : la semaine avance toute seule d'une visite à
+   l'autre, donc le compte à rebours reste juste sans que la
+   personne ait à le mettre à jour.
+   Valeur spéciale : "born" (bébé déjà né).
+   ============================================================= */
+const PREG_KEY   = "ns_pregnancy";
+const TERM_WEEKS = 40;               /* terme de référence */
+const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+function savePregnancy(value) {
+  try {
+    if (!value) { localStorage.removeItem(PREG_KEY); return; }
+    localStorage.setItem(PREG_KEY, JSON.stringify({
+      week: value, declaredAt: new Date().toISOString(),
+    }));
+  } catch (_) { /* stockage indisponible — non bloquant */ }
+}
+
+function readPregnancy() {
+  try {
+    const raw = localStorage.getItem(PREG_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) { return null; }
+}
+
+/* Semaine actuelle = semaine déclarée + semaines écoulées depuis. */
+function currentPregnancyWeek() {
+  const p = readPregnancy();
+  if (!p || !p.week) return null;
+  if (p.week === "born") return "born";
+  const declared = parseInt(p.week, 10);
+  if (!Number.isFinite(declared)) return null;
+  const elapsed = Math.floor((Date.now() - new Date(p.declaredAt).getTime()) / MS_PER_WEEK);
+  const week = declared + Math.max(0, elapsed);
+  return week > TERM_WEEKS + 2 ? "born" : week;
+}
+
+function populateWeeksSelect() {
+  const sel = document.getElementById("saveListeWeeks");
+  if (!sel || sel.dataset.filled === "1") return;
+  const frag = document.createDocumentFragment();
+  for (let w = 4; w <= TERM_WEEKS; w++) {
+    const o = document.createElement("option");
+    o.value = String(w);
+    o.textContent = t("weeks_opt_week").replace("{n}", w);
+    frag.appendChild(o);
+  }
+  const born = document.createElement("option");
+  born.value = "born";
+  born.textContent = t("weeks_opt_born");
+  frag.appendChild(born);
+  sel.appendChild(frag);
+  sel.dataset.filled = "1";
+
+  const p = readPregnancy();
+  if (p && p.week) sel.value = String(p.week);
+}
+
+function renderPregnancyCountdown() {
+  const el = document.getElementById("pregnancyCountdown");
+  if (!el) return;
+  const week = currentPregnancyWeek();
+  if (week === null) { el.hidden = true; el.textContent = ""; return; }
+
+  let msg;
+  if (week === "born") {
+    msg = t("weeks_cd_born");
+  } else {
+    const left = TERM_WEEKS - week;
+    if (left <= 0)      msg = t("weeks_cd_soon").replace("{w}", week);
+    else if (left === 1) msg = t("weeks_cd_last").replace("{w}", week);
+    else                 msg = t("weeks_cd_left").replace("{w}", week).replace("{n}", left);
+  }
+  el.textContent = msg;
+  el.hidden = false;
+}
+
 async function handleSaveListeSubmit(e) {
   e.preventDefault();
   const email     = document.getElementById("saveListeEmail").value.trim();
   const firstName = document.getElementById("saveListeFirstName").value.trim();
+  const weeks     = document.getElementById("saveListeWeeks")?.value || "";
   const emailOk   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   if (!emailOk) {
@@ -1730,10 +1830,12 @@ async function handleSaveListeSubmit(e) {
   /* Appel backend réel */
   try {
     saveListeToStorage(firstName, email);
+    savePregnancy(weeks);
+    renderPregnancyCountdown();
     await fetch("/api/save-list", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, firstName, names: [...favorites], lang }),
+      body: JSON.stringify({ email, firstName, names: [...favorites], lang, weeks: weeks || null }),
     });
   } catch (_) { /* silencieux — la liste est déjà sauvegardée localement */ }
 
@@ -1770,6 +1872,8 @@ function initSaveListeModal() {
     if (e.target === e.currentTarget) closeSaveListeModal();
   });
   document.getElementById("saveListeForm").addEventListener("submit", handleSaveListeSubmit);
+  populateWeeksSelect();
+  renderPregnancyCountdown();
   document.getElementById("saveListeSuccessClose").addEventListener("click", closeSaveListeModal);
   document.getElementById("saveListeEmail").addEventListener("input", () => {
     document.getElementById("saveListeEmail").classList.remove("field-error");

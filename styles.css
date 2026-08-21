@@ -2416,3 +2416,25 @@ body { animation: pageIn .5s ease; }
 }
 .share-menu button:hover { background: var(--accent-soft); }
 .share-menu button span { font-size: 1.15rem; }
+
+/* ============================ COMPTE À REBOURS GROSSESSE ============================ */
+.pregnancy-countdown {
+  display: inline-block;
+  margin: 10px 0 4px;
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink-soft);
+  font-size: .84rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.pregnancy-countdown[hidden] { display: none; }
+
+.field-hint {
+  margin: 6px 0 0;
+  font-size: .8rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}

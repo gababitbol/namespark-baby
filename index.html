@@ -46,7 +46,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=3" />
   <!-- Analytics — Plausible (RGPD, sans cookie, sans bannière)
        Remplace YOUR_DOMAIN par votre domaine réel (ex: namespark.baby)
        dans les Project Settings de plausible.io -->
@@ -99,6 +99,7 @@
     <section class="hero" id="accueil">
       <div class="container hero-inner">
         <span class="eyebrow" data-i18n="hero_eyebrow">Générateur de prénoms bébé</span>
+        <div class="pregnancy-countdown" id="pregnancyCountdown" hidden></div>
         <h1 data-animate-title data-i18n="hero_title">Le prénom de votre bébé, choisi ensemble</h1>
         <p class="subtitle" data-i18n="hero_subtitle">Générez des idées, votez chacun de votre côté, et découvrez les prénoms où vous êtes vraiment d'accord.</p>
         <div class="hero-actions">
@@ -777,6 +778,13 @@
           <input type="text" id="saveListeFirstName" placeholder="Marie…" autocomplete="given-name" />
         </div>
         <div class="field">
+          <label for="saveListeWeeks" data-i18n="weeks_field_label">Où en êtes-vous ? (optionnel)</label>
+          <select id="saveListeWeeks">
+            <option value="" data-i18n="weeks_opt_none">Je préfère ne pas dire</option>
+          </select>
+          <p class="field-hint" id="saveListeWeeksHint" data-i18n="weeks_field_hint">Pour vous montrer le temps qu'il vous reste pour choisir.</p>
+        </div>
+        <div class="field">
           <label for="saveListeEmail">
             <span data-i18n="save_field_email">Votre adresse email</span>
             <span class="required-star" aria-hidden="true"> *</span>
@@ -844,6 +852,6 @@
   <script src="storage.js?v=20"></script>
   <!-- data.js et app.js (data.js en premier) -->
   <script src="data.js?v=31"></script>
-  <script src="app.js?v=28"></script>
+  <script src="app.js?v=29"></script>
 </body>
 </html>

@@ -144,9 +144,32 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { email, firstName, names = [], lang = "fr" } = req.body || {};
+  const { email, firstName, names = [], lang = "fr", weeks = null } = req.body || {};
   if (!email || !names.length) {
     return res.status(400).json({ error: "email and names are required" });
+  }
+
+  /* Stade de grossesse (facultatif) — best effort, ne bloque jamais l'envoi.
+     Valeurs acceptées : "4".."40" ou "born". */
+  if (weeks) {
+    const valid = weeks === "born" || (/^\d{1,2}$/.test(weeks) && +weeks >= 4 && +weeks <= 40);
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (valid && url && key) {
+      fetch(`${url}/rest/v1/subscribers?on_conflict=email`, {
+        method: "POST",
+        headers: {
+          apikey: key, Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates",
+        },
+        body: JSON.stringify({
+          email: email.toLowerCase().trim(),
+          pregnancy_weeks: weeks,
+          pregnancy_declared_at: new Date().toISOString(),
+        }),
+      }).catch((e) => console.error("[save-list] pregnancy upsert:", e.message));
+    }
   }
 
   const resendKey = process.env.RESEND_API_KEY;
