@@ -1,0 +1,10 @@
+SELECT DISTINCT ?item ?itemLabelEn ?itemLabelFr ?gender ?namedAfter ?namedAfterLabelEn ?etymLang ?etymLangLabel ?nameLang ?nameLangLabel WHERE {
+  VALUES ?gender { wd:Q12308941 wd:Q11879590 wd:Q3409032 }
+  ?item wdt:P31 ?gender.
+  { ?item wdt:P138 ?x } UNION { ?item wdt:P1560 ?y }
+  OPTIONAL { ?item rdfs:label ?itemLabelEn. FILTER(LANG(?itemLabelEn)="en") }
+  OPTIONAL { ?item rdfs:label ?itemLabelFr. FILTER(LANG(?itemLabelFr)="fr") }
+  OPTIONAL { ?item wdt:P138 ?namedAfter. ?namedAfter rdfs:label ?namedAfterLabelEn. FILTER(LANG(?namedAfterLabelEn)="en") }
+  OPTIONAL { ?item wdt:P1560 ?etymLang. ?etymLang rdfs:label ?etymLangLabel. FILTER(LANG(?etymLangLabel)="en") }
+  OPTIONAL { ?item wdt:P407 ?nameLang. ?nameLang rdfs:label ?nameLangLabel. FILTER(LANG(?nameLangLabel)="en") }
+}
