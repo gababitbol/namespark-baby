@@ -82,6 +82,9 @@ const I18N = {
     f_letter: "Première lettre (optionnel)", f_length: "Longueur",
     l_court: "Court", l_moyen: "Moyen", l_long: "Long",
     f_surname: "Nom de famille (optionnel)", f_submit: "Générer des prénoms",
+    gen_searching_1: "Analyse de vos préférences…",
+    gen_searching_2: "Recherche parmi nos prénoms…",
+    f_submit_loading: "Recherche…",
     /* ---- résultats ---- */
     res_title: "Vos prénoms",
     res_empty: "Choisissez vos critères puis cliquez sur « Générer » pour découvrir des idées de prénoms.",
@@ -380,6 +383,9 @@ const I18N = {
     f_letter: "First letter (optional)", f_length: "Length",
     l_court: "Short", l_moyen: "Medium", l_long: "Long",
     f_surname: "Last name (optional)", f_submit: "Generate names",
+    gen_searching_1: "Analysing your preferences…",
+    gen_searching_2: "Searching our name collection…",
+    f_submit_loading: "Searching…",
     res_title: "Your names",
     res_empty: 'Pick your criteria then click "Generate" to discover name ideas.',
     res_none: "No name matches exactly. Try widening your criteria.",
@@ -709,6 +715,7 @@ let _authMode     = "unknown"; /* "unknown" | "existing" | "new" — détection 
 let _authEmailTimer = null;   /* debounce pour la détection email */
 let _genShown   = new Set(); /* prénoms déjà affichés dans la session filtre courante */
 let _genFilSig  = "";        /* signature JSON des filtres de la dernière génération */
+let _genInProgress = false;  /* garde contre le double-clic pendant l'état de recherche */
 let _heartHintShown    = false; /* popup incitation favoris — une seule fois par session */
 let _heartHintSeenCount = 0;   /* nb de cartes vues sans favori */
 
@@ -1172,39 +1179,78 @@ function renderResults(list, title) {
 /* =============================================================
    13) FORMULAIRE
    ============================================================= */
+/* État de recherche : ~1.6s, deux phases de texte, pas de blocage réel —
+   c'est un temps d'anticipation, la génération elle-même est instantanée
+   (pas d'IA, pas d'appel réseau : filtrage + tri local sur data.js). */
+const SEARCHING_PHASE_MS = 800;
+
+function showSearchingState() {
+  const wrap = document.getElementById("results");
+  wrap.innerHTML = `
+    <div class="searching">
+      <span class="spark-loader" aria-hidden="true">✶</span>
+      <p id="searchingText">${t("gen_searching_1")}</p>
+    </div>`;
+  const textEl = document.getElementById("searchingText");
+  const swapTimer = setTimeout(() => {
+    if (textEl.isConnected) textEl.textContent = t("gen_searching_2");
+  }, SEARCHING_PHASE_MS);
+  return () => clearTimeout(swapTimer); /* annule le swap si les résultats arrivent avant */
+}
+
 function initForm() {
   const form = document.getElementById("genForm");
+  const submitBtn = form.querySelector('[type="submit"]');
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const f = readFilters();
-    lastSurname = f.surname;
-    /* ── Génération progressive : on exclut les noms déjà montrés ── */
-    const sig = filterSignature(f);
-    if (sig !== _genFilSig) {
-      /* Les filtres ont changé → on repart de zéro */
-      _genShown  = new Set();
-      _genFilSig = sig;
-    }
+    if (_genInProgress) return; /* anti double-clic / double-soumission */
+    _genInProgress = true;
 
-    let results = generateDemo(f, 20, _genShown); // ← mode démo
+    const origBtnText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = t("f_submit_loading");
 
-    if (!results.length && _genShown.size > 0) {
-      /* Pool épuisé → réinitialiser silencieusement et recommencer */
-      _genShown  = new Set();
-      _genFilSig = sig;
-      results    = generateDemo(f, 20);
-      showToast(lang === "fr"
-        ? "Vous avez vu tous les prénoms correspondants — on recommence !"
-        : "You've seen all matching names — starting over!");
-    }
+    const cancelSwap = showSearchingState();
 
-    results.forEach(n => _genShown.add(n.name));
+    setTimeout(() => {
+      cancelSwap();
+      const f = readFilters();
+      lastSurname = f.surname;
+      /* ── Génération progressive : on exclut les noms déjà montrés ── */
+      const sig = filterSignature(f);
+      if (sig !== _genFilSig) {
+        /* Les filtres ont changé → on repart de zéro */
+        _genShown  = new Set();
+        _genFilSig = sig;
+      }
 
-    renderResults(results, t("res_title"));
-    addToHistory(f, results);            // ← sauvegarde dans l'historique
-    window.plausible?.("Génération", { props: { genre: f.gender || "tous", origine: f.origin || "toutes" } });
-    if (favorites.size > 0) renderFavorites();
-    updateSelPanel();
+      let results = generateDemo(f, 20, _genShown); // ← mode démo
+
+      if (!results.length && _genShown.size > 0) {
+        /* Pool épuisé → réinitialiser silencieusement et recommencer */
+        _genShown  = new Set();
+        _genFilSig = sig;
+        results    = generateDemo(f, 20);
+        showToast(lang === "fr"
+          ? "Vous avez vu tous les prénoms correspondants — on recommence !"
+          : "You've seen all matching names — starting over!");
+      }
+
+      results.forEach(n => _genShown.add(n.name));
+
+      renderResults(results, t("res_title"));
+      addToHistory(f, results);            // ← sauvegarde dans l'historique
+      window.plausible?.("Génération", { props: { genre: f.gender || "tous", origine: f.origin || "toutes" } });
+      if (favorites.size > 0) renderFavorites();
+      updateSelPanel();
+
+      document.querySelector(".results-head")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = origBtnText;
+      _genInProgress = false;
+    }, SEARCHING_PHASE_MS * 2);
   });
 
   // Mise à jour des scores en temps réel quand le nom de famille change
