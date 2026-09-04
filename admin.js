@@ -4,8 +4,8 @@
    Utilise storage.js comme couche de données (même principe que
    l'app principale). admin.html charge storage.js en premier.
 
-   Auth : mot de passe fixé dans storage.js (ADMIN_PASSWORD).
-   ⚠️  Local uniquement. En production : auth serveur + JWT.
+   Auth : vérifiée côté serveur via /api/admin-login (env ADMIN_PASSWORD).
+   Le token de session est ensuite gardé en sessionStorage.
    ============================================================= */
 
 "use strict";

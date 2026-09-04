@@ -46,6 +46,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Par où commencer ?","acceptedAnswer":{"@type":"Answer","text":"C'est immédiat : cliquez sur Générer des prénoms, parcourez les résultats et cliquez sur le ❤️ dès qu'un prénom vous plaît. Vos coups de cœur s'accumulent dans Ma sélection. Régénérez autant de fois que vous voulez — de nouveaux prénoms apparaissent à chaque fois. Quand votre liste est prête, partagez-la pour voter en couple ou en famille."}},{"@type":"Question","name":"NameSpark Baby est-il gratuit ?","acceptedAnswer":{"@type":"Answer","text":"Oui, entièrement gratuit. Le générateur, les favoris, la recherche par signification, le vote en couple, le vote famille et l'export PDF sont tous accessibles sans abonnement ni carte bancaire. Vous pouvez créer un espace personnel (email facultatif) pour retrouver vos favoris d'une session à l'autre, depuis n'importe quel appareil."}},{"@type":"Question","name":"En quoi NameSpark Baby est-il différent de ChatGPT ?","acceptedAnswer":{"@type":"Answer","text":"ChatGPT vous produit une liste statique de prénoms. NameSpark Baby vous accompagne dans la décision : vous générez, vous likez, vous comparez, et vous invitez votre partenaire ou votre famille à voter en secret sur votre sélection. L'outil révèle ensuite les prénoms sur lesquels vous êtes vraiment d'accord, sans vous être influencés mutuellement. C'est un outil de décision partagée, pas juste une recherche."}},{"@type":"Question","name":"Comment fonctionne le vote en couple ?","acceptedAnswer":{"@type":"Answer","text":"1. Générez des prénoms et cliquez sur ❤️ pour remplir votre sélection. 2. Ouvrez Ma sélection et cliquez sur « Décider à deux ». 3. Un lien unique est créé — envoyez-le à votre partenaire. 4. Chacun vote en secret : ❤️ j'adore, ? peut-être, ✗ non. 5. NameSpark vous révèle les prénoms que vous avez tous les deux adorés."}},{"@type":"Question","name":"Comment fonctionne le vote famille ?","acceptedAnswer":{"@type":"Answer","text":"Même principe que le vote couple, mais ouvert à tous les proches. Depuis Ma sélection, choisissez « Décider en famille » et partagez le lien. Chaque participant vote juste avec son prénom, sans créer de compte. Vous suivez le classement en temps réel — qui a voté quoi, pour chaque prénom."}},{"@type":"Question","name":"Comment fonctionne le score de compatibilité ?","acceptedAnswer":{"@type":"Answer","text":"Renseignez votre nom de famille dans le générateur. Chaque prénom reçoit un score de 1 à 10 estimant la fluidité de la combinaison : longueur totale, équilibre syllabique, enchaînement sonore. C'est une aide indicative — pas une règle absolue — pour repérer les combinaisons naturellement harmonieuses."}},{"@type":"Question","name":"Mes favoris sont-ils sauvegardés si je ferme l'onglet ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Vos favoris sont sauvegardés automatiquement dans votre navigateur et restent disponibles à la prochaine visite. Pour les retrouver sur un autre appareil ou les partager, créez un espace personnel en laissant votre email — c'est gratuit et facultatif. Aucune donnée n'est vendue ni partagée avec des tiers."}}]}</script>
   <link rel="stylesheet" href="styles.css?v=3" />
   <!-- Analytics — Plausible (RGPD, sans cookie, sans bannière)
        Remplace YOUR_DOMAIN par votre domaine réel (ex: namespark.baby)
@@ -72,7 +73,7 @@
         <li><a href="#faq" data-nav data-i18n="nav_faq">FAQ</a></li>
         <li id="navListeWrap">
           <a href="#" class="nav-liste-link" id="navListeLink" onclick="event.preventDefault();openSelection()">
-            📋 Ma liste <span id="navListeBadge" class="nav-badge">0</span>
+            📋 <span data-i18n="fav_title">Ma sélection</span> <span id="navListeBadge" class="nav-badge">0</span>
           </a>
         </li>
       </ul>
@@ -335,7 +336,7 @@
           <h2 data-i18n="pop_title">Exemples de prénoms populaires</h2>
           <p data-i18n="pop_sub">Cliquez sur un prénom pour voir des idées similaires dans le générateur.</p>
         </div>
-        <div class="chips reveal" id="popularChips"></div>
+        <div class="chips reveal" id="popularChips"><a class="chip" href="/prenom/jade">Jade</a><a class="chip" href="/prenom/louise">Louise</a><a class="chip" href="/prenom/ambre">Ambre</a><a class="chip" href="/prenom/alba">Alba</a><a class="chip" href="/prenom/emma">Emma</a><a class="chip" href="/prenom/alice">Alice</a><a class="chip" href="/prenom/rose">Rose</a><a class="chip" href="/prenom/anna">Anna</a><a class="chip" href="/prenom/lina">Lina</a><a class="chip" href="/prenom/mia">Mia</a><a class="chip" href="/prenom/romy">Romy</a><a class="chip" href="/prenom/lea">Léa</a><a class="chip" href="/prenom/chloe">Chloé</a><a class="chip" href="/prenom/ines">Inès</a><a class="chip" href="/prenom/agathe">Agathe</a><a class="chip" href="/prenom/iris">Iris</a><a class="chip" href="/prenom/nina">Nina</a><a class="chip" href="/prenom/juliette">Juliette</a><a class="chip" href="/prenom/lou">Lou</a><a class="chip" href="/prenom/charlie">Charlie</a><a class="chip" href="/prenom/manon">Manon</a><a class="chip" href="/prenom/camille">Camille</a><a class="chip" href="/prenom/sofia">Sofia</a><a class="chip" href="/prenom/adele">Adèle</a><a class="chip" href="/prenom/elsa">Elsa</a><a class="chip" href="/prenom/gabriel">Gabriel</a><a class="chip" href="/prenom/raphael">Raphaël</a><a class="chip" href="/prenom/mael">Maël</a><a class="chip" href="/prenom/louis">Louis</a><a class="chip" href="/prenom/noah">Noah</a><a class="chip" href="/prenom/jules">Jules</a><a class="chip" href="/prenom/adam">Adam</a><a class="chip" href="/prenom/arthur">Arthur</a><a class="chip" href="/prenom/lucas">Lucas</a><a class="chip" href="/prenom/hugo">Hugo</a><a class="chip" href="/prenom/liam">Liam</a><a class="chip" href="/prenom/sacha">Sacha</a><a class="chip" href="/prenom/gabin">Gabin</a><a class="chip" href="/prenom/nathan">Nathan</a><a class="chip" href="/prenom/ethan">Ethan</a><a class="chip" href="/prenom/aaron">Aaron</a><a class="chip" href="/prenom/isaac">Isaac</a><a class="chip" href="/prenom/timeo">Timéo</a><a class="chip" href="/prenom/malo">Malo</a><a class="chip" href="/prenom/basile">Basile</a><a class="chip" href="/prenom/antoine">Antoine</a><a class="chip" href="/prenom/victor">Victor</a><a class="chip" href="/prenom/paul">Paul</a><a class="chip" href="/prenom/marius">Marius</a><a class="chip" href="/prenom/achille">Achille</a></div>
       </div>
     </section>
 
@@ -345,7 +346,36 @@
         <div class="section-head reveal">
           <h2 data-i18n="faq_title">Questions fréquentes</h2>
         </div>
-        <div id="faqList"></div>
+        <div id="faqList">
+      <div class="faq-item">
+        <button class="faq-q">Par où commencer ?</button>
+        <div class="faq-a"><p style="padding-right:30px">C'est immédiat : cliquez sur <strong>Générer des prénoms</strong>, parcourez les résultats et cliquez sur le ❤️ dès qu'un prénom vous plaît. Vos coups de cœur s'accumulent dans <strong>Ma sélection</strong>. Régénérez autant de fois que vous voulez — de nouveaux prénoms apparaissent à chaque fois. Quand votre liste est prête, partagez-la pour voter en couple ou en famille.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">NameSpark Baby est-il gratuit ?</button>
+        <div class="faq-a"><p style="padding-right:30px">Oui, entièrement gratuit. Le générateur, les favoris, la recherche par signification, le vote en couple, le vote famille et l'export PDF sont tous accessibles sans abonnement ni carte bancaire. Vous pouvez créer un espace personnel (email facultatif) pour retrouver vos favoris d'une session à l'autre, depuis n'importe quel appareil.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">En quoi NameSpark Baby est-il différent de ChatGPT ?</button>
+        <div class="faq-a"><p style="padding-right:30px">ChatGPT vous produit une liste statique de prénoms. NameSpark Baby vous accompagne dans <strong>la décision</strong> : vous générez, vous likez, vous comparez, et vous invitez votre partenaire ou votre famille à voter en secret sur votre sélection. L'outil révèle ensuite les prénoms sur lesquels vous êtes vraiment d'accord, sans vous être influencés mutuellement. C'est un outil de décision partagée, pas juste une recherche.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Comment fonctionne le vote en couple ?</button>
+        <div class="faq-a"><p style="padding-right:30px">1. Générez des prénoms et cliquez sur ❤️ pour remplir votre sélection.<br>2. Ouvrez <strong>Ma sélection</strong> et cliquez sur « Décider à deux ».<br>3. Un lien unique est créé — envoyez-le à votre partenaire.<br>4. Chacun vote en secret : ❤️ j'adore, ? peut-être, ✗ non.<br>5. NameSpark vous révèle les prénoms que vous avez tous les deux adorés.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Comment fonctionne le vote famille ?</button>
+        <div class="faq-a"><p style="padding-right:30px">Même principe que le vote couple, mais ouvert à tous les proches. Depuis <strong>Ma sélection</strong>, choisissez « Décider en famille » et partagez le lien. Chaque participant vote juste avec son prénom, sans créer de compte. Vous suivez le classement en temps réel — qui a voté quoi, pour chaque prénom.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Comment fonctionne le score de compatibilité ?</button>
+        <div class="faq-a"><p style="padding-right:30px">Renseignez votre nom de famille dans le générateur. Chaque prénom reçoit un score de 1 à 10 estimant la fluidité de la combinaison : longueur totale, équilibre syllabique, enchaînement sonore. C'est une aide indicative — pas une règle absolue — pour repérer les combinaisons naturellement harmonieuses.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Mes favoris sont-ils sauvegardés si je ferme l'onglet ?</button>
+        <div class="faq-a"><p style="padding-right:30px">Oui. Vos favoris sont sauvegardés automatiquement dans votre navigateur et restent disponibles à la prochaine visite. Pour les retrouver sur un autre appareil ou les partager, créez un espace personnel en laissant votre email — c'est gratuit et facultatif. Aucune donnée n'est vendue ni partagée avec des tiers.</p></div>
+      </div>
+        </div>
       </div>
     </section>
   </main>
@@ -380,10 +410,18 @@
             <li><a href="#faq" data-nav data-i18n="nav_faq">FAQ</a></li>
           </ul>
         </div>
+        <div>
+          <h5 data-i18n="foot_legal">Légal</h5>
+          <ul>
+            <li><a href="/mentions-legales" data-i18n="foot_legal_notice">Mentions légales</a></li>
+            <li><a href="/privacy" data-i18n="foot_privacy">Confidentialité</a></li>
+            <li><a href="/terms" data-i18n="foot_terms">Conditions d'utilisation</a></li>
+            <li><a href="mailto:bonjour@namespark.baby">Contact</a></li>
+          </ul>
+        </div>
       </div>
       <div class="footer-bottom">
         <span>© 2026 NameSpark Baby</span>
-        <a href="admin.html" style="font-size:.75rem;color:rgba(0,0,0,.2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='rgba(0,0,0,.4)'" onmouseout="this.style.color='rgba(0,0,0,.2)'">admin</a>
       </div>
     </div>
   </footer>
@@ -556,8 +594,8 @@
               <div class="field-error-msg" id="partnerFirstNameError" role="alert"></div>
             </div>
             <div class="field">
-              <label for="partnerEmail">Votre adresse email <span class="req">*</span></label>
-              <input type="email" id="partnerEmail" placeholder="marie@exemple.com" autocomplete="email" inputmode="email" required />
+              <label for="partnerEmail">Votre adresse email (optionnel)</label>
+              <input type="email" id="partnerEmail" placeholder="marie@exemple.com" autocomplete="email" inputmode="email" />
               <div class="field-error-msg" id="partnerEmailError" role="alert"></div>
             </div>
             <button type="submit" class="btn btn-primary" id="partnerRegSubmit">Commencer à voter →</button>
@@ -794,7 +832,7 @@
           <div class="field-error-msg" id="saveListeEmailError" role="alert"></div>
         </div>
         <label class="checkbox-row" style="display:flex;align-items:center;gap:10px;margin:12px 0 18px;cursor:pointer;">
-          <input type="checkbox" id="saveListeNewsletter" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;" />
+          <input type="checkbox" id="saveListeNewsletter" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;" />
           <span style="font-size:.88rem;color:var(--ink-soft);line-height:1.4;" data-i18n="save_newsletter_opt">Recevoir aussi les tendances et idées chaque semaine</span>
         </label>
         <button type="submit" class="btn btn-primary" id="saveListeSubmit" data-i18n="save_submit">
@@ -852,6 +890,6 @@
   <script src="storage.js?v=20"></script>
   <!-- data.js et app.js (data.js en premier) -->
   <script src="data.js?v=31"></script>
-  <script src="app.js?v=31"></script>
+  <script src="app.js?v=32"></script>
 </body>
 </html>

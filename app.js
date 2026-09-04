@@ -95,7 +95,7 @@ const I18N = {
     /* ---- favoris ---- */
     fav_add_tip: "Ajouter aux favoris",
     fav_remove_tip: "Retirer des favoris",
-    fav_title: "Ma liste",
+    fav_title: "Ma sélection",
     fav_sub: "Vos coups de cœur sauvegardés. Sauvegardez, comparez ou partagez votre sélection.",
     /* ---- sauvegarder ---- */
     save_btn: "📩 Sauvegarder ma liste",
@@ -104,7 +104,7 @@ const I18N = {
     save_field_fname: "Votre prénom (optionnel)",
     save_newsletter_opt: "Recevoir aussi les tendances et idées chaque semaine",
     weeks_field_label: "Où en êtes-vous ? (optionnel)",
-    weeks_field_hint:  "Pour vous montrer le temps qu'il vous reste pour choisir.",
+    weeks_field_hint:  "Facultatif. Utilisé uniquement pour afficher votre compte à rebours personnel — jamais partagé ni affiché publiquement.",
     weeks_opt_none:    "Je préfère ne pas dire",
     weeks_opt_week:    "Semaine {n}",
     weeks_opt_born:    "Bébé est déjà né",
@@ -151,8 +151,8 @@ const I18N = {
     login_found:   "✓ Compte trouvé",
     /* ---- page sélection ---- */
     sel_see_btn: "Voir ma sélection",
-    sel_page_eyebrow: "Votre sélection",
-    sel_page_title: "Votre sélection de prénoms",
+    sel_page_eyebrow: "Ma sélection",
+    sel_page_title: "Ma sélection de prénoms",
     sel_page_sub: "Retrouvez tous les prénoms que vous avez enregistrés.",
     sel_page_empty: "Cliquez sur ❤️ pour ajouter des prénoms à votre sélection.",
     sel_page_count: (n) => `${n} prénom${n > 1 ? "s" : ""} enregistré${n > 1 ? "s" : ""}`,
@@ -244,6 +244,7 @@ const I18N = {
     /* ---- footer ---- */
     foot_tag: "Choisissez le prénom de votre bébé, ensemble.",
     foot_explore: "Explorer", foot_nav: "Navigation",
+    foot_legal: "Légal", foot_legal_notice: "Mentions légales", foot_privacy: "Confidentialité", foot_terms: "Conditions d'utilisation",
     foot_demo: "",
     /* ---- décider ensemble (boucle virale) ---- */
     decide_eyebrow: "Décidez ensemble",
@@ -389,7 +390,7 @@ const I18N = {
     similar_title: (n) => `Names similar to ${n}`,
     fav_add_tip: "Add to favourites",
     fav_remove_tip: "Remove from favourites",
-    fav_title: "My list",
+    fav_title: "My selection",
     fav_sub: "Your saved picks. Save, compare or share your selection.",
     /* ---- save modal ---- */
     save_btn: "📩 Save my list",
@@ -398,7 +399,7 @@ const I18N = {
     save_field_fname: "Your first name (optional)",
     save_newsletter_opt: "Also send me weekly trends and ideas",
     weeks_field_label: "How far along are you? (optional)",
-    weeks_field_hint:  "So we can show you how much time is left to choose.",
+    weeks_field_hint:  "Optional. Used only to show your personal countdown — never shared or displayed publicly.",
     weeks_opt_none:    "I'd rather not say",
     weeks_opt_week:    "Week {n}",
     weeks_opt_born:    "Baby is already here",
@@ -445,8 +446,8 @@ const I18N = {
     login_found:   "✓ Account found",
     /* ---- selection page ---- */
     sel_see_btn: "View my selection",
-    sel_page_eyebrow: "Your selection",
-    sel_page_title: "Your name selection",
+    sel_page_eyebrow: "My selection",
+    sel_page_title: "My name selection",
     sel_page_sub: "Find all the names you have saved.",
     sel_page_empty: "Click ❤️ to add names to your selection.",
     sel_page_count: (n) => `${n} name${n > 1 ? "s" : ""} saved`,
@@ -531,6 +532,7 @@ const I18N = {
     faq_title: "Frequently asked questions",
     foot_tag: "Choose your baby's name, together.",
     foot_explore: "Explore", foot_nav: "Navigation",
+    foot_legal: "Legal", foot_legal_notice: "Legal notice", foot_privacy: "Privacy", foot_terms: "Terms of use",
     foot_demo: "",
     /* ---- decide together (viral loop) ---- */
     decide_eyebrow: "Decide together",
@@ -2958,7 +2960,7 @@ async function handlePartnerRegSubmit(e) {
   const firstName = document.getElementById("partnerFirstName").value.trim();
   const email     = document.getElementById("partnerEmail").value.trim();
 
-  /* Validation prénom */
+  /* Validation prénom (seul champ obligatoire) */
   if (!firstName) {
     document.getElementById("partnerFirstName").classList.add("field-error");
     document.getElementById("partnerFirstNameError").textContent = t("partner_reg_firstname_required");
@@ -2967,8 +2969,8 @@ async function handlePartnerRegSubmit(e) {
     return;
   }
 
-  /* Validation email */
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  /* Email facultatif : on ne valide le format que s'il a été renseigné */
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     document.getElementById("partnerEmail").classList.add("field-error");
     document.getElementById("partnerEmailError").textContent = t("partner_reg_email_required");
     document.getElementById("partnerEmailError").classList.add("visible");
@@ -2982,27 +2984,31 @@ async function handlePartnerRegSubmit(e) {
   btn.textContent = "…";
 
   try {
-    const quality = await _checkEmailQuality(email);
-    if (!quality.ok) {
-      document.getElementById("partnerEmail").classList.add("field-error");
-      document.getElementById("partnerEmailError").textContent = quality.msg;
-      document.getElementById("partnerEmailError").classList.add("visible");
-      document.getElementById("partnerEmail").focus();
-      return;
+    if (email) {
+      const quality = await _checkEmailQuality(email);
+      if (!quality.ok) {
+        document.getElementById("partnerEmail").classList.add("field-error");
+        document.getElementById("partnerEmailError").textContent = quality.msg;
+        document.getElementById("partnerEmailError").classList.add("visible");
+        document.getElementById("partnerEmail").focus();
+        return;
+      }
+      const existing = await findUserByEmail(email);
+      currentUser = existing || {
+        email, firstName, createdAt: new Date().toISOString(), surname: lastSurname || null,
+      };
+    } else {
+      currentUser = { email: null, firstName, createdAt: new Date().toISOString(), surname: lastSurname || null };
     }
-    const existing = await findUserByEmail(email);
-    currentUser = existing || {
-      email, firstName, createdAt: new Date().toISOString(), surname: lastSurname || null,
-    };
   } catch (_) {
-    currentUser = { email, firstName, createdAt: new Date().toISOString(), surname: lastSurname || null };
+    currentUser = { email: email || null, firstName, createdAt: new Date().toISOString(), surname: lastSurname || null };
   } finally {
     btn.disabled = false;
     btn.textContent = origText;
   }
 
   saveUser();
-  registerLead(email, firstName, 0);
+  registerLead(email, firstName, 0); /* no-op silencieux si email vide */
   updateEspaceButton();
 
   /* Reprendre le flow avec la décision en attente */
