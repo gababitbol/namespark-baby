@@ -1718,6 +1718,7 @@ function openSaveListeModal() {
   document.getElementById("saveListeEmail").value     = currentUser?.email     || "";
   document.getElementById("saveListeEmail").classList.remove("field-error");
   document.getElementById("saveListeEmailError").classList.remove("visible");
+  syncWeeksSelectValue();
   // Ouvre la modale
   document.getElementById("saveListeModal").classList.add("open");
   document.body.style.overflow = "hidden";
@@ -1786,9 +1787,18 @@ function populateWeeksSelect() {
   frag.appendChild(born);
   sel.appendChild(frag);
   sel.dataset.filled = "1";
+  syncWeeksSelectValue();
+}
 
-  const p = readPregnancy();
-  if (p && p.week) sel.value = String(p.week);
+/* Aligne le select sur la semaine CALCULEE (pas la valeur brute declaree) :
+   sans ca, rouvrir le formulaire des semaines plus tard puis valider sans
+   toucher au champ ecraserait la date de declaration et ferait reculer
+   le compte a rebours. Appelee a chaque ouverture de la modale. */
+function syncWeeksSelectValue() {
+  const sel = document.getElementById("saveListeWeeks");
+  if (!sel) return;
+  const week = currentPregnancyWeek();
+  sel.value = week === null ? "" : String(week);
 }
 
 function renderPregnancyCountdown() {
