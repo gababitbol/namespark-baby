@@ -1741,29 +1741,15 @@ function closeSaveListeModal() {
    personne ait à le mettre à jour.
    Valeur spéciale : "born" (bébé déjà né).
    ============================================================= */
-const PREG_KEY   = "ns_pregnancy";
 const TERM_WEEKS = 40;               /* terme de référence */
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 
-function savePregnancy(value) {
-  try {
-    if (!value) { localStorage.removeItem(PREG_KEY); return; }
-    localStorage.setItem(PREG_KEY, JSON.stringify({
-      week: value, declaredAt: new Date().toISOString(),
-    }));
-  } catch (_) { /* stockage indisponible — non bloquant */ }
-}
-
-function readPregnancy() {
-  try {
-    const raw = localStorage.getItem(PREG_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (_) { return null; }
-}
+/* Lecture/écriture via storage.js (getPregnancy/savePregnancy) — pas d'accès
+   localStorage direct ici, comme pour le reste des données de l'app. */
 
 /* Semaine actuelle = semaine déclarée + semaines écoulées depuis. */
 function currentPregnancyWeek() {
-  const p = readPregnancy();
+  const p = getPregnancy();
   if (!p || !p.week) return null;
   if (p.week === "born") return "born";
   const declared = parseInt(p.week, 10);

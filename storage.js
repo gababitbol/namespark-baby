@@ -50,6 +50,7 @@ const KEYS = {
   notifications:   NS + "notifications",
   leads:           NS + "leads",
   adminSession:    NS + "admin_session",
+  pregnancy:       NS + "pregnancy",
 };
 
 /* ── 3. CONFIG ADMIN ───────────────────────────────────────────────────────
@@ -96,6 +97,12 @@ function _migrateLegacy() {
     const l = localStorage.getItem("namespark_v1_lang");
     if (l === "fr" || l === "en") _write(KEYS.lang, l);
   }
+  /* Le compte à rebours grossesse écrivait directement en localStorage sous une
+     clé non namespacée avant d'être rattaché à cette couche d'accès. */
+  if (localStorage.getItem(KEYS.pregnancy) == null) {
+    const p = _read("ns_pregnancy", null);
+    if (p && p.week) _write(KEYS.pregnancy, p);
+  }
 }
 try { _migrateLegacy(); } catch (_) {}
 
@@ -116,6 +123,15 @@ function getLang()        { return _read(KEYS.lang, "fr"); }
 function saveLang(lang)   { _write(KEYS.lang, lang); }
 function getSurname()     { return _read(KEYS.surname, ""); }
 function saveSurname(s)   { _write(KEYS.surname, s || ""); }
+
+/* Stade de grossesse déclaré — { week: "4".."40"|"born", declaredAt: ISO }.
+   On stocke la semaine ET sa date de déclaration : la semaine affichée
+   avance donc toute seule d'une visite à l'autre (voir currentPregnancyWeek
+   dans app.js), sans qu'on ait à redemander l'info. */
+function getPregnancy()      { return _read(KEYS.pregnancy, null); }
+function savePregnancy(week) {
+  week ? _write(KEYS.pregnancy, { week, declaredAt: new Date().toISOString() }) : _remove(KEYS.pregnancy);
+}
 
 /* ── 7. UTILISATEUR ──────────────────────────────────────────────────────── */
 
@@ -655,7 +671,7 @@ function clearAdminSession()   { _remove(KEYS.adminSession); try { sessionStorag
 /* ── 15. EXPORT (Node / tests) ───────────────────────────────────────────── */
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
-    getLang, saveLang, getSurname, saveSurname,
+    getLang, saveLang, getSurname, saveSurname, getPregnancy, savePregnancy,
     getUser, setUser, clearUser, findUserByEmail,
     getSelection, saveSelection, addToSelection, removeFromSelection,
     getSavedLists, addSavedList, getHistory, addHistory, getComparisons, addComparison,
