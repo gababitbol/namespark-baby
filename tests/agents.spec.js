@@ -412,7 +412,7 @@ test.describe.serial('🔑 Scénario auth — Reconnexion email connu', () => {
     await page.click('#espaceBtn');
     await page.waitForSelector('#authModal.open');
 
-    const newEmail = `ns-test-nouveau-${Date.now()}@yopmail.com`;
+    const newEmail = `ns-test-nouveau-${Date.now()}@namespark.baby`;
     await page.fill('#authEmail', newEmail);
     await page.waitForTimeout(3_500); // debounce + Supabase lookup
 
@@ -780,7 +780,7 @@ test.describe.serial('🧨 Scénario cas limites — décisions mortes', () => {
     await pageA.goto('/');
     await seedFavorites(pageA, TEST_SELECTION);
     edgeState.voteUrl = await createFamilyDecision(pageA, {
-      firstName: 'Suzanne', email: 'ns-test-suzanne@yopmail.com',
+      firstName: 'Suzanne', email: 'ns-test-suzanne@namespark.baby',
     });
     edgeState.decisionId = new URL(edgeState.voteUrl).searchParams.get('familyVote');
     await ctxA.close();
@@ -922,7 +922,7 @@ test.describe.serial('🧨 Scénario cas limites — décisions mortes', () => {
     const pageCreator = await ctxCreator.newPage();
     await pageCreator.goto('/');
     await seedFavorites(pageCreator, TEST_SELECTION);
-    const voteUrl    = await createFamilyDecision(pageCreator, { firstName: 'ClaudeCloture', email: 'ns-test-claude-cloture@yopmail.com' });
+    const voteUrl    = await createFamilyDecision(pageCreator, { firstName: 'ClaudeCloture', email: 'ns-test-claude-cloture@namespark.baby' });
     const decisionId = new URL(voteUrl).searchParams.get('familyVote');
     expect(decisionId, 'Prérequis : decisionId créé').toBeTruthy();
 
@@ -1109,7 +1109,7 @@ test.describe('📱 Scénario mobile — iPhone 14 & Galaxy S21', () => {
           { sel: '#voteStartSubmit',    label: 'Bouton valider' },
         ]);
         expect(modalIssues, `Bug mobile (${device.name}) : ${modalIssues.join(' · ')}`).toEqual([]);
-        await page.fill('#voteStartEmail', 'ns-test-sophie@yopmail.com');
+        await page.fill('#voteStartEmail', 'ns-test-sophie@namespark.baby');
         await page.fill('#voteStartFirstName', 'Sophie');
         await page.click('#voteStartSubmit');
       }
@@ -1143,7 +1143,7 @@ test.describe('📱 Scénario mobile — iPhone 14 & Galaxy S21', () => {
       await pageA.goto('/');
       await seedFavorites(pageA, TEST_SELECTION);
       const inviteUrl = await createCoupleDecision(pageA, {
-        firstName: 'Sophie', email: 'ns-test-sophie@yopmail.com',
+        firstName: 'Sophie', email: 'ns-test-sophie@namespark.baby',
       });
       await ctxA.close();
 
@@ -1248,7 +1248,7 @@ test.describe.serial('🚀 Scénario charge — 50 votants simultanés', () => {
     await page.goto('/');
     await seedFavorites(page, TEST_SELECTION);
     chargeState.voteUrl = await createFamilyDecision(page, {
-      firstName: 'Capucine', email: 'ns-test-capucine@yopmail.com',
+      firstName: 'Capucine', email: 'ns-test-capucine@namespark.baby',
     });
     chargeState.decisionId = new URL(chargeState.voteUrl).searchParams.get('familyVote');
     expect(chargeState.voteUrl).toMatch(/\?familyVote=/);
