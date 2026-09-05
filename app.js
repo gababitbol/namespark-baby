@@ -84,6 +84,7 @@ const I18N = {
     f_surname: "Nom de famille (optionnel)", f_submit: "Générer des prénoms",
     gen_searching_1: "Analyse de vos préférences…",
     gen_searching_2: "Recherche parmi nos prénoms…",
+    gen_searching_2_deep: "On va un peu plus loin…",
     f_submit_loading: "Recherche…",
     /* ---- résultats ---- */
     res_title: "Vos prénoms",
@@ -385,6 +386,7 @@ const I18N = {
     f_surname: "Last name (optional)", f_submit: "Generate names",
     gen_searching_1: "Analysing your preferences…",
     gen_searching_2: "Searching our name collection…",
+    gen_searching_2_deep: "Let's dig a little deeper…",
     f_submit_loading: "Searching…",
     res_title: "Your names",
     res_empty: 'Pick your criteria then click "Generate" to discover name ideas.',
@@ -715,6 +717,7 @@ let _authMode     = "unknown"; /* "unknown" | "existing" | "new" — détection 
 let _authEmailTimer = null;   /* debounce pour la détection email */
 let _genShown   = new Set(); /* prénoms déjà affichés dans la session filtre courante */
 let _genFilSig  = "";        /* signature JSON des filtres de la dernière génération */
+let _genDepth   = 0;         /* nombre de générations successives sur la même recherche */
 let _genInProgress = false;  /* garde contre le double-clic pendant l'état de recherche */
 let _heartHintShown    = false; /* popup incitation favoris — une seule fois par session */
 let _heartHintSeenCount = 0;   /* nb de cartes vues sans favori */
@@ -881,7 +884,64 @@ function filterSignature(f) {
                          f.style||"",  f.meaning||"", f.length||""]);
 }
 
-function generateDemo(f, limit = 20, exclude = null) {
+/* =============================================================
+   Ranking progressif par popularité/établissement
+   -------------------------------------------------------------
+   popularityTier (calculé hors-ligne dans data.js, voir
+   tools/compute-popularity-tiers.js) : "classic" | "established" |
+   "rare" | "very_rare" | "unknown_popularity".
+   "unknown_popularity" signifie uniquement "pas encore de donnée de
+   fréquence fiable" — ce n'est jamais interprété comme rare/bizarre.
+   La distribution ci-dessous détermine la part de chaque tier selon
+   la profondeur de génération sur une même recherche (_genDepth).
+   ============================================================= */
+const TIER_ORDER = ["classic", "established", "rare", "very_rare", "unknown_popularity"];
+const TIER_DISTRIBUTION = {
+  0: { classic: 58, established: 34, rare: 5,  very_rare: 0,  unknown_popularity: 3  },
+  1: { classic: 37, established: 37, rare: 16, very_rare: 2,  unknown_popularity: 8  },
+  2: { classic: 17, established: 30, rare: 30, very_rare: 8,  unknown_popularity: 15 },
+  3: { classic: 8,  established: 21, rare: 33, very_rare: 20, unknown_popularity: 18 },
+};
+
+function pickProgressive(pool, limit, depth) {
+  const d = Math.min(Math.max(depth, 0), 3);
+  const dist = TIER_DISTRIBUTION[d];
+
+  const buckets = {};
+  TIER_ORDER.forEach((t) => (buckets[t] = []));
+  pool.forEach((s) => {
+    const tier = TIER_ORDER.includes(s.n.popularityTier) ? s.n.popularityTier : "unknown_popularity";
+    buckets[tier].push(s);
+  });
+
+  const picked = [];
+  /* 1ère passe : jusqu'au quota cible de chaque tier (clampé pour ne
+     jamais dépasser `limit` malgré les arrondis indépendants) */
+  TIER_ORDER.forEach((t) => {
+    const target = Math.min(Math.round((dist[t] / 100) * limit), limit - picked.length);
+    picked.push(...buckets[t].splice(0, target));
+  });
+  /* 2e passe : un tier trop petit pour son quota -> on comble avec les
+     tiers voisins (dans l'ordre classic -> ... -> unknown_popularity)
+     plutôt que de renvoyer moins de résultats que demandé. */
+  let deficit = limit - picked.length;
+  if (deficit > 0) {
+    for (const t of TIER_ORDER) {
+      if (deficit <= 0) break;
+      const take = Math.min(deficit, buckets[t].length);
+      if (take > 0) picked.push(...buckets[t].splice(0, take));
+      deficit -= take;
+    }
+  }
+  /* mélange léger pour ne pas afficher les tiers groupés visuellement */
+  for (let i = picked.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [picked[i], picked[j]] = [picked[j], picked[i]];
+  }
+  return picked.map((s) => s.n);
+}
+
+function generateDemo(f, limit = 20, exclude = null, depth = 0) {
   /* Deduplicate NAMES by name (data.js may contain duplicates) */
   const _seen = new Set();
   const scored = NAMES.filter(n => {
@@ -917,7 +977,12 @@ function generateDemo(f, limit = 20, exclude = null) {
     .filter((s) => !s.hardFail && !(exclude && exclude.has(s.n.name)))
     .sort((a, b) => b.score - a.score);
   pool = shuffleByScore(pool);
-  return pool.slice(0, limit).map((s) => s.n);
+
+  /* Le filtre explicite "style = rare" doit basculer immédiatement vers
+     une distribution orientée rare/very_rare, sans forcer l'utilisateur
+     à traverser classic/established d'abord. */
+  const effectiveDepth = f.style === "rare" ? Math.max(depth, 2) : depth;
+  return pickProgressive(pool, limit, effectiveDepth);
 }
 
 function shuffleByScore(arr) {
@@ -1184,7 +1249,7 @@ function renderResults(list, title) {
    (pas d'IA, pas d'appel réseau : filtrage + tri local sur data.js). */
 const SEARCHING_PHASE_MS = 800;
 
-function showSearchingState() {
+function showSearchingState(deep = false) {
   const wrap = document.getElementById("results");
   wrap.innerHTML = `
     <div class="searching">
@@ -1193,7 +1258,7 @@ function showSearchingState() {
     </div>`;
   const textEl = document.getElementById("searchingText");
   const swapTimer = setTimeout(() => {
-    if (textEl.isConnected) textEl.textContent = t("gen_searching_2");
+    if (textEl.isConnected) textEl.textContent = t(deep ? "gen_searching_2_deep" : "gen_searching_2");
   }, SEARCHING_PHASE_MS);
   return () => clearTimeout(swapTimer); /* annule le swap si les résultats arrivent avant */
 }
@@ -1211,27 +1276,35 @@ function initForm() {
     submitBtn.disabled = true;
     submitBtn.textContent = t("f_submit_loading");
 
-    const cancelSwap = showSearchingState();
+    const f = readFilters();
+    lastSurname = f.surname;
+    /* ── Génération progressive : on exclut les noms déjà montrés et on
+       augmente la profondeur tant que la recherche (signature de filtres)
+       reste la même ── */
+    const sig = filterSignature(f);
+    if (sig !== _genFilSig) {
+      /* Les filtres ont changé → on repart de zéro */
+      _genShown  = new Set();
+      _genFilSig = sig;
+      _genDepth  = 0;
+    } else {
+      _genDepth = Math.min(_genDepth + 1, 3);
+    }
+    const effectiveDepth = f.style === "rare" ? Math.max(_genDepth, 2) : _genDepth;
+
+    const cancelSwap = showSearchingState(effectiveDepth >= 2);
 
     setTimeout(() => {
       cancelSwap();
-      const f = readFilters();
-      lastSurname = f.surname;
-      /* ── Génération progressive : on exclut les noms déjà montrés ── */
-      const sig = filterSignature(f);
-      if (sig !== _genFilSig) {
-        /* Les filtres ont changé → on repart de zéro */
-        _genShown  = new Set();
-        _genFilSig = sig;
-      }
 
-      let results = generateDemo(f, 20, _genShown); // ← mode démo
+      let results = generateDemo(f, 20, _genShown, effectiveDepth); // ← mode démo
 
       if (!results.length && _genShown.size > 0) {
         /* Pool épuisé → réinitialiser silencieusement et recommencer */
         _genShown  = new Set();
         _genFilSig = sig;
-        results    = generateDemo(f, 20);
+        _genDepth  = 0;
+        results    = generateDemo(f, 20, null, 0);
         showToast(lang === "fr"
           ? "Vous avez vu tous les prénoms correspondants — on recommence !"
           : "You've seen all matching names — starting over!");
