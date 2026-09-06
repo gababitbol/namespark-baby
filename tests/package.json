@@ -1,0 +1,17 @@
+{
+  "name": "namespark-agents-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tests automatisés multi-agents pour namespark.baby",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:couple": "playwright test --grep 'couple'",
+    "test:famille": "playwright test --grep 'famille'",
+    "test:double": "playwright test --grep 'double'",
+    "report": "playwright show-report test-results/html"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

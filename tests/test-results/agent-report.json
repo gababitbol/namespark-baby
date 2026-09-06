@@ -1,0 +1,50 @@
+{
+  "passed": 1,
+  "failed": 1,
+  "unexpected": 0,
+  "duration": 20.9,
+  "results": [
+    {
+      "scenario": "🥂 Scénario couple — Sophie & Thomas",
+      "title": "[Sophie] S'inscrit et crée une décision couple",
+      "status": "passed",
+      "duration": 4219,
+      "errors": [],
+      "unexpected": []
+    },
+    {
+      "scenario": "🥂 Scénario couple — Sophie & Thomas",
+      "title": "[Thomas] Rejoint via lien et vote sur tous les prénoms",
+      "status": "failed",
+      "duration": 15766,
+      "errors": [
+        "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded."
+      ],
+      "unexpected": []
+    },
+    {
+      "scenario": "🥂 Scénario couple — Sophie & Thomas",
+      "title": "[Thomas] Tente de voter deux fois sur le même prénom — upsert attendu, pas d'erreur",
+      "status": "skipped",
+      "duration": 0,
+      "errors": [],
+      "unexpected": []
+    },
+    {
+      "scenario": "🥂 Scénario couple — Sophie & Thomas",
+      "title": "[Sophie] Rouvre sa décision et voit les votes de Thomas",
+      "status": "skipped",
+      "duration": 0,
+      "errors": [],
+      "unexpected": []
+    },
+    {
+      "scenario": "🥂 Scénario couple — Sophie & Thomas",
+      "title": "[Thomas] Revient via le lien — ses votes doivent être rechargés depuis Supabase",
+      "status": "skipped",
+      "duration": 0,
+      "errors": [],
+      "unexpected": []
+    }
+  ]
+}

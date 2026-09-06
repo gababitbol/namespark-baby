@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rapport agents — NameSpark Baby</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;padding:32px 24px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#fbf9f6;color:#1f1b16;}
+    h1{font-size:22px;font-weight:700;margin:0 0 4px;}
+    .sub{font-size:13px;color:#9c9388;margin:0 0 28px;}
+    .summary{display:flex;gap:16px;margin-bottom:28px;flex-wrap:wrap;}
+    .stat{background:#fff;border:1px solid #ece4da;border-radius:12px;padding:14px 20px;min-width:120px;}
+    .stat-num{font-size:28px;font-weight:800;}
+    .stat-label{font-size:11px;color:#9c9388;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+    .green{color:#166534;} .red{color:#991b1b;} .amber{color:#92400e;}
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #ece4da;border-radius:12px;overflow:hidden;}
+    th{background:#f4efe9;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9c9388;text-align:left;}
+    tr+tr{border-top:1px solid #f4efe9;}
+    h2{font-size:16px;font-weight:700;margin:28px 0 10px;}
+  </style>
+</head>
+<body>
+  <h1>🤖 Rapport agents — NameSpark Baby</h1>
+  <p class="sub">Généré le 04/09/2026 13:50:47 · Durée totale : 20.9s</p>
+
+  <div class="summary">
+    <div class="stat"><div class="stat-num green">1</div><div class="stat-label">Réussis</div></div>
+    <div class="stat"><div class="stat-num red">1</div><div class="stat-label">Échoués</div></div>
+    <div class="stat"><div class="stat-num amber">0</div><div class="stat-label">Comportements inattendus</div></div>
+  </div>
+
+  <h2>Par scénario</h2>
+  <table>
+    <thead><tr><th>Scénario</th><th>Réussis</th><th>Échoués</th></tr></thead>
+    <tbody><tr>
+        <td style="padding:8px 14px;font-size:13px;color:#1f1b16;">🥂 Scénario couple — Sophie &amp; Thomas</td>
+        <td style="padding:8px 14px;font-size:13px;color:#166534;">1 ✅</td>
+        <td style="padding:8px 14px;font-size:13px;color:#991b1b;">4 ❌</td>
+      </tr></tbody>
+  </table>
+
+  <h2>Détail par test</h2>
+  <table>
+    <thead><tr><th>Statut</th><th>Test</th><th>Durée</th></tr></thead>
+    <tbody>
+        <tr style="background:#f0fdf4;">
+          <td style="padding:10px 14px;font-size:13px;color:#166534;font-weight:700;">✅ PASSED</td>
+          <td style="padding:10px 14px;font-size:13px;color:#1f1b16;">[Sophie] S'inscrit et crée une décision couple</td>
+          <td style="padding:10px 14px;font-size:12px;color:#9c9388;text-align:right;white-space:nowrap;">4.2s</td>
+        </tr>
+        <tr style="background:#fef2f2;">
+          <td style="padding:10px 14px;font-size:13px;color:#991b1b;font-weight:700;">❌ FAILED</td>
+          <td style="padding:10px 14px;font-size:13px;color:#1f1b16;">[Thomas] Rejoint via lien et vote sur tous les prénoms<pre style="margin:6px 0 0;font-size:11px;color:#991b1b;background:#fef2f2;padding:8px;border-radius:6px;overflow-x:auto;white-space:pre-wrap;">TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.</pre></td>
+          <td style="padding:10px 14px;font-size:12px;color:#9c9388;text-align:right;white-space:nowrap;">15.8s</td>
+        </tr>
+        <tr style="background:#fffbeb;">
+          <td style="padding:10px 14px;font-size:13px;color:#92400e;font-weight:700;">⚠️ SKIPPED</td>
+          <td style="padding:10px 14px;font-size:13px;color:#1f1b16;">[Thomas] Tente de voter deux fois sur le même prénom — upsert attendu, pas d'erreur</td>
+          <td style="padding:10px 14px;font-size:12px;color:#9c9388;text-align:right;white-space:nowrap;">0.0s</td>
+        </tr>
+        <tr style="background:#fffbeb;">
+          <td style="padding:10px 14px;font-size:13px;color:#92400e;font-weight:700;">⚠️ SKIPPED</td>
+          <td style="padding:10px 14px;font-size:13px;color:#1f1b16;">[Sophie] Rouvre sa décision et voit les votes de Thomas</td>
+          <td style="padding:10px 14px;font-size:12px;color:#9c9388;text-align:right;white-space:nowrap;">0.0s</td>
+        </tr>
+        <tr style="background:#fffbeb;">
+          <td style="padding:10px 14px;font-size:13px;color:#92400e;font-weight:700;">⚠️ SKIPPED</td>
+          <td style="padding:10px 14px;font-size:13px;color:#1f1b16;">[Thomas] Revient via le lien — ses votes doivent être rechargés depuis Supabase</td>
+          <td style="padding:10px 14px;font-size:12px;color:#9c9388;text-align:right;white-space:nowrap;">0.0s</td>
+        </tr></tbody>
+  </table>
+</body>
+</html>
