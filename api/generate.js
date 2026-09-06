@@ -41,10 +41,15 @@ function catalogue() {
   if (!_cat) {
     const INDEX = loadJson("names-index.json");
     const BY_NAME = new Map();
-    for (const n of INDEX) if (!BY_NAME.has(n.name)) BY_NAME.set(n.name, n);
+    const BY_SLUG = new Map();
+    for (const n of INDEX) {
+      if (!BY_NAME.has(n.name)) BY_NAME.set(n.name, n);
+      if (!BY_SLUG.has(n.slug)) BY_SLUG.set(n.slug, n);
+    }
     _cat = {
       INDEX,
       BY_NAME,
+      BY_SLUG,
       DETAIL: loadJson("names-detail.json"),
       ORIGINS: new Set(INDEX.map((n) => n.origin)),
     };
@@ -153,7 +158,7 @@ function modeGenerate(body, cat) {
 }
 
 function modeHydrate(body, cat) {
-  const { BY_NAME, DETAIL, INDEX } = cat;
+  const { BY_NAME, BY_SLUG, DETAIL, INDEX } = cat;
   const raw = Array.isArray(body.names) ? body.names.slice(0, HYDRATE_MAX) : [];
   const wantDetail = body.detail === true || body.detail === 1 || body.detail === "1";
 
@@ -164,13 +169,23 @@ function modeHydrate(body, cat) {
     if (n) out.push(wantDetail ? toDetail(n, DETAIL) : toCard(n, DETAIL));
   }
 
+  /* Résolution par slug : le routage client #/prenom/<slug> en dépend,
+     et sans data.js le navigateur ne peut plus faire la correspondance. */
+  if (Array.isArray(body.slugs)) {
+    for (const sl of body.slugs.slice(0, HYDRATE_MAX)) {
+      if (typeof sl !== "string" || !sl || sl.length > MAX_NAME_LEN) continue;
+      const n = BY_SLUG.get(sl);
+      if (n && !out.some((x) => x.name === n.name)) {
+        out.push(wantDetail ? toDetail(n, DETAIL) : toCard(n, DETAIL));
+      }
+    }
+  }
+
   const result = { names: out };
   /* Prénoms similaires : la fiche Signification a besoin de la fiche
      ET de ses voisins en un seul aller-retour. */
   if (wantDetail && typeof body.similarFor === "string" && body.similarFor.length <= MAX_NAME_LEN) {
-    result.similar = getSimilar(INDEX, body.similarFor, SIMILAR_LIMIT).map((n) => ({
-      name: n.name, slug: n.slug, hasPage: n.hasPage,
-    }));
+    result.similar = getSimilar(INDEX, body.similarFor, SIMILAR_LIMIT).map((n) => toCard(n, DETAIL));
   }
   return result;
 }

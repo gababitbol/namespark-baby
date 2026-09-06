@@ -989,6 +989,13 @@ function pickProgressive(pool, limit, depth) {
   return picked.map((s) => s.n);
 }
 
+/* ⚠️ generateDemo / getSimilarDemo ne sont PLUS appelés par l'interface :
+   la génération se fait côté serveur (/api/generate). Ils sont conservés
+   ici comme IMPLÉMENTATION DE RÉFÉRENCE — tools/parity-check.js les
+   extrait de ce fichier et vérifie que api/_ranking.js produit
+   exactement les mêmes résultats, à graine aléatoire égale. Les
+   supprimer ferait sauter ce filet de sécurité. Ils s'exécutent en Node
+   avec data.js chargé par le harnais, pas dans le navigateur. */
 function generateDemo(f, limit = 20, exclude = null, depth = 0) {
   /* Deduplicate NAMES by name (data.js may contain duplicates) */
   const _seen = new Set();
@@ -1223,9 +1230,10 @@ function wireCards(container, scrollTarget = "generateur") {
 
   // Similaires
   container.querySelectorAll("[data-similar]").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const name = btn.dataset.similar;
-      const similar = getSimilarDemo(name);
+      const similar = await fetchSimilar(name);
+      if (!similar.length) return;
       renderResults(similar, t("similar_title")(name));
       /* Scroll vers le titre des résultats, pas le haut du générateur */
       document.querySelector(".results-head")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1309,6 +1317,24 @@ function showSearchingState(deep = false) {
     if (textEl.isConnected) textEl.textContent = t(deep ? "gen_searching_2_deep" : "gen_searching_2");
   }, SEARCHING_PHASE_MS);
   return () => clearTimeout(swapTimer); /* annule le swap si les résultats arrivent avant */
+}
+
+/* Prénoms similaires via /api/names (mode hydrate). Alimente le cache
+   au passage. Renvoie [] si l'API échoue — l'appelant n'affiche alors
+   rien plutôt que des résultats inventés. */
+async function fetchSimilar(name) {
+  try {
+    const res = await fetch("/api/names", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ names: [name], detail: true, similarFor: name }),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    cacheNames(data.names);
+    cacheNames(data.similar);
+    return Array.isArray(data.similar) ? data.similar : [];
+  } catch { return []; }
 }
 
 /* Appelle /api/generate. Renvoie { names, reset } ou null en cas
@@ -1458,9 +1484,11 @@ function initPopular() {
     (name) => `<button class="chip" data-pop="${name}">${name}</button>`
   ).join("");
   wrap.querySelectorAll("[data-pop]").forEach((chip) => {
-    chip.addEventListener("click", () => {
+    chip.addEventListener("click", async () => {
       const name = chip.dataset.pop;
-      renderResults(getSimilarDemo(name), t("similar_title")(name));
+      const similar = await fetchSimilar(name);
+      if (!similar.length) return;
+      renderResults(similar, t("similar_title")(name));
       document.getElementById("generateur").scrollIntoView({ behavior: "smooth" });
     });
   });
@@ -4039,37 +4067,41 @@ function sigSlug(name) {
   return name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
              .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
-let _sigIndex = null;      // [{ name, norm, slug, ref }]
-let _sigBySlug = null;     // Map slug -> name
 let currentSigName = null; // prénom actuellement affiché (pour re-render i18n)
 
-function buildSigIndex() {
-  if (_sigIndex) return;
-  _sigIndex = [];
-  _sigBySlug = new Map();
-  const seen = new Set();
-  for (const n of NAMES) {
-    const key = n.name.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    const norm = n.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-    const slug = sigSlug(n.name);
-    _sigIndex.push({ name: n.name, norm, slug, ref: n });
-    if (!_sigBySlug.has(slug)) _sigBySlug.set(slug, n.name);
-  }
-}
+/* Prénoms similaires de la fiche courante, alimentés par /api/names.
+   Remplace le balayage local de toute la base. */
+let _sigSimilar = new Map();   // nom -> [cartes similaires]
 
-function sigSearch(q, limit = 24) {
-  buildSigIndex();
-  const nq = q.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
-  if (!nq) return [];
-  const starts = [], contains = [];
-  for (const e of _sigIndex) {
-    if (e.norm.startsWith(nq)) starts.push(e);
-    else if (e.norm.includes(nq)) contains.push(e);
-    // no early break — we must scan all entries to collect both starts and contains
-  }
-  return starts.concat(contains).slice(0, limit);
+/* Autocomplétion via /api/search.
+   Deux verrous complémentaires contre les réponses désordonnées quand
+   l'utilisateur tape vite :
+     - un numéro de séquence : seule la réponse de la DERNIÈRE requête
+       émise est appliquée (c'est ce qui garantit la correction — une
+       requête annulée peut malgré tout se résoudre) ;
+     - un AbortController, qui coupe la requête en vol (économie de
+       bande passante, pas une garantie de correction à lui seul). */
+let _searchSeq = 0;
+let _searchAbort = null;
+/* Sentinelle distincte de "aucun résultat" : une réponse périmée doit
+   être IGNORÉE, surtout pas rendue — sinon elle efface les suggestions
+   fraîches déjà affichées. */
+const STALE = Symbol("stale");
+
+async function sigSearchRemote(q) {
+  const seq = ++_searchSeq;
+  if (_searchAbort) _searchAbort.abort();
+  const ctrl = new AbortController();
+  _searchAbort = ctrl;
+  try {
+    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&lang=${encodeURIComponent(lang)}`,
+                            { signal: ctrl.signal });
+    if (seq !== _searchSeq) return STALE;  /* une frappe plus récente a pris la main */
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (seq !== _searchSeq) return STALE;   /* re-vérifié après le parsing */
+    return Array.isArray(data.results) ? data.results : null;
+  } catch { return seq !== _searchSeq ? STALE : null; }
 }
 
 function renderSigDetail(name) {
@@ -4093,7 +4125,7 @@ function renderSigDetail(name) {
   const pron = n.pronunciation
     ? `<div class="sig-row"><span class="k">${t("sig_pron")}</span><span class="v sig-pron">${n.pronunciation}</span></div>` : "";
 
-  const similar = getSimilarDemo(name, 6);
+  const similar = _sigSimilar.get(name) || [];
   const similarHTML = similar.length ? `
     <div class="sig-similar">
       <h4>${t("sig_similar")}</h4>
@@ -4137,11 +4169,18 @@ function renderSigDetail(name) {
 
 function renderSigCurrent() { if (currentSigName) renderSigDetail(currentSigName); }
 
-function selectSigName(name, opts = {}) {
+async function selectSigName(name, opts = {}) {
   const input = document.getElementById("sigInput");
   const sug = document.getElementById("sigSuggest");
   if (input) input.value = name;
   if (sug) { sug.hidden = true; sug.innerHTML = ""; }
+
+  /* La fiche a besoin des champs détaillés (thèmes, variantes) et de
+     ses prénoms proches : un seul aller-retour pour les deux. */
+  if (!_sigSimilar.has(name) || !nameFromCache(name)) {
+    const similar = await fetchSimilar(name);
+    _sigSimilar.set(name, similar);
+  }
   renderSigDetail(name);
   const slug = sigSlug(name);
   if (location.hash !== "#/prenom/" + slug) {
@@ -4156,28 +4195,45 @@ function initSignification() {
   const input = document.getElementById("sigInput");
   const sug = document.getElementById("sigSuggest");
   if (!input || !sug) return;
-  buildSigIndex();
 
-  const showSuggest = () => {
-    const q = input.value.trim();
-    const res = sigSearch(q, 24);
-    if (!res.length) { sug.hidden = true; sug.innerHTML = ""; return; }
-    sug.innerHTML = res.map((e) => {
-      const o = (t("origins") || {})[e.ref.origin] || e.ref.origin;
-      const m = (e.ref.meaning && (e.ref.meaning[lang] || e.ref.meaning.fr)) || "";
-      return `<li role="option" data-name="${e.name}"><span class="s-name">${e.name}</span><span class="s-meta">${o} — ${m}</span></li>`;
+  let _lastResults = [];
+
+  const renderSuggest = (results) => {
+    _lastResults = results || [];
+    if (!_lastResults.length) { sug.hidden = true; sug.innerHTML = ""; return; }
+    sug.innerHTML = _lastResults.map((e) => {
+      const o = (t("origins") || {})[e.origin] || e.origin;
+      return `<li role="option" data-name="${e.name}"><span class="s-name">${e.name}</span><span class="s-meta">${o} — ${e.meaning || ""}</span></li>`;
     }).join("");
     sug.hidden = false;
     sug.querySelectorAll("li").forEach((li) =>
       li.addEventListener("mousedown", (ev) => { ev.preventDefault(); selectSigName(li.getAttribute("data-name")); }));
   };
 
-  input.addEventListener("input", showSuggest);
-  input.addEventListener("focus", () => { if (input.value.trim()) showSuggest(); });
-  input.addEventListener("keydown", (e) => {
+  const showSuggest = async () => {
+    const q = input.value.trim();
+    if (!q) { renderSuggest([]); return; }
+    const res = await sigSearchRemote(q);
+    if (res === STALE) return;  /* périmé : on ne touche pas à l'affichage */
+    renderSuggest(res);
+  };
+
+  /* Debounce : on n'interroge pas le serveur à chaque frappe. */
+  let _sugTimer = null;
+  const showSuggestDebounced = () => {
+    clearTimeout(_sugTimer);
+    _sugTimer = setTimeout(showSuggest, 200);
+  };
+
+  input.addEventListener("input", showSuggestDebounced);
+  input.addEventListener("focus", () => { if (input.value.trim()) showSuggestDebounced(); });
+  input.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
-      const res = sigSearch(input.value.trim(), 1);
-      if (res.length) selectSigName(res[0].name);
+      e.preventDefault();
+      /* On privilégie la suggestion déjà affichée ; sinon on interroge. */
+      if (_lastResults.length) { selectSigName(_lastResults[0].name); return; }
+      const res = await sigSearchRemote(input.value.trim());
+      if (res && res !== STALE && res.length) selectSigName(res[0].name);
     } else if (e.key === "Escape") { sug.hidden = true; }
   });
   document.addEventListener("click", (e) => {
@@ -4185,11 +4241,26 @@ function initSignification() {
   });
 
   // Deep-link : #/prenom/<slug>
-  const routeFromHash = () => {
+  /* Le navigateur n'a plus la base pour faire slug -> prénom :
+     c'est le serveur qui résout. */
+  const routeFromHash = async () => {
     const m = location.hash.match(/^#\/prenom\/(.+)$/);
     if (!m) return false;
-    const name = _sigBySlug.get(decodeURIComponent(m[1]));
-    if (name) { selectSigName(name, { noScroll: false }); return true; }
+    const slug = decodeURIComponent(m[1]);
+    try {
+      const res = await fetch("/api/names", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slugs: [slug], detail: true }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      cacheNames(data.names);
+      if (data.names && data.names.length) {
+        selectSigName(data.names[0].name, { noScroll: false });
+        return true;
+      }
+    } catch { /* silencieux : deep-link non résolu */ }
     return false;
   };
   window.addEventListener("hashchange", routeFromHash);
