@@ -2,6 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/generate.js": { "includeFiles": "data/**" },
+    "api/names.js":    { "includeFiles": "data/**" },
+    "api/search.js":   { "includeFiles": "data/**" }
+  },
   "redirects": [
     { "source": "/vote/:id",   "destination": "/?invite=:id",      "permanent": false },
     { "source": "/family/:id", "destination": "/?familyVote=:id",   "permanent": false }
