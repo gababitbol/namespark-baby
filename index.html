@@ -888,8 +888,11 @@
   <!-- Storage abstrait doit être chargé AVANT app.js -->
   <!-- ?v= : cache-busting au déploiement (incrémenter à chaque release) -->
   <script src="storage.js?v=21"></script>
-  <!-- data.js et app.js (data.js en premier) -->
-  <script src="data.js?v=34"></script>
-  <script src="app.js?v=41"></script>
+  <!-- Le catalogue de prénoms n'est plus envoyé au navigateur : il vit
+       côté serveur et n'est interrogé qu'à la demande via /api/generate,
+       /api/names et /api/search. data.js reste dans le dépôt comme source
+       de génération (pages SEO, index serveur), mais n'est plus chargé.
+       Gain mesuré : 362 Ko transférés en moins à chaque première visite. -->
+  <script src="app.js?v=42"></script>
 </body>
 </html>
