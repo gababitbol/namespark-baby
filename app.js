@@ -749,6 +749,28 @@ function namesFromCache(list) { return (list || []).map((n) => _nameCache.get(n)
 /* Récupère du serveur les prénoms absents du cache, par lots.
    Renvoie false si l'API a échoué — l'appelant affiche alors un état
    d'erreur plutôt que du contenu incomplet. */
+/* Hydrate tout ce que le navigateur a stocké en local sous forme de
+   simples chaînes : favoris, historique de générations, comparaisons.
+   Sans cela, une fois data.js retiré du client, une session revenant
+   sur le site afficherait des favoris vides. Un seul appel groupé au
+   démarrage, puis tout vient du cache. */
+async function hydrateStoredNames() {
+  const wanted = new Set(favorites);
+  try { (loadHistory() || []).forEach((e) => (e.results || []).forEach((n) => wanted.add(n))); } catch {}
+  try {
+    (loadComparisons() || []).forEach((c) => {
+      const list = Array.isArray(c) ? c : (c && c.names) || [];
+      list.forEach((n) => wanted.add(n));
+    });
+  } catch {}
+  if (!wanted.size) return;
+  const ok = await ensureNames([...wanted]);
+  if (!ok) return;
+  /* Re-rendu des surfaces qui dépendaient de ces prénoms. */
+  if (favorites.size > 0) renderFavorites();
+  updateSelPanel();
+}
+
 async function ensureNames(list, opts = {}) {
   const missing = [...new Set((list || []).filter(
     (n) => typeof n === "string" && n && !_nameCache.has(n)))];
@@ -1897,7 +1919,7 @@ function _dismissHeartHint() {
 /* =============================================================
    22) PRÉ-REMPLISSAGE QUERY STRING
    ============================================================= */
-function applyQueryPrefill() {
+async function applyQueryPrefill() {
   const p = new URLSearchParams(location.search);
 
   // Liens de vote (couple/famille) : gérés par le module "Décider ensemble" (voir init)
@@ -1906,6 +1928,9 @@ function applyQueryPrefill() {
   // Chargement d'une sélection partagée
   if (p.get("share")) {
     const names = p.get("share").split(",");
+    /* On vérifie que chaque prénom partagé existe réellement — le
+       serveur est la seule source de vérité une fois data.js retiré. */
+    await ensureNames(names.map((n) => n.trim()));
     names.forEach((name) => {
       const trimmed = name.trim();
       if (trimmed && nameFromCache(trimmed)) favorites.add(trimmed);
@@ -3192,7 +3217,7 @@ async function _joinAndShowPartnerVote(decision, decisionId) {
     email: currentUser?.email || null,
   });
   decideState = { decisionId, role: "partner", participantId, mode: "couple", status: decision.status || 'open' };
-  renderDecideVote(decision);
+  await renderDecideVote(decision);
   showDecideStep("decideVote");
   document.getElementById("decideOverlay")?.classList.add("open");
   document.body.style.overflow = "hidden";
@@ -3264,7 +3289,10 @@ async function handlePartnerRegSubmit(e) {
 }
 
 /* ---- Rendu de la liste de vote (partenaire OU votant famille) ---- */
-function renderDecideVote(decision) {
+async function renderDecideVote(decision) {
+  /* Sans data.js, les prénoms d'une décision (reçus par lien de vote)
+     ne sont pas encore connus du navigateur : on les hydrate d'abord. */
+  await ensureNames(decision.items);
   const isFamily = decideState.mode === "family";
   const isClosed = decision.status === 'closed';
 
@@ -3364,6 +3392,7 @@ async function showDecideResults() {
     const fn  = t("notif_match_found");
     const msg = typeof fn === "function" ? fn(matchs.length) : fn;
     addNotification("match_found", msg);
+    await ensureNames(matchs);
     const names = namesFromCache(matchs);
     grid.innerHTML = names.map((n, i) => nameCardHTML(n, i, lastSurname)).join("");
     wireCards(grid, "generateur");
@@ -3813,7 +3842,7 @@ async function handleFamilyNameSubmit(e) {
     decideState.participantId = pid;
     /* La décision est déjà en cache depuis openFamilyVoteAsVoter */
     const decision = await getDecision(decideState.decisionId);
-    renderDecideVote(decision);
+    await renderDecideVote(decision);
     showDecideStep("decideVote");
   } catch (err) {
     console.error("[NameSpark] handleFamilyNameSubmit:", err);
@@ -4011,6 +4040,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadFavorites();
   loadUser();                       // ← charge le profil utilisateur
+  /* Hydratation des prénoms stockés localement (favoris, historique,
+     comparaisons). No-op tant que data.js pré-remplit le cache. */
+  hydrateStoredNames();
   lastSurname = getSurname() || currentUser?.surname || "";
   const surnameInput = document.getElementById("surname");
   if (surnameInput && lastSurname) surnameInput.value = lastSurname;
