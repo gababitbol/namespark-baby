@@ -719,6 +719,50 @@ let _genShown   = new Set(); /* prénoms déjà affichés dans la session filtre
 let _genFilSig  = "";        /* signature JSON des filtres de la dernière génération */
 let _genDepth   = 0;         /* nombre de générations successives sur la même recherche */
 let _genInProgress = false;  /* garde contre le double-clic pendant l'état de recherche */
+
+/* =============================================================
+   CACHE DE PRÉNOMS
+   -------------------------------------------------------------
+   L'app ne stocke que des CHAÎNES de prénoms (favoris, historique,
+   votes, liens de partage). Pour les afficher, il faut retrouver
+   l'objet complet. Historiquement c'était NAMES.find(...) sur la base
+   chargée dans le navigateur ; ce cache est l'indirection qui permet
+   de basculer cette source vers /api/names sans toucher aux 12
+   endroits qui en dépendent.
+
+   Tant que data.js est chargé, le cache est intégralement pré-rempli
+   au démarrage : aucun appel réseau, comportement inchangé.
+   ============================================================= */
+const _nameCache = new Map();
+
+function cacheNames(list) {
+  if (!Array.isArray(list)) return;
+  for (const n of list) if (n && n.name && !_nameCache.has(n.name)) _nameCache.set(n.name, n);
+}
+function nameFromCache(name) { return _nameCache.get(name) || null; }
+function namesFromCache(list) { return (list || []).map((n) => _nameCache.get(n)).filter(Boolean); }
+
+/* Récupère du serveur les prénoms absents du cache, par lots.
+   Renvoie false si l'API a échoué — l'appelant affiche alors un état
+   d'erreur plutôt que du contenu incomplet. */
+async function ensureNames(list, opts = {}) {
+  const missing = [...new Set((list || []).filter(
+    (n) => typeof n === "string" && n && !_nameCache.has(n)))];
+  if (!missing.length) return true;
+  try {
+    for (let i = 0; i < missing.length; i += 300) {
+      const res = await fetch("/api/names", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ names: missing.slice(i, i + 300), detail: !!opts.detail }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      cacheNames(data.names);
+    }
+    return true;
+  } catch { return false; }
+}
 let _heartHintShown    = false; /* popup incitation favoris — une seule fois par session */
 let _heartHintSeenCount = 0;   /* nb de cartes vues sans favori */
 
@@ -1383,7 +1427,7 @@ function renderFavorites() {
   const printEl = document.getElementById("printResults");
   if (printEl) {
     const list = [...favorites]
-      .map((n) => NAMES.find((x) => x.name === n))
+      .map((n) => nameFromCache(n))
       .filter(Boolean);
     printEl.innerHTML = list.length
       ? list.map((n, i) => nameCardHTML(n, i, lastSurname, { inFavorites: false })).join("")
@@ -1502,7 +1546,7 @@ function openCompare() {
   addToComparisons([...favorites]); // ← sauvegarde dans l'historique des comparaisons
 
   const list = [...favorites]
-    .map((name) => NAMES.find((n) => n.name === name))
+    .map((name) => nameFromCache(name))
     .filter(Boolean);
 
   const hasSurname = !!lastSurname;
@@ -1767,7 +1811,7 @@ function applyQueryPrefill() {
     const names = p.get("share").split(",");
     names.forEach((name) => {
       const trimmed = name.trim();
-      if (trimmed && NAMES.some((n) => n.name === trimmed)) favorites.add(trimmed);
+      if (trimmed && nameFromCache(trimmed)) favorites.add(trimmed);
     });
     saveFavorites();
 
@@ -2107,7 +2151,7 @@ function renderEspaceDrawer() {
     typeof greetFn === "function" ? greetFn(currentUser.firstName) : "Mon espace";
   document.getElementById("drawerUserEmail").textContent = currentUser.email || "";
 
-  const favList     = [...favorites].map((n) => NAMES.find((x) => x.name === n)).filter(Boolean);
+  const favList     = namesFromCache([...favorites]);
   const history     = loadHistory();
   const comparisons = loadComparisons();
   const allDecisions = (typeof getAllDecisions === "function") ? getAllDecisions() : [];
@@ -2279,7 +2323,7 @@ async function sendEmailFromEspace() {
 }
 
 function loadHistoryEntry(entry) {
-  const names = entry.results.map((n) => NAMES.find((x) => x.name === n)).filter(Boolean);
+  const names = namesFromCache(entry.results);
   renderResults(names, t("drawer_history_from"));
   closeEspace();
   document.getElementById("generateur").scrollIntoView({ behavior: "smooth" });
@@ -2472,7 +2516,7 @@ function initMonEspace() {
 /* ---- Unlock gate — modal "Votre sélection est prête !" ---- */
 function openUnlockModal() {
   const favList = [...favorites]
-    .map((n) => NAMES.find((x) => x.name === n))
+    .map((n) => nameFromCache(n))
     .filter(Boolean);
 
   /* Aperçu des prénoms choisis */
@@ -2587,9 +2631,7 @@ function closeSelection() {
 
 /* ---- Rendu de la page Ma sélection ---- */
 function renderSelectionPage() {
-  const favList = [...favorites]
-    .map((n) => NAMES.find((x) => x.name === n))
-    .filter(Boolean);
+  const favList = namesFromCache([...favorites]);
 
   /* Compteur */
   const countEl = document.getElementById("selPageCount");
@@ -3157,7 +3199,7 @@ function renderDecideVote(decision) {
 
   const wrap = document.getElementById("voteList");
   wrap.innerHTML = decision.items.map((name) => {
-    const n = NAMES.find((x) => x.name === name);
+    const n = nameFromCache(name);
     return `
       <div class="vote-item" data-vote-name="${name}">
         <span class="vote-name">${n ? n.name : name}</span>
@@ -3225,7 +3267,7 @@ async function showDecideResults() {
     const fn  = t("notif_match_found");
     const msg = typeof fn === "function" ? fn(matchs.length) : fn;
     addNotification("match_found", msg);
-    const names = matchs.map((n) => NAMES.find((x) => x.name === n)).filter(Boolean);
+    const names = namesFromCache(matchs);
     grid.innerHTML = names.map((n, i) => nameCardHTML(n, i, lastSurname)).join("");
     wireCards(grid, "generateur");
   }
@@ -3833,6 +3875,14 @@ async function simulateFamilyVotes() {
    27) INIT
    ============================================================= */
 document.addEventListener("DOMContentLoaded", () => {
+  /* Amorçage du cache de prénoms.
+     Tant que data.js est chargé dans le navigateur, on pré-remplit
+     intégralement le cache : aucun appel réseau, comportement
+     strictement identique à l'historique. Quand data.js sera retiré
+     du client, ce bloc ne fera rien et le cache se remplira à la
+     demande via ensureNames() / les réponses de /api/generate. */
+  if (typeof NAMES !== "undefined" && Array.isArray(NAMES)) cacheNames(NAMES);
+
   /* Risque 6 — masque les boutons "Simuler (démo)" en production.
      Activables via ?demo=1 dans l'URL (usage interne uniquement). */
   if (new URLSearchParams(location.search).get("demo") !== "1") {
@@ -3956,7 +4006,7 @@ function sigSearch(q, limit = 24) {
 function renderSigDetail(name) {
   const detail = document.getElementById("sigDetail");
   if (!detail) return;
-  const n = NAMES.find((x) => x.name === name);
+  const n = nameFromCache(name);
   if (!n) {
     detail.innerHTML = `<div class="sig-empty">${t("sig_not_found")} « ${name} ».</div>`;
     currentSigName = null;
