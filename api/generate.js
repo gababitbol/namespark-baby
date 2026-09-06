@@ -2,8 +2,7 @@
    NameSpark Baby — POST /api/generate
    -------------------------------------------------------------
    Génération de prénoms côté serveur. Remplace la génération locale
-   qui obligeait le navigateur à télécharger tout data.js (362 Ko
-   transférés aujourd'hui, ~2 Mo une fois la base à 60k prénoms).
+   qui obligeait le navigateur à télécharger tout data.js.
 
    L'ÉTAT DE SESSION RESTE CÔTÉ CLIENT :
      _genDepth, _genShown, _genFilSig ne migrent pas ici. Le client
@@ -11,60 +10,61 @@
      La fonction reste donc totalement sans état.
 
    La logique de sélection vit dans api/_ranking.js, partagée et
-   verrouillée par tools/parity-check.js (parité stricte avec le
-   code client historique, à graine aléatoire égale).
+   verrouillée par tools/parity-check.js (parité stricte avec le code
+   client historique, à graine aléatoire égale).
+
+   NOTE D'IMPLÉMENTATION : tout le chargement (module de ranking +
+   catalogue JSON) est fait paresseusement DANS le handler, sous
+   try/catch. Une erreur de chemin ou de bundling renvoie ainsi un 500
+   JSON lisible au lieu d'un FUNCTION_INVOCATION_FAILED opaque.
    ============================================================= */
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { generate } from "./_ranking.js";
 
-/* ---------- Chargement du catalogue (une fois par instance) ----------
-   Lecture au niveau module : payée au cold start, puis réutilisée par
-   toutes les invocations chaudes de la même instance.
+const BUILD = "gen-6";
 
-   Le catalogue vit dans api/_data/ : Vercel ne sert PAS publiquement
-   les chemins /api/_* (vérifié en production — 404), donc le fichier
-   n'est jamais téléchargeable par le navigateur. On résout le chemin
-   depuis le module lui-même, avec repli sur cwd selon la disposition
-   du bundle. */
-const HERE = path.dirname(fileURLToPath(import.meta.url));
+const HERE = (() => {
+  try { return path.dirname(fileURLToPath(import.meta.url)); } catch { return ""; }
+})();
 
 function candidatePaths(file) {
-  return [
-    path.join(HERE, "_data", file),
-    path.join(HERE, "..", "api", "_data", file),
-    path.join(process.cwd(), "api", "_data", file),
-    path.join(process.cwd(), "_data", file),
-    path.join("/var/task", "api", "_data", file),
-  ];
+  const out = [];
+  if (HERE) {
+    out.push(path.join(HERE, "_data", file));
+    out.push(path.join(HERE, "..", "api", "_data", file));
+  }
+  out.push(path.join(process.cwd(), "api", "_data", file));
+  out.push(path.join(process.cwd(), "_data", file));
+  out.push(path.join("/var/task", "api", "_data", file));
+  return out;
 }
 
-function loadData(file) {
+function loadJson(file) {
   for (const p of candidatePaths(file)) {
-    try { if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, "utf8")); } catch { /* suivant */ }
+    try { if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, "utf8")); } catch { /* candidat suivant */ }
   }
   const err = new Error(`Catalogue introuvable : ${file}`);
   err.tried = candidatePaths(file);
   throw err;
 }
 
-/* Chargement paresseux : une seule fois par instance, mais une erreur
-   de chemin renvoie un 500 propre et diagnosticable au lieu de faire
-   échouer l'invocation entière (FUNCTION_INVOCATION_FAILED, illisible
-   sans accès aux logs). */
-let _cache = null;
-function catalogue() {
-  if (!_cache) {
-    _cache = { INDEX: loadData("names-index.json"), DETAIL: loadData("names-detail.json") };
+let _boot = null;
+async function boot() {
+  if (!_boot) {
+    const ranking = await import("./_ranking.js");
+    _boot = {
+      generate: ranking.generate,
+      INDEX: loadJson("names-index.json"),
+      DETAIL: loadJson("names-detail.json"),
+    };
+    _boot.ORIGINS = new Set(_boot.INDEX.map((n) => n.origin));
   }
-  return _cache;
+  return _boot;
 }
 
 /* ---------- Validation stricte : listes blanches ---------- */
 const GENDERS = new Set(["boy", "girl", "mixte"]);
-let _origins = null;
-const origins = () => (_origins ||= new Set(catalogue().INDEX.map((n) => n.origin)));
 const STYLES = new Set(["classique", "moderne", "rare", "elegant", "court", "poetique"]);
 const MEANINGS = new Set(["force", "courage", "sagesse", "lumiere", "nature", "liberte", "foi",
   "amour", "paix", "victoire", "joie", "beaute", "espoir", "noblesse", "grace", "prosperite"]);
@@ -76,16 +76,14 @@ const LIMIT = 20;
 const MAX_EXCLUDE = 1000;
 const MAX_NAME_LEN = 60;
 
-function pickEnum(value, allowed) {
-  return typeof value === "string" && allowed.has(value) ? value : "";
-}
+const pickEnum = (v, allowed) => (typeof v === "string" && allowed.has(v) ? v : "");
 
-function sanitizeFilters(raw) {
+function sanitizeFilters(raw, ORIGINS) {
   const f = raw && typeof raw === "object" ? raw : {};
   const letter = typeof f.letter === "string" ? f.letter.trim().toLowerCase().slice(0, 1) : "";
   return {
     gender:  pickEnum(f.gender, GENDERS),
-    origin:  pickEnum(f.origin, origins()),
+    origin:  pickEnum(f.origin, ORIGINS),
     style:   pickEnum(f.style, STYLES),
     meaning: pickEnum(f.meaning, MEANINGS),
     length:  pickEnum(f.length, LENGTHS),
@@ -105,11 +103,10 @@ function sanitizeExclude(raw) {
   return out;
 }
 
-/* ---------- Mise en forme de la réponse ----------
-   On ne renvoie que ce dont nameCardHTML() a besoin. popularityTier et
+/* On ne renvoie que ce dont nameCardHTML() a besoin. popularityTier et
    meaningTags restent internes : ils ne servent pas à l'affichage. */
-function toCard(n) {
-  const d = catalogue().DETAIL[n.name] || {};
+function toCard(n, DETAIL) {
+  const d = DETAIL[n.name] || {};
   return {
     name: n.name,
     gender: n.gender,
@@ -124,18 +121,25 @@ function toCard(n) {
 }
 
 export default async function handler(req, res) {
+  /* Sonde de diagnostic : GET ?ping=1 confirme quel build répond, sans
+     rien charger. */
+  if (req.method === "GET" && req.query && req.query.ping) {
+    return res.status(200).json({ build: BUILD, ok: true });
+  }
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "method_not_allowed" });
   }
 
   try {
+    const { generate, INDEX, DETAIL, ORIGINS } = await boot();
+
     const body = req.body && typeof req.body === "object" ? req.body : {};
-    const filters = sanitizeFilters(body.filters);
+    const filters = sanitizeFilters(body.filters, ORIGINS);
     const depth = Math.min(Math.max(Number.isFinite(+body.depth) ? Math.trunc(+body.depth) : 0, 0), 3);
     const exclude = sanitizeExclude(body.exclude);
 
-    const { INDEX } = catalogue();
     let names = generate(INDEX, filters, LIMIT, exclude, depth);
     let reset = false;
 
@@ -149,18 +153,24 @@ export default async function handler(req, res) {
     }
 
     res.setHeader("Cache-Control", "no-store");
-    return res.status(200).json({ names: names.map(toCard), reset });
+    return res.status(200).json({ names: names.map((n) => toCard(n, DETAIL)), reset });
   } catch (err) {
     console.error("[generate]", err);
     return res.status(500).json({
       error: "generation_failed",
-      detail: String(err && err.message || err),
-      tried: err && err.tried ? err.tried : undefined,
+      build: BUILD,
+      detail: String((err && err.message) || err),
+      stack: String((err && err.stack) || "").split("\n").slice(0, 4),
+      tried: (err && err.tried) || undefined,
       cwd: process.cwd(),
       here: HERE,
       listing: (() => {
-        try { return { here: fs.readdirSync(HERE).slice(0, 40), cwd: fs.readdirSync(process.cwd()).slice(0, 40) }; }
-        catch (e) { return String(e); }
+        try {
+          return {
+            here: HERE ? fs.readdirSync(HERE).slice(0, 30) : null,
+            cwd: fs.readdirSync(process.cwd()).slice(0, 30),
+          };
+        } catch (e) { return String(e); }
       })(),
     });
   }
