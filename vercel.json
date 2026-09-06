@@ -3,9 +3,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "functions": {
-    "api/generate.js": { "includeFiles": "data/**" },
-    "api/names.js":    { "includeFiles": "data/**" },
-    "api/search.js":   { "includeFiles": "data/**" }
+    "api/generate.js": { "includeFiles": "api/_data/**" }
   },
   "redirects": [
     { "source": "/vote/:id",   "destination": "/?invite=:id",      "permanent": false },

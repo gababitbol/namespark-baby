@@ -16,14 +16,31 @@
    ============================================================= */
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { generate } from "../lib/ranking.js";
 
 /* ---------- Chargement du catalogue (une fois par instance) ----------
    Lecture au niveau module : payée au cold start, puis réutilisée par
-   toutes les invocations chaudes de la même instance. */
-const DATA_DIR = path.join(process.cwd(), "data");
-const INDEX = JSON.parse(fs.readFileSync(path.join(DATA_DIR, "names-index.json"), "utf8"));
-const DETAIL = JSON.parse(fs.readFileSync(path.join(DATA_DIR, "names-detail.json"), "utf8"));
+   toutes les invocations chaudes de la même instance.
+
+   Le catalogue vit dans api/_data/ : Vercel ne sert PAS publiquement
+   les chemins /api/_* (vérifié en production — 404), donc le fichier
+   n'est jamais téléchargeable par le navigateur. On résout le chemin
+   depuis le module lui-même, avec repli sur cwd selon la disposition
+   du bundle. */
+function loadData(file) {
+  const candidates = [
+    path.join(path.dirname(fileURLToPath(import.meta.url)), "_data", file),
+    path.join(process.cwd(), "api", "_data", file),
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, "utf8"));
+  }
+  throw new Error(`Catalogue introuvable : ${file} (essayé ${candidates.join(", ")})`);
+}
+
+const INDEX = loadData("names-index.json");
+const DETAIL = loadData("names-detail.json");
 
 /* ---------- Validation stricte : listes blanches ---------- */
 const GENDERS = new Set(["boy", "girl", "mixte"]);

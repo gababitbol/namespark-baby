@@ -22,7 +22,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
-const OUT = path.join(ROOT, "data");
+const OUT = path.join(ROOT, "api", "_data");
 
 /* Doit rester rigoureusement identique à slugify() de build-seo-pages.js
    et à sigSlug() d'app.js — sinon les liens /prenom/<slug> cassent. */

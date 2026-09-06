@@ -185,7 +185,7 @@ console.log("");
    sous-ensemble doit produire EXACTEMENT la même sélection, sinon
    l'allègement du payload introduirait une régression silencieuse. */
 let idxPass = 0, idxFail = 0;
-const idxPath = path.join(ROOT, "data", "names-index.json");
+const idxPath = path.join(ROOT, "api", "_data", "names-index.json");
 if (fs.existsSync(idxPath)) {
   const INDEX = JSON.parse(fs.readFileSync(idxPath, "utf8"));
   if (INDEX.length !== NAMES.length) {
