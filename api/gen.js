@@ -2,7 +2,7 @@
    Aucun import au niveau module : tout est dynamique et sous try/catch,
    pour que chaque couche soit testable isolément via ?t=... */
 
-const BUILD = "bisect-1";
+const BUILD = "bisect-gen";
 
 export default async function handler(req, res) {
   const t = (req.query && req.query.t) || "ping";
