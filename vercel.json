@@ -2,22 +2,61 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "functions": {
-    "api/generate.js": { "includeFiles": "api/_data/**" }
+    "api/generate.js": {
+      "includeFiles": "api/_data/**"
+    }
   },
   "trailingSlash": false,
   "redirects": [
-    { "source": "/vote/:id",   "destination": "/?invite=:id",      "permanent": false },
-    { "source": "/family/:id", "destination": "/?familyVote=:id",   "permanent": false }
+    {
+      "source": "/vote/:id",
+      "destination": "/?invite=:id",
+      "permanent": false
+    },
+    {
+      "source": "/family/:id",
+      "destination": "/?familyVote=:id",
+      "permanent": false
+    }
   ],
   "crons": [
-    { "path": "/api/keepalive", "schedule": "0 9 * * *" }
+    {
+      "path": "/api/keepalive",
+      "schedule": "0 9 * * *"
+    }
   ],
   "rewrites": [
-    { "source": "/prenom-garcon", "destination": "/seo/prenom-garcon.html" },
-    { "source": "/prenom-fille", "destination": "/seo/prenom-fille.html" },
-    { "source": "/prenom-hebreu", "destination": "/seo/prenom-hebreu.html" },
-    { "source": "/prenom-rare", "destination": "/seo/prenom-rare.html" },
-    { "source": "/prenom-court", "destination": "/seo/prenom-court.html" },
-    { "source": "/prenom-signification-force", "destination": "/seo/prenom-signification-force.html" }
+    {
+      "source": "/api/names",
+      "destination": "/api/generate?mode=hydrate"
+    },
+    {
+      "source": "/api/search",
+      "destination": "/api/generate?mode=search"
+    },
+    {
+      "source": "/prenom-garcon",
+      "destination": "/seo/prenom-garcon.html"
+    },
+    {
+      "source": "/prenom-fille",
+      "destination": "/seo/prenom-fille.html"
+    },
+    {
+      "source": "/prenom-hebreu",
+      "destination": "/seo/prenom-hebreu.html"
+    },
+    {
+      "source": "/prenom-rare",
+      "destination": "/seo/prenom-rare.html"
+    },
+    {
+      "source": "/prenom-court",
+      "destination": "/seo/prenom-court.html"
+    },
+    {
+      "source": "/prenom-signification-force",
+      "destination": "/seo/prenom-signification-force.html"
+    }
   ]
 }
