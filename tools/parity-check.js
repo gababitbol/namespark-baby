@@ -21,7 +21,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import * as server from "../lib/ranking.js";
+import * as server from "../api/_ranking.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
@@ -159,7 +159,7 @@ function compare(label, f, depth, exclude) {
   }
 }
 
-console.log("=== HARNAIS DE PARITÉ app.js ↔ lib/ranking.js ===");
+console.log("=== HARNAIS DE PARITÉ app.js ↔ api/_ranking.js ===");
 console.log("Catalogue :", NAMES.length, "prénoms");
 console.log("Cas de test :", cases.length + withExclude.length);
 console.log("");

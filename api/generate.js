@@ -10,14 +10,14 @@
      les gère comme avant et envoie `depth` + `exclude` à chaque appel.
      La fonction reste donc totalement sans état.
 
-   La logique de sélection vit dans lib/ranking.js, partagée et
+   La logique de sélection vit dans api/_ranking.js, partagée et
    verrouillée par tools/parity-check.js (parité stricte avec le
    code client historique, à graine aléatoire égale).
    ============================================================= */
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { generate } from "../lib/ranking.js";
+import { generate } from "./_ranking.js";
 
 /* ---------- Chargement du catalogue (une fois par instance) ----------
    Lecture au niveau module : payée au cold start, puis réutilisée par
