@@ -10,5 +10,5 @@ deploy-check.txt
 # Artefacts serveur de la migration /api/generate — en pause.
 # ⚠️ À RETIRER de ce fichier quand la migration reprendra : les fonctions
 # en ont besoin (via functions.includeFiles dans vercel.json).
-_catalog/
-_lib/
+
+

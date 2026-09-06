@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
+  "functions": {
+    "api/esmtest.js": { "includeFiles": "api/_data/**" }
+  },
   "trailingSlash": false,
   "redirects": [
     { "source": "/vote/:id",   "destination": "/?invite=:id",      "permanent": false },
