@@ -1,0 +1,14 @@
+# Fichiers de développement — ne doivent pas être déployés ni servis publiquement.
+# (Constat : backups/ et tools/ étaient jusqu'ici téléchargeables en production,
+#  dont une copie complète de data.js de 2,8 Mo.)
+backups/
+tools/
+tests/
+test-results/
+deploy-check.txt
+
+# Artefacts serveur de la migration /api/generate — en pause.
+# ⚠️ À RETIRER de ce fichier quand la migration reprendra : les fonctions
+# en ont besoin (via functions.includeFiles dans vercel.json).
+_catalog/
+_lib/
