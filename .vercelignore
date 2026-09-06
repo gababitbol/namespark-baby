@@ -1,14 +1,16 @@
-# Fichiers de développement — ne doivent pas être déployés ni servis publiquement.
-# (Constat : backups/ et tools/ étaient jusqu'ici téléchargeables en production,
-#  dont une copie complète de data.js de 2,8 Mo.)
+# Fichiers de développement — ne doivent pas être déployés ni servis
+# publiquement. (Constat lors de la migration : backups/ et tools/ étaient
+# téléchargeables en production, dont une copie complète de data.js de 2,8 Mo.)
 backups/
 tools/
 tests/
 test-results/
-deploy-check.txt
 
-# Artefacts serveur de la migration /api/generate — en pause.
-# ⚠️ À RETIRER de ce fichier quand la migration reprendra : les fonctions
-# en ont besoin (via functions.includeFiles dans vercel.json).
+# data.js reste dans le DÉPÔT — il sert de source à tools/build-seo-pages.js
+# et tools/build-server-data.js — mais il n'est plus chargé par index.html.
+# Il n'est PAS ignoré ici : le laisser déployé ne coûte rien tant qu'aucune
+# page ne le référence, et l'ignorer romprait les liens éventuels.
 
-
+# NE PAS ignorer api/_data/ : le catalogue serveur y vit et il est embarqué
+# dans la fonction via functions.includeFiles (vercel.json). Vercel ne sert
+# pas publiquement les chemins /api/_* (vérifié en production : 404).
