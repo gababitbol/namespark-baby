@@ -85,6 +85,8 @@ const I18N = {
     gen_searching_1: "Analyse de vos préférences…",
     gen_searching_2: "Recherche parmi nos prénoms…",
     gen_searching_2_deep: "On va un peu plus loin…",
+    gen_error: "La génération n'a pas abouti. Vérifiez votre connexion.",
+    gen_retry: "Réessayer",
     f_submit_loading: "Recherche…",
     /* ---- résultats ---- */
     res_title: "Vos prénoms",
@@ -387,6 +389,8 @@ const I18N = {
     gen_searching_1: "Analysing your preferences…",
     gen_searching_2: "Searching our name collection…",
     gen_searching_2_deep: "Let's dig a little deeper…",
+    gen_error: "The generation didn't go through. Check your connection.",
+    gen_retry: "Try again",
     f_submit_loading: "Searching…",
     res_title: "Your names",
     res_empty: 'Pick your criteria then click "Generate" to discover name ideas.',
@@ -1307,6 +1311,43 @@ function showSearchingState(deep = false) {
   return () => clearTimeout(swapTimer); /* annule le swap si les résultats arrivent avant */
 }
 
+/* Appelle /api/generate. Renvoie { names, reset } ou null en cas
+   d'échec (réseau, 4xx/5xx, JSON invalide) — jamais de résultat
+   partiel ou inventé. */
+async function fetchGenerate(f, depth, exclude) {
+  try {
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filters: {
+          gender: f.gender || "", origin: f.origin || "", style: f.style || "",
+          meaning: f.meaning || "", length: f.length || "", letter: f.letter || "",
+        },
+        depth,
+        exclude,
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && Array.isArray(data.names) ? data : null;
+  } catch { return null; }
+}
+
+/* État d'erreur du générateur : honnête, et réessayable en un clic.
+   Pas de repli sur une base locale — on ne veut pas de résultats
+   différents de ceux du serveur sans le dire. */
+function renderGeneratorError(onRetry) {
+  const wrap = document.getElementById("results");
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <div class="searching">
+      <p>${t("gen_error")}</p>
+      <button class="btn btn-ghost" id="genRetryBtn" type="button">${t("gen_retry")}</button>
+    </div>`;
+  document.getElementById("genRetryBtn")?.addEventListener("click", onRetry, { once: true });
+}
+
 function initForm() {
   const form = document.getElementById("genForm");
   const submitBtn = form.querySelector('[type="submit"]');
@@ -1326,35 +1367,65 @@ function initForm() {
        augmente la profondeur tant que la recherche (signature de filtres)
        reste la même ── */
     const sig = filterSignature(f);
+    let nextDepth;
     if (sig !== _genFilSig) {
       /* Les filtres ont changé → on repart de zéro */
       _genShown  = new Set();
       _genFilSig = sig;
       _genDepth  = 0;
+      nextDepth  = 0;
     } else {
-      _genDepth = Math.min(_genDepth + 1, 3);
+      nextDepth = Math.min(_genDepth + 1, 3);
     }
-    const effectiveDepth = f.style === "rare" ? Math.max(_genDepth, 2) : _genDepth;
+    /* La profondeur n'est validée qu'en cas de succès : une tentative
+       échouée ne doit pas faire progresser la recherche vers les
+       prénoms rares sans avoir rien montré. */
+    const effectiveDepth = f.style === "rare" ? Math.max(nextDepth, 2) : nextDepth;
 
     const cancelSwap = showSearchingState(effectiveDepth >= 2);
 
-    setTimeout(() => {
+    /* L'appel réseau part IMMÉDIATEMENT, en parallèle du délai
+       d'anticipation de ~1,6 s déjà présent. On attend ensuite les deux :
+       tant que la fonction est chaude (~0,35 s), la latence est
+       intégralement absorbée par ce délai et rien ne change pour
+       l'utilisateur. */
+    const apiCall = fetchGenerate(f, effectiveDepth, [..._genShown]);
+    const minDelay = new Promise((r) => setTimeout(r, SEARCHING_PHASE_MS * 2));
+
+    Promise.all([apiCall, minDelay]).then(([payload]) => {
       cancelSwap();
 
-      let results = generateDemo(f, 20, _genShown, effectiveDepth); // ← mode démo
+      const finish = () => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = origBtnText;
+        _genInProgress = false;
+      };
 
-      if (!results.length && _genShown.size > 0) {
-        /* Pool épuisé → réinitialiser silencieusement et recommencer */
+      /* Échec de l'API : message propre + bouton Réessayer. On ne
+         dégrade pas silencieusement et on ne perd pas l'état de session. */
+      if (!payload) {
+        renderGeneratorError(() => form.requestSubmit());
+        finish();
+        return;
+      }
+
+      const results = payload.names || [];
+      cacheNames(results);
+      _genDepth = nextDepth; /* succès → la profondeur progresse */
+
+      /* Pool épuisé : le serveur a déjà régénéré sans exclusion et nous
+         le signale. Même comportement visible qu'avant (remise à zéro
+         des vus + toast), mais en un seul aller-retour. */
+      if (payload.reset) {
         _genShown  = new Set();
         _genFilSig = sig;
         _genDepth  = 0;
-        results    = generateDemo(f, 20, null, 0);
         showToast(lang === "fr"
           ? "Vous avez vu tous les prénoms correspondants — on recommence !"
           : "You've seen all matching names — starting over!");
       }
 
-      results.forEach(n => _genShown.add(n.name));
+      results.forEach((n) => _genShown.add(n.name));
 
       renderResults(results, t("res_title"));
       addToHistory(f, results);            // ← sauvegarde dans l'historique
@@ -1364,10 +1435,8 @@ function initForm() {
 
       document.querySelector(".results-head")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-      submitBtn.disabled = false;
-      submitBtn.textContent = origBtnText;
-      _genInProgress = false;
-    }, SEARCHING_PHASE_MS * 2);
+      finish();
+    });
   });
 
   // Mise à jour des scores en temps réel quand le nom de famille change
