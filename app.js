@@ -944,9 +944,9 @@ function readFilters() {
 /* =============================================================
    8) GÉNÉRATION — MODE DÉMO (LOCAL, SANS API)
    -------------------------------------------------------------
-   👉 À REMPLACER PLUS TARD :
-   Remplacer generateDemo(...) par generateViaBackend(...)
-   quand le backend Vercel sera actif (cf. api/generate.js).
+   ✅ FAIT : la génération passe par /api/generate. generateDemo() est
+   conservée plus bas comme implémentation de référence pour le harnais
+   de parité (tools/parity-check.js), pas appelée par l'interface.
    ============================================================= */
 /* Retourne une clé courte représentant la combinaison de filtres actifs */
 function filterSignature(f) {
@@ -1979,7 +1979,22 @@ async function applyQueryPrefill() {
     }
   }
 
-  const results = generateDemo(readFilters(), 20);
+  /* Génération initiale depuis les paramètres d'URL — c'est le chemin
+     emprunté par les boutons « Générer des prénoms… » des pages SEO
+     /prenom/*. Il passe désormais par l'API comme le formulaire, et
+     initialise l'état de session pour que les générations suivantes
+     enchaînent correctement. */
+  const f = readFilters();
+  const payload = await fetchGenerate(f, 0, []);
+  if (!payload) {
+    renderGeneratorError(() => document.getElementById("genForm")?.requestSubmit());
+    return;
+  }
+  const results = payload.names || [];
+  cacheNames(results);
+  _genShown  = new Set(results.map((n) => n.name));
+  _genFilSig = filterSignature(f);
+  _genDepth  = 0;
   renderResults(results, t("res_title"));
   setTimeout(() => document.getElementById("generateur").scrollIntoView({ behavior: "smooth" }), 300);
 }
