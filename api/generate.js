@@ -28,23 +28,43 @@ import { generate } from "../lib/ranking.js";
    n'est jamais téléchargeable par le navigateur. On résout le chemin
    depuis le module lui-même, avec repli sur cwd selon la disposition
    du bundle. */
-function loadData(file) {
-  const candidates = [
-    path.join(path.dirname(fileURLToPath(import.meta.url)), "_data", file),
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+
+function candidatePaths(file) {
+  return [
+    path.join(HERE, "_data", file),
+    path.join(HERE, "..", "api", "_data", file),
     path.join(process.cwd(), "api", "_data", file),
+    path.join(process.cwd(), "_data", file),
+    path.join("/var/task", "api", "_data", file),
   ];
-  for (const p of candidates) {
-    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, "utf8"));
-  }
-  throw new Error(`Catalogue introuvable : ${file} (essayé ${candidates.join(", ")})`);
 }
 
-const INDEX = loadData("names-index.json");
-const DETAIL = loadData("names-detail.json");
+function loadData(file) {
+  for (const p of candidatePaths(file)) {
+    try { if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, "utf8")); } catch { /* suivant */ }
+  }
+  const err = new Error(`Catalogue introuvable : ${file}`);
+  err.tried = candidatePaths(file);
+  throw err;
+}
+
+/* Chargement paresseux : une seule fois par instance, mais une erreur
+   de chemin renvoie un 500 propre et diagnosticable au lieu de faire
+   échouer l'invocation entière (FUNCTION_INVOCATION_FAILED, illisible
+   sans accès aux logs). */
+let _cache = null;
+function catalogue() {
+  if (!_cache) {
+    _cache = { INDEX: loadData("names-index.json"), DETAIL: loadData("names-detail.json") };
+  }
+  return _cache;
+}
 
 /* ---------- Validation stricte : listes blanches ---------- */
 const GENDERS = new Set(["boy", "girl", "mixte"]);
-const ORIGINS = new Set(INDEX.map((n) => n.origin));
+let _origins = null;
+const origins = () => (_origins ||= new Set(catalogue().INDEX.map((n) => n.origin)));
 const STYLES = new Set(["classique", "moderne", "rare", "elegant", "court", "poetique"]);
 const MEANINGS = new Set(["force", "courage", "sagesse", "lumiere", "nature", "liberte", "foi",
   "amour", "paix", "victoire", "joie", "beaute", "espoir", "noblesse", "grace", "prosperite"]);
@@ -65,7 +85,7 @@ function sanitizeFilters(raw) {
   const letter = typeof f.letter === "string" ? f.letter.trim().toLowerCase().slice(0, 1) : "";
   return {
     gender:  pickEnum(f.gender, GENDERS),
-    origin:  pickEnum(f.origin, ORIGINS),
+    origin:  pickEnum(f.origin, origins()),
     style:   pickEnum(f.style, STYLES),
     meaning: pickEnum(f.meaning, MEANINGS),
     length:  pickEnum(f.length, LENGTHS),
@@ -89,7 +109,7 @@ function sanitizeExclude(raw) {
    On ne renvoie que ce dont nameCardHTML() a besoin. popularityTier et
    meaningTags restent internes : ils ne servent pas à l'affichage. */
 function toCard(n) {
-  const d = DETAIL[n.name] || {};
+  const d = catalogue().DETAIL[n.name] || {};
   return {
     name: n.name,
     gender: n.gender,
@@ -115,6 +135,7 @@ export default async function handler(req, res) {
     const depth = Math.min(Math.max(Number.isFinite(+body.depth) ? Math.trunc(+body.depth) : 0, 0), 3);
     const exclude = sanitizeExclude(body.exclude);
 
+    const { INDEX } = catalogue();
     let names = generate(INDEX, filters, LIMIT, exclude, depth);
     let reset = false;
 
@@ -131,6 +152,16 @@ export default async function handler(req, res) {
     return res.status(200).json({ names: names.map(toCard), reset });
   } catch (err) {
     console.error("[generate]", err);
-    return res.status(500).json({ error: "generation_failed" });
+    return res.status(500).json({
+      error: "generation_failed",
+      detail: String(err && err.message || err),
+      tried: err && err.tried ? err.tried : undefined,
+      cwd: process.cwd(),
+      here: HERE,
+      listing: (() => {
+        try { return { here: fs.readdirSync(HERE).slice(0, 40), cwd: fs.readdirSync(process.cwd()).slice(0, 40) }; }
+        catch (e) { return String(e); }
+      })(),
+    });
   }
 }
