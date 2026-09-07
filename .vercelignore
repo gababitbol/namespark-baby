@@ -14,3 +14,4 @@ test-results/
 # NE PAS ignorer api/_data/ : le catalogue serveur y vit et il est embarqué
 # dans la fonction via functions.includeFiles (vercel.json). Vercel ne sert
 # pas publiquement les chemins /api/_* (vérifié en production : 404).
+work/
