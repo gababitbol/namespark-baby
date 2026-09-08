@@ -172,7 +172,10 @@ const newLines = rawLines.map(line => {
   if (!line.startsWith("  { name: \"")) return line;
   const tier = NAMES[idx]._tier;
   idx++;
-  return line.replace(", style: [", `, popularityTier: "${tier}", style: [`);
+  /* Idempotence : on retire d'abord un éventuel popularityTier déjà
+     présent, sinon chaque relance en empile un nouveau. */
+  const clean = line.replace(/, popularityTier: "[^"]*"/g, "");
+  return clean.replace(", style: [", `, popularityTier: "${tier}", style: [`);
 });
 if (idx !== NAMES.length) {
   console.error("ERREUR: nombre de lignes objet (" + idx + ") != nombre de prenoms (" + NAMES.length + "). Abandon, rien n'est ecrit.");
