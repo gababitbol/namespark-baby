@@ -1,0 +1,94 @@
+{
+ "purgedAt": "2026-09-08T18:07:01.538Z",
+ "backup": "data.pre-purge-isoles.2026-09-08T18-07-01-535Z.js",
+ "criterion": "Liste nommée, arbitrée individuellement après vérification externe.",
+ "count": 19,
+ "entries": [
+  {
+   "name": "Adenzio",
+   "sourceLine": "  { name: \"Adenzio\", gender: \"boy\", origin: \"italien\", popularityTier: \"unknown_popularity\", style: [\"classique\",\"rare\"], meaningTags: [\"noblesse\"], length: \"long\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Adenzio rare sans être difficile à porter.\",\"en\":\"Adenzio rare yet easy to wear.\"} },"
+  },
+  {
+   "name": "Alkeh",
+   "sourceLine": "  { name: \"Alkeh\", gender: \"boy\", origin: \"latin\", popularityTier: \"unknown_popularity\", style: [\"classique\",\"poetique\"], meaningTags: [\"noblesse\"], length: \"moyen\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Alkeh chaleureux et facile à prononcer.\",\"en\":\"Alkeh warm and easy to pronounce.\"} },"
+  },
+  {
+   "name": "Allidis",
+   "sourceLine": "  { name: \"Allidis\", gender: \"girl\", origin: \"latin\", popularityTier: \"unknown_popularity\", style: [\"rare\"], meaningTags: [\"noblesse\"], length: \"long\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Allidis plein de caractère et de douceur.\",\"en\":\"Allidis full of character and softness.\"} },"
+  },
+  {
+   "name": "Aloga",
+   "sourceLine": "  { name: \"Aloga\", gender: \"girl\", origin: \"latin\", popularityTier: \"unknown_popularity\", style: [\"poetique\",\"moderne\"], meaningTags: [\"lumiere\",\"noblesse\"], length: \"moyen\", meaning: {\"fr\":\"lumière noble\",\"en\":\"noble light\"}, why: {\"fr\":\"Aloga authentique et ancré dans sa culture.\",\"en\":\"Aloga authentic and rooted in its culture.\"} },"
+  },
+  {
+   "name": "Alphuswith",
+   "sourceLine": "  { name: \"Alphuswith\", gender: \"girl\", origin: \"latin\", popularityTier: \"unknown_popularity\", style: [\"rare\",\"classique\"], meaningTags: [\"noblesse\"], length: \"long\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Alphuswith chaleureux et facile à prononcer.\",\"en\":\"Alphuswith warm and easy to pronounce.\"} },"
+  },
+  {
+   "name": "Alibardesco",
+   "sourceLine": "  { name: \"Alibardesco\", gender: \"boy\", origin: \"italien\", popularityTier: \"unknown_popularity\", style: [\"elegant\",\"poetique\"], meaningTags: [\"noblesse\"], length: \"long\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Alibardesco singulier et marquant.\",\"en\":\"Alibardesco distinctive and memorable.\"} },"
+  },
+  {
+   "name": "Alcinia",
+   "sourceLine": "  { name: \"Alcinia\", gender: \"girl\", origin: \"arabe\", popularityTier: \"unknown_popularity\", style: [\"classique\"], meaningTags: [\"noblesse\"], length: \"long\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Alcinia singulier et marquant.\",\"en\":\"Alcinia distinctive and memorable.\"} },"
+  },
+  {
+   "name": "Aldua",
+   "sourceLine": "  { name: \"Aldua\", gender: \"girl\", origin: \"arabe\", popularityTier: \"unknown_popularity\", style: [\"rare\",\"poetique\"], meaningTags: [\"noblesse\"], length: \"moyen\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Aldua singulier et marquant.\",\"en\":\"Aldua distinctive and memorable.\"} },"
+  },
+  {
+   "name": "Abbal",
+   "sourceLine": "  { name: \"Abbal\", gender: \"boy\", origin: \"arabe\", popularityTier: \"unknown_popularity\", style: [\"moderne\",\"poetique\"], meaningTags: [\"force\"], length: \"moyen\", meaning: {\"fr\":\"père fort\",\"en\":\"strong father\"}, why: {\"fr\":\"Abbal rare sans être difficile à porter.\",\"en\":\"Abbal rare yet easy to wear.\"} },"
+  },
+  {
+   "name": "Alluka",
+   "sourceLine": "  { name: \"Alluka\", gender: \"girl\", origin: \"francais\", popularityTier: \"unknown_popularity\", style: [\"rare\",\"classique\"], meaningTags: [\"lumiere\",\"noblesse\"], length: \"moyen\", meaning: {\"fr\":\"lumière noble\",\"en\":\"noble light\"}, why: {\"fr\":\"Alluka plein de caractère et de douceur.\",\"en\":\"Alluka full of character and softness.\"} },"
+  },
+  {
+   "name": "Allitt",
+   "sourceLine": "  { name: \"Allitt\", gender: \"boy\", origin: \"anglais\", popularityTier: \"unknown_popularity\", style: [\"elegant\",\"moderne\"], meaningTags: [\"noblesse\"], length: \"moyen\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Allitt rare sans être difficile à porter.\",\"en\":\"Allitt rare yet easy to wear.\"} },"
+  },
+  {
+   "name": "Allron",
+   "sourceLine": "  { name: \"Allron\", gender: \"boy\", origin: \"anglais\", popularityTier: \"unknown_popularity\", style: [\"moderne\",\"rare\"], meaningTags: [\"noblesse\"], length: \"moyen\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Allron harmonieux et lumineux.\",\"en\":\"Allron harmonious and bright.\"} },"
+  },
+  {
+   "name": "Almenith",
+   "sourceLine": "  { name: \"Almenith\", gender: \"girl\", origin: \"africain\", popularityTier: \"unknown_popularity\", style: [\"poetique\"], meaningTags: [\"lumiere\",\"noblesse\"], length: \"long\", meaning: {\"fr\":\"lumière noble\",\"en\":\"noble light\"}, why: {\"fr\":\"Almenith plein de caractère et de douceur.\",\"en\":\"Almenith full of character and softness.\"} },"
+  },
+  {
+   "name": "Alast",
+   "sourceLine": "  { name: \"Alast\", gender: \"boy\", origin: \"persan\", popularityTier: \"unknown_popularity\", style: [\"moderne\",\"elegant\"], meaningTags: [\"force\",\"noblesse\"], length: \"moyen\", meaning: {\"fr\":\"noble et fort\",\"en\":\"noble and strong\"}, why: {\"fr\":\"Alast musical et simple à retenir.\",\"en\":\"Alast musical and easy to remember.\"} },"
+  },
+  {
+   "name": "Halor",
+   "sourceLine": "  { name: \"Halor\", gender: \"boy\", origin: \"hebreu\", popularityTier: \"unknown_popularity\", style: [\"rare\"], meaningTags: [\"lumiere\",\"noblesse\"], length: \"moyen\", meaning: {\"fr\":\"lumière noble\",\"en\":\"noble light\"}, why: {\"fr\":\"Halor authentique et ancré dans sa culture.\",\"en\":\"Halor authentic and rooted in its culture.\"} },"
+  },
+  {
+   "name": "Alounia",
+   "sourceLine": "  { name: \"Alounia\", gender: \"girl\", origin: \"africain\", popularityTier: \"unknown_popularity\", style: [\"poetique\",\"elegant\"], meaningTags: [\"noblesse\"], length: \"long\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Alounia singulier et marquant.\",\"en\":\"Alounia distinctive and memorable.\"} },"
+  },
+  {
+   "name": "Adnesa",
+   "sourceLine": "  { name: \"Adnesa\", gender: \"girl\", origin: \"georgien\", popularityTier: \"unknown_popularity\", style: [\"elegant\",\"moderne\"], meaningTags: [\"noblesse\"], length: \"moyen\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Adnesa rare sans être difficile à porter.\",\"en\":\"Adnesa rare yet easy to wear.\"} },"
+  },
+  {
+   "name": "Alhraud",
+   "sourceLine": "  { name: \"Alhraud\", gender: \"girl\", origin: \"nordique\", popularityTier: \"unknown_popularity\", style: [\"moderne\"], meaningTags: [\"noblesse\"], length: \"long\", meaning: {\"fr\":\"noble\",\"en\":\"noble\"}, why: {\"fr\":\"Alhraud chaleureux et facile à prononcer.\",\"en\":\"Alhraud warm and easy to pronounce.\"} },"
+  },
+  {
+   "name": "Abinori",
+   "sourceLine": "  { name: \"Abinori\", gender: \"girl\", origin: \"latin\", popularityTier: \"unknown_popularity\", style: [\"poetique\",\"elegant\"], meaningTags: [\"lumiere\",\"noblesse\"], length: \"long\", meaning: {\"fr\":\"lumière noble\",\"en\":\"noble light\"}, why: {\"fr\":\"Abinori rare sans être difficile à porter.\",\"en\":\"Abinori rare yet easy to wear.\"} },"
+  }
+ ],
+ "flagged": {
+  "Alinor": "conserve-purge3: variante medievale attestee d'Alienor/Eleanor. Origine et sens a revoir.",
+  "Aelinor": "conserve-purge3: forme anglo-normande attestee d'Eleanor. Origine et sens a revoir.",
+  "Allertus": "conserve-purge3: latinisation attestee d'Adalbert. ORIGINE PROBABLEMENT FAUSSE (slave -> germanique).",
+  "Abashi": "conserve-purge3: atteste comme nom est-africain. Origine arabe a verifier.",
+  "Alosia": "conserve-purge3: proche d'Aloisia (feminin latin de Louis). A verifier.",
+  "Almodis": "conserve-purge2: atteste historiquement (Almodis de La Marche, +1071). Origine latin a verifier.",
+  "Adha": "incertain-purge3: mot arabe reel (Aid al-Adha). ORIGINE PROBABLEMENT FAUSSE (irlandais -> arabe).",
+  "Alid": "incertain-purge3: forme courte scandinave d'Adelheid, rare mais portee. A verifier."
+ }
+}
