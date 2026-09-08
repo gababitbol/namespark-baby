@@ -766,6 +766,18 @@ async function hydrateStoredNames() {
   if (!wanted.size) return;
   const ok = await ensureNames([...wanted]);
   if (!ok) return;
+
+  /* Purge des favoris devenus introuvables.
+     Un prénom retiré du catalogue ne pourra plus jamais s'afficher :
+     le garder gonflerait le compteur sans qu'aucune carte n'apparaisse.
+     On ne le retire QUE si l'appel API a réussi (ok === true) — sinon
+     une simple coupure réseau effacerait les favoris de l'utilisateur. */
+  let pruned = 0;
+  for (const name of [...favorites]) {
+    if (!nameFromCache(name)) { favorites.delete(name); pruned++; }
+  }
+  if (pruned > 0) saveFavorites();
+
   /* Re-rendu des surfaces qui dépendaient de ces prénoms. */
   if (favorites.size > 0) renderFavorites();
   updateSelPanel();
