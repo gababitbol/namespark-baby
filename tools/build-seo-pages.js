@@ -18,6 +18,69 @@ const g = {};
 eval(fs.readFileSync(path.join(ROOT, "data.js"), "utf8").replace(/const NAMES =/, "g.NAMES ="));
 const NAMES = g.NAMES;
 
+/* Statistiques de fréquence réelles (tools/build-name-stats.js).
+   Elles servent deux objectifs :
+   1. donner à chaque page un contenu FACTUEL et unique — c'est ce
+      qui manquait, et la raison pour laquelle Google refusait
+      d'indexer des pages toutes bâties sur le même gabarit ;
+   2. décider quelles pages méritent d'être indexées. Un prénom
+      qu'aucun registre officiel ne connaît n'a rien à apporter à
+      quelqu'un qui cherche sur Google : sa page passe en noindex et
+      sort du sitemap, sans disparaître pour autant. */
+const STATS_PATH = path.join(ROOT, "tools", "name-stats.json");
+const STATS = fs.existsSync(STATS_PATH) ? JSON.parse(fs.readFileSync(STATS_PATH, "utf8")) : {};
+console.log(`Statistiques disponibles pour ${Object.keys(STATS).length} prénoms`);
+
+const nf = (n) => n.toLocaleString("fr-FR").replace(/\u202f|\u00a0/g, " ");
+
+/* Phrase de tendance — prudente, et jamais affirmative au-delà de ce
+   que les chiffres permettent de dire. */
+function trendSentence(name, fr) {
+  const recent = fr.lastYear - 8;
+  if (fr.total < 100) return `Il reste rare en France : ${nf(fr.total)} naissances recensées en tout.`;
+  if (fr.peakYear >= recent) return `Il n'a jamais été autant donné qu'aujourd'hui : son maximum est tout récent.`;
+  if (fr.recentAvg >= fr.peakCount * 0.5) return `Il reste très donné aujourd'hui, à un niveau proche de son record.`;
+  if (fr.recentAvg >= fr.peakCount * 0.15) return `Il continue d'être régulièrement attribué, sans retrouver son niveau record.`;
+  return `Il est nettement moins donné aujourd'hui qu'à son apogée.`;
+}
+
+function statsSection(n) {
+  const st = STATS[n.name];
+  if (!st) return "";
+  const parts = [];
+  const sources = [];
+
+  if (st.fr && st.fr.total > 0) {
+    const fr = st.fr;
+    parts.push(`<p>En France, <strong>${nf(fr.total)}</strong> enfant${fr.total > 1 ? "s ont" : " a"} reçu le prénom ${esc(n.name)} depuis 1900. Son pic de popularité date de <strong>${fr.peakYear}</strong>, avec ${nf(fr.peakCount)} naissance${fr.peakCount > 1 ? "s" : ""} cette année-là. ${trendSentence(n.name, fr)}</p>`);
+    sources.push("INSEE (France, 1900-2022)");
+
+    /* Tableau par décennie — seulement quand les effectifs le justifient. */
+    const ds = Object.entries(fr.decades).filter(([, c]) => c > 0).sort((a, b) => +a[0] - +b[0]);
+    if (fr.total >= 300 && ds.length >= 4) {
+      const max = Math.max(...ds.map(([, c]) => c));
+      parts.push(`<table class="stat-table"><caption>Naissances de ${esc(n.name)} en France, par décennie</caption>
+        <thead><tr><th scope="col">Décennie</th><th scope="col">Naissances</th></tr></thead><tbody>` +
+        ds.map(([d, c]) => `<tr><th scope="row">${d}s</th><td><span class="bar" style="width:${Math.max(2, Math.round(55 * c / max))}%"></span>${nf(c)}</td></tr>`).join("") +
+        `</tbody></table>`);
+    }
+  }
+
+  const ailleurs = [];
+  if (st.us && st.us.total > 0) { ailleurs.push(`aux États-Unis (${nf(st.us.total)} naissances depuis 1880, pic en ${st.us.peakYear})`); sources.push("Social Security Administration (États-Unis, 1880-2020)"); }
+  if (st.uk) { ailleurs.push("en Angleterre et au pays de Galles"); sources.push("Office for National Statistics (Royaume-Uni)"); }
+  if (st.ie) { ailleurs.push("en Irlande"); sources.push("Central Statistics Office (Irlande)"); }
+  if (st.de) { ailleurs.push("à Berlin"); sources.push("Open Data Berlin"); }
+  if (ailleurs.length) {
+    parts.push(`<p>Hors de France, ${esc(n.name)} est aussi enregistré ${listFr(ailleurs)}.</p>`);
+  }
+
+  if (!parts.length) return "";
+  return `<h2>Popularité du prénom ${esc(n.name)}</h2>
+      ${parts.join("\n      ")}
+      <p class="stat-sources">Sources : ${listFr([...new Set(sources)])}.</p>`;
+}
+
 const ORIGINS = { hebreu:"hébraïque", francais:"française", anglais:"anglaise", arabe:"arabe", italien:"italienne", espagnol:"espagnole", grec:"grecque", latin:"latine", nordique:"nordique", irlandais:"irlandaise", japonais:"japonaise", slave:"slave", sanskrit:"sanskrite", persan:"persane", africain:"africaine", portugais:"portugaise", coreen:"coréenne", chinois:"chinoise", gallois:"galloise", basque:"basque", armenien:"arménienne", georgien:"géorgienne" };
 const STYLES = { classique:"classique", moderne:"moderne", rare:"rare", elegant:"élégant", court:"court", poetique:"poétique" };
 const GENDER = { boy:"masculin", girl:"féminin", mixte:"mixte" };
@@ -111,8 +174,21 @@ function page(n, all) {
   const genre = GENDER[n.gender] || n.gender;
   const meaningFr = n.meaning.fr;
   const styleFr = n.style.map(s => STYLES[s] || s).join(", ");
-  const title = `${n.name} : signification, origine et style du prénom`;
-  const desc = `${n.name} est ${GENDER_ART[n.gender]} d'origine ${origine}. Signification : ${meaningFr}. Découvrez son style, ses variantes et des prénoms similaires sur NameSpark Baby.`;
+  const st = STATS[n.name];
+  /* Une page n'est indexable que si le prénom est réellement attesté
+     dans au moins un registre officiel. Les autres restent en ligne et
+     accessibles, mais en noindex : elles n'apportent rien à quelqu'un
+     qui cherche, et leur masse faisait baisser la confiance accordée
+     à tout le domaine. */
+  const indexable = !!st;
+
+  const title = `${n.name} : signification, origine et popularité du prénom`;
+  /* La description reprend un chiffre réel quand il existe : un extrait
+     concret attire davantage qu'une formule passe-partout. */
+  const statBit = st && st.fr && st.fr.total >= 100
+    ? ` ${nf(st.fr.total)} naissances en France depuis 1900, pic en ${st.fr.peakYear}.`
+    : (st && st.us && st.us.total >= 500 ? ` ${nf(st.us.total)} naissances recensées aux États-Unis.` : "");
+  const desc = `${n.name} est ${GENDER_ART[n.gender]} d'origine ${origine}. Signification : ${meaningFr}.${statBit} Popularité, variantes et prénoms proches.`;
   const url = `${DOMAIN}/prenom/${slug}`;
   const letters = n.name.replace(/[^A-Za-zÀ-ÿ]/g, "").length;
 
@@ -187,7 +263,7 @@ function page(n, all) {
   <title>${esc(title)} | NameSpark Baby</title>
   <meta name="description" content="${esc(desc)}" />
   <link rel="canonical" href="${url}" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="${indexable ? "index, follow" : "noindex, follow"}" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="${esc(n.name)} — ${esc(meaningFr)}" />
   <meta property="og:description" content="${esc(desc)}" />
@@ -198,6 +274,15 @@ function page(n, all) {
   <script type="application/ld+json">${JSON.stringify(faq)}</script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css?v=2" />
+  <style>
+    .stat-table{width:100%;max-width:520px;border-collapse:collapse;margin:18px 0;font-size:15px}
+    .stat-table caption{text-align:left;font-weight:600;padding-bottom:8px;color:#6b6257}
+    .stat-table th,.stat-table td{padding:6px 10px;border-bottom:1px solid #ece4da;text-align:left}
+    .stat-table th[scope=row]{font-weight:500;width:90px;color:#6b6257}
+    .stat-table td{position:relative}
+    .stat-table .bar{display:inline-block;height:8px;background:#e7d6c0;border-radius:4px;margin-right:8px;vertical-align:middle;min-width:3px;max-width:55%}
+    .stat-sources{font-size:13px;color:#9b9188;margin-top:6px}
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -225,6 +310,7 @@ function page(n, all) {
       <p><strong>Nombre de lettres :</strong> ${letters}</p>
       ${variants}
       ${originPara}
+      ${statsSection(n)}
       ${themePara}
       <h2>Choisir ${esc(n.name)}… à deux</h2>
       <p>Un prénom se choisit rarement seul. Avec NameSpark Baby, générez une sélection de prénoms proches de ${esc(n.name)}, votez chacun de votre côté, et découvrez ceux sur lesquels vous êtes réellement d'accord.</p>
@@ -245,19 +331,19 @@ function page(n, all) {
 // --- Génération ---
 if (!fs.existsSync(OUT)) fs.mkdirSync(OUT, { recursive: true });
 const seen = new Set();
-let written = 0, skipped = 0;
+let written = 0, skipped = 0, indexables = 0;
 const urls = [];
 for (const n of NAMES) {
   const slug = slugify(n.name);
   if (seen.has(slug)) { skipped++; continue; }
   seen.add(slug);
   fs.writeFileSync(path.join(OUT, slug + ".html"), page(n, NAMES));
-  urls.push(`${DOMAIN}/prenom/${slug}`);
+  if (STATS[n.name]) { urls.push(`${DOMAIN}/prenom/${slug}`); indexables++; }
   written++;
 }
 
 // --- sitemap.xml ---
-const staticUrls = [ `${DOMAIN}/`, `${DOMAIN}/seo/prenom-garcon`, `${DOMAIN}/seo/prenom-fille`, `${DOMAIN}/seo/prenom-hebreu`, `${DOMAIN}/seo/prenom-rare`, `${DOMAIN}/seo/prenom-court` ];
+const staticUrls = [ `${DOMAIN}/`, `${DOMAIN}/seo/prenom-garcon`, `${DOMAIN}/seo/prenom-fille`, `${DOMAIN}/seo/prenom-hebreu`, `${DOMAIN}/seo/prenom-rare`, `${DOMAIN}/seo/prenom-court`, `${DOMAIN}/seo/prenom-signification-force` ];
 const all = staticUrls.concat(urls);
 const today = new Date().toISOString().slice(0,10);
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
@@ -266,4 +352,6 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://w
 fs.writeFileSync(path.join(ROOT, "sitemap.xml"), sitemap);
 
 console.log(`Pages SEO générées : ${written} (slugs en double ignorés : ${skipped})`);
+console.log(`  dont indexables (prénom attesté)  : ${indexables}`);
+console.log(`  en noindex (aucune attestation)   : ${written - indexables}`);
 console.log(`sitemap.xml : ${all.length} URLs`);
