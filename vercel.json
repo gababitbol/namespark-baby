@@ -36,27 +36,27 @@
     },
     {
       "source": "/prenom-garcon",
-      "destination": "/seo/prenom-garcon.html"
+      "destination": "/seo/prenom-garcon"
     },
     {
       "source": "/prenom-fille",
-      "destination": "/seo/prenom-fille.html"
+      "destination": "/seo/prenom-fille"
     },
     {
       "source": "/prenom-hebreu",
-      "destination": "/seo/prenom-hebreu.html"
+      "destination": "/seo/prenom-hebreu"
     },
     {
       "source": "/prenom-rare",
-      "destination": "/seo/prenom-rare.html"
+      "destination": "/seo/prenom-rare"
     },
     {
       "source": "/prenom-court",
-      "destination": "/seo/prenom-court.html"
+      "destination": "/seo/prenom-court"
     },
     {
       "source": "/prenom-signification-force",
-      "destination": "/seo/prenom-signification-force.html"
+      "destination": "/seo/prenom-signification-force"
     }
   ]
 }
